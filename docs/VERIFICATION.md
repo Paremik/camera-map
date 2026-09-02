@@ -1,28 +1,33 @@
-# MVP verification — 2026-09-02
+# Verification — 2026-09-03
 
-Environment: Windows, Node.js 24.19.0, pnpm 11.19.0, Next.js 16.3.4, MapLibre 5.24.0. Dependencies are captured in pnpm-lock.yaml.
+Environment: Windows, Node.js 24.19.0, pnpm 11.19.0, Next.js 16.3.4, MapLibre 5.24.0. Dependencies remain captured in pnpm-lock.yaml; this update adds no packages.
 
 ## Automated checks
 
-- Frozen-lockfile installation: passed.
 - TypeScript / Next route types: passed.
-- Unit tests: 12 passed, covering seed validation, Polish search, filters, co-located points, geographic bearings, closed sectors, missing optical data, deterministic imports, duplicates, invalid coordinates, unsafe links and source validation.
-- Production build: passed; home page statically prerendered.
-- Import CLI: dry run preserved the real dataset. A valid write and a rejected empty import were checked in an isolated fixture directory; failed import preserved the previous file. Synthetic fixtures were not added to the application dataset.
+- Unit tests: 20 passed. Coverage includes geometry, search/filters, both import formats, rejected malformed/duplicate/unsafe data, favorites storage format, stable camera links and unknown IDs.
+- The shipped ITS dataset exactly matches the archived public GeoJSON through the adapter. The combined repository validates all 163 records.
+- Production build: passed; the home page remains statically prerendered. Browser history and local storage are handled after hydration.
+- Import CLI processed the saved official snapshot and atomically wrote 159 normalized records. The previous phase also checked that a rejected empty import preserves existing data.
 
 ## Browser checks
 
-- Development and production pages loaded with MapLibre/OSM. Production contained all four camera records.
-- Search `wieza` and `sw wojciecha` matched the expected Polish names. Card selection and visible map count followed the results.
-- ITS and verified-only filters produced the correct empty states, without retaining an unrelated card.
-- Clicking the shared map point opened all four individually selectable views. Selecting Katedra updated the card.
-- 2D/3D, reset to central Opole and sector visibility worked; the perspective view was inspected visually.
-- Desktop 1440×1000 and mobile 390×844 were inspected. Mobile search/selection worked, there was no horizontal overflow, and the source-view button remained visible.
-- Aborting OSM tile requests produced an error message; removing the simulated fault and pressing retry restored the map.
-- WCAG 2 A/AA automated audit reported zero violations. Contrast over the map canvas required visual inspection and is not a claim of full accessibility certification.
+Checked both development and production with Playwright using installed Edge. agent-browser's native CDP connection failed in this Windows environment, so standard Playwright was used for the same browser checks. No TLS exceptions were enabled.
 
-## Public data review
+- All 163 records reach the map; the list paginates by 50. Search matches Polish street names without diacritics, including the four cameras at Niemodlińska / Hallera.
+- Adding a favorite from the list does not select the camera. Two favorites survived a full reload; the favorites filter applied to both list and map.
+- Favorites synchronized between two tabs, including removal of the storage key. Removing the selected favorite while filtering removed its card and URL selection.
+- Selection updates `?camera=`; a full reload opens the same card. Back/forward, closing the card, and filters keep URL and selection consistent. Unknown IDs display a message.
+- A direct link to `its:159`, beyond the first list page, opens correctly. ITS cards show the source address and three unknown optical values, without fictitious sectors, and link to the publisher's map.
+- Clipboard success was checked with an isolated browser stub that captured the exact generated URL. An unavailable Clipboard API displayed a selectable manual-copy field. Local links explain their scope.
+- With localStorage blocked, the page remained usable, favorites worked in memory and a storage warning appeared.
+- The shared town-hall point opened its camera picker. Selection, 2D/3D, sector visibility and reset worked.
+- Desktop 1440×1000 and mobile 390×844 were inspected visually. Mobile search/selection worked, no horizontal overflow appeared, and the public-view action remained visible outside the scrolling card body.
+- Aborted OSM requests produced the map error state. Removing the simulated fault and retrying restored the map while retaining the selected ITS card.
+- No unhandled page errors occurred in the completed feature checks.
 
-The City of Opole page describes the four town-hall views. The original marker position was outside the town hall. Public OSM way 207031541, tagged `Ratusz`, `amenity=townhall`, and `source=UM Opole`, was inspected through the OSM API. The shared approximate point was moved inside this building outline.
+## Public data and limits
 
-This verifies the building reference, not camera mounting positions or optical parameters. All camera records remain unverified. No real ITS export, video embedding permission, live-stream uptime or building/obstacle visibility model was verified.
+See [ITS_SOURCE_REVIEW.md](ITS_SOURCE_REVIEW.md) for the observed public endpoint, snapshot, count and source checksum. The 159 ITS coordinates are source metadata, not an independent survey. The four town-hall views retain an approximate OSM building reference and illustrative optics. All verification flags remain false.
+
+No camera images or video streams were retrieved or embedded. Stream uptime, optical parameters, building/obstacle visibility and permission to redistribute video were not established. The 3D switch provides map tilt without extruded buildings. No scheduled live synchronization is configured.

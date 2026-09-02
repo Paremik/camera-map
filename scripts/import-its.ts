@@ -1,6 +1,6 @@
 import { readFile, writeFile, rename, stat } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import { importItsExport } from "../lib/import-cameras.ts";
+import { importItsExport, importItsGeoJson } from "../lib/import-cameras.ts";
 async function main() {
   const args = process.argv.slice(2);
   const [inputPath, flag] = args;
@@ -8,7 +8,9 @@ async function main() {
     throw new Error("Usage: pnpm import:its public-export.json [--write] (default: validate only)");
   }
   if ((await stat(inputPath)).size > 10 * 1024 * 1024) throw new Error("Export exceeds 10 MB");
-  const cameras = importItsExport(JSON.parse(await readFile(inputPath, "utf8")));
+  const input: unknown = JSON.parse(await readFile(inputPath, "utf8"));
+  const geoJson = input && typeof input === "object" && "format" in input;
+  const cameras = geoJson ? importItsGeoJson(input) : importItsExport(input);
   console.log("Validated " + cameras.length + " public ITS records.");
   if (flag === "--write") {
     const output = fileURLToPath(new URL("../data/its-cameras.json", import.meta.url));

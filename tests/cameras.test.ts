@@ -3,12 +3,46 @@ import test from "node:test";
 import { cameras } from "../data/cameras.ts";
 import { filterCameras, groupCameraSites } from "../lib/camera.ts";
 import { cameraSector, destinationPoint, sectorsGeoJson, directionGeoJson } from "../lib/geometry.ts";
-import { importItsExport, publicUrl, validateCameraDataset } from "../lib/import-cameras.ts";
+import { importItsExport, importItsGeoJson, publicUrl, validateCameraDataset } from "../lib/import-cameras.ts";
 
 // Synthetic records for validation tests only. They are never shipped as camera data.
 const input = () => ({
   schemaVersion: 1, sourceUrl: "https://its.mzd.opole.pl/mapa", retrievedAt: "2026-09-02",
   cameras: [{ id: "fixture-1", name: "Synthetic test camera", street: "Test fixture", lat: 50.66, lng: 17.92 }],
+});
+
+const geoInput = () => ({
+  schemaVersion: 1, format: "its-geojson-v1", sourceUrl: "https://its.mzd.opole.pl/api/cameras", retrievedAt: "2026-09-03",
+  collection: { type: "FeatureCollection", features: [{ type: "Feature", properties: { id: 1, name: "Synthetic test camera", description: "Test fixture", image: "/ignored", state: 1 }, geometry: { type: "Point", coordinates: [17.9, 50.66] } }] },
+});
+
+test("official GeoJSON preserves source coordinates and IDs without inventing optics or online status", () => {
+  const camera = importItsGeoJson(geoInput())[0];
+  assert.equal(camera.id, "its:1");
+  assert.equal(camera.lng, 17.9);
+  assert.equal(camera.lat, 50.66);
+  assert.equal(camera.street, "Test fixture");
+  assert.equal(camera.heading, null);
+  assert.equal(camera.fov, null);
+  assert.equal(camera.rangeMeters, null);
+  assert.equal(camera.verified, false);
+  assert.equal(camera.opticsVerified, false);
+  assert.equal(camera.publicViewUrl, "https://its.mzd.opole.pl/mapa");
+  assert.equal("image" in camera, false);
+  assert.equal("state" in camera, false);
+});
+
+test("GeoJSON import rejects malformed geometry, duplicate IDs, bad dates and unrelated sources", () => {
+  const input = geoInput();
+  assert.throws(() => importItsGeoJson({ ...input, sourceUrl: "https://example.com/cameras" }), /official/);
+  assert.throws(() => importItsGeoJson({ ...input, retrievedAt: "2026-02-31" }), /retrievedAt/);
+  assert.throws(() => importItsGeoJson({ ...input, collection: { type: "FeatureCollection", features: [] } }), /1–10000/);
+  const feature = input.collection.features[0];
+  for (const geometry of [{ type: "LineString", coordinates: [17.9, 50.66] }, { type: "Point", coordinates: [50.66, 17.9] }, { type: "Point", coordinates: [17.9, 50.66, 5] }]) {
+    assert.throws(() => importItsGeoJson({ ...input, collection: { ...input.collection, features: [{ ...feature, geometry }] } }));
+  }
+  assert.throws(() => importItsGeoJson({ ...input, collection: { ...input.collection, features: [feature, feature] } }), /duplicate/);
+  assert.throws(() => importItsGeoJson({ ...input, collection: { ...input.collection, features: [{ ...feature, properties: { ...feature.properties, id: 1.5 } }] } }), /id/);
 });
 test("seed records retain uncertainty and pass repository validation", () => {
   assert.deepEqual(validateCameraDataset(cameras), cameras);

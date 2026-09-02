@@ -1,0 +1,2874 @@
+{
+  "schemaVersion": 1,
+  "format": "its-geojson-v1",
+  "sourceUrl": "https://its.mzd.opole.pl/api/cameras",
+  "retrievedAt": "2026-09-03",
+  "responseSha256": "0aa45044a4bf553ad083bf8e24a4084210881c27b885d2d2443e0eae670f6419",
+  "collection": {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 1,
+          "name": "S01_CCTV1",
+          "description": "Niemodlińska - Wojska Polskiego - Hallera",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/1/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.896964,
+            50.663086
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 2,
+          "name": "S01_CCTV2",
+          "description": "Niemodlińska - Wojska Polskiego - Hallera",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/2/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.897216,
+            50.663095
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 3,
+          "name": "S01_CCTV3",
+          "description": "Niemodlińska - Wojska Polskiego - Hallera",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/3/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.897266,
+            50.662895
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 4,
+          "name": "S01_CCTV4",
+          "description": "Niemodlińska - Wojska Polskiego - Hallera",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/4/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.897015,
+            50.662905
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 5,
+          "name": "S02_CCTV1",
+          "description": "Hallera (PDP)",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/5/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.894244,
+            50.665717
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 6,
+          "name": "S02_CCTV2",
+          "description": "Hallera (PDP)",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/6/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.894388,
+            50.665698
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 7,
+          "name": "S03_CCTV1",
+          "description": "Obwodnica Północna - Luboszycka",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/7/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.9343,
+            50.7038
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 8,
+          "name": "S03_CCTV2",
+          "description": "Obwodnica Północna - Luboszycka",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/8/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.9345,
+            50.7037
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 9,
+          "name": "S03_CCTV3",
+          "description": "Obwodnica Północna - Luboszycka",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/9/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.9341,
+            50.7036
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 10,
+          "name": "S03_CCTV4",
+          "description": "Obwodnica Północna - Luboszycka",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/10/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.934,
+            50.7037
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 11,
+          "name": "S04_CCTV1",
+          "description": "Obwodnica północna - Oleska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/11/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.958042,
+            50.697027
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 12,
+          "name": "S04_CCTV2",
+          "description": "Obwodnica północna - Oleska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/12/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.95803,
+            50.696862
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 13,
+          "name": "S04_CCTV3",
+          "description": "Obwodnica północna - Oleska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/13/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.95785,
+            50.696823
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 14,
+          "name": "S04_CCTV4",
+          "description": "Obwodnica północna - Oleska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/14/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.957871,
+            50.697016
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 15,
+          "name": "S05_CCTV1",
+          "description": "Obwodnica Północna - Częstochowska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/15/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.9951,
+            50.6729
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 16,
+          "name": "S05_CCTV2",
+          "description": "Obwodnica Północna - Częstochowska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/16/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.9953,
+            50.6728
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 17,
+          "name": "S05_CCTV3",
+          "description": "Obwodnica Północna - Częstochowska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/17/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.9952,
+            50.6727
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 18,
+          "name": "S05_CCTV4",
+          "description": "Obwodnica Północna - Częstochowska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/18/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.995,
+            50.6728
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 19,
+          "name": "S06_CCTV1",
+          "description": "Obwodnica Północna - Wrocławska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/19/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.811792,
+            50.688112
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 20,
+          "name": "S06_CCTV2",
+          "description": "Obwodnica Północna - Wrocławska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/20/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.8119,
+            50.6881
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 21,
+          "name": "S06_CCTV3",
+          "description": "Obwodnica Północna - Wrocławska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/21/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.811741,
+            50.687966
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 22,
+          "name": "S06_CCTV4",
+          "description": "Obwodnica Północna - Wrocławska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/22/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.8116,
+            50.688
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 23,
+          "name": "S07_CCTV1",
+          "description": "Wrocławska - Domańskiego - Partyzancka",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/23/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.890303,
+            50.678337
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 24,
+          "name": "S07_CCTV2",
+          "description": "Wrocławska - Domańskiego - Partyzancka",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/24/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.890565,
+            50.678213
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 25,
+          "name": "S07_CCTV3",
+          "description": "Wrocławska - Domańskiego - Partyzancka",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/25/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.890433,
+            50.678028
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 26,
+          "name": "S07_CCTV4",
+          "description": "Wrocławska - Domańskiego - Partyzancka",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/26/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.890102,
+            50.678077
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 27,
+          "name": "S08_CCTV1",
+          "description": "Wrocławska - Niemodlińska - Nysy Łużyckiej",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/27/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.911551,
+            50.671493
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 28,
+          "name": "S08_CCTV2",
+          "description": "Wrocławska - Niemodlińska - Nysy Łużyckiej",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/28/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.911728,
+            50.671518
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 29,
+          "name": "S08_CCTV3",
+          "description": "Wrocławska - Niemodlińska - Nysy Łużyckiej",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/29/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.9118,
+            50.671362
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 30,
+          "name": "S08_CCTV4",
+          "description": "Wrocławska - Niemodlińska - Nysy Łużyckiej",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/30/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.911586,
+            50.671381
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 31,
+          "name": "S09_CCTV1",
+          "description": "Niemodlińska - Spychalskiego",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/31/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.90507,
+            50.667155
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 32,
+          "name": "S09_CCTV2.1",
+          "description": "Niemodlińska - Spychalskiego",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/32/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.904884,
+            50.666972
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 33,
+          "name": "S09_CCTV2.2",
+          "description": "Niemodlińska - Spychalskiego",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/33/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.904849,
+            50.666993
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 34,
+          "name": "S10_CCTV1",
+          "description": "Niemodlińska - Koszyka - Prószkowska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/34/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.902362,
+            50.665558
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 35,
+          "name": "S10_CCTV2",
+          "description": "Niemodlińska - Koszyka - Prószkowska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/35/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.90257,
+            50.665557
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 36,
+          "name": "S10_CCTV3",
+          "description": "Niemodlińska - Koszyka - Prószkowska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/36/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.902535,
+            50.665363
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 37,
+          "name": "S10_CCTV4",
+          "description": "Niemodlińska - Koszyka - Prószkowska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/37/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.902246,
+            50.665331
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 38,
+          "name": "S11_CCTV1",
+          "description": "Ozimska - Witosa - Tysiąclecia - Częstochowska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/38/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.975467,
+            50.67016
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 39,
+          "name": "S11_CCTV2",
+          "description": "Ozimska - Witosa - Tysiąclecia - Częstochowska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/39/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.975746,
+            50.670081
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 40,
+          "name": "S11_CCTV3",
+          "description": "Ozimska - Witosa - Tysiąclecia - Częstochowska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/40/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.975649,
+            50.669928
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 41,
+          "name": "S11_CCTV4",
+          "description": "Ozimska - Witosa - Tysiąclecia - Częstochowska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/41/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.975345,
+            50.669967
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 42,
+          "name": "S12_CCTV1",
+          "description": "Ozimska - Piotrkowska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/42/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.968529,
+            50.669548
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 43,
+          "name": "S12_CCTV2",
+          "description": "Ozimska - Piotrkowska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/43/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.968539,
+            50.669446
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 44,
+          "name": "S13_CCTV1",
+          "description": "Ozimska - Wiejska - Głogowska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/44/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.963712,
+            50.669459
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 45,
+          "name": "S13_CCTV2",
+          "description": "Ozimska - Wiejska - Głogowska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/45/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.963993,
+            50.669215
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 46,
+          "name": "S13_CCTV3.1",
+          "description": "Ozimska - Wiejska - Głogowska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/46/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.962585,
+            50.669251
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 47,
+          "name": "S13_CCTV3.2",
+          "description": "Ozimska - Wiejska - Głogowska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/47/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.962598,
+            50.66922
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 48,
+          "name": "S13_CCTV4",
+          "description": "Ozimska - Wiejska - Głogowska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/48/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.962205,
+            50.669109
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 49,
+          "name": "S14_CCTV1",
+          "description": "Ozimska - Sandomierska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/49/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.954431,
+            50.668965
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 50,
+          "name": "S14_CCTV2",
+          "description": "Ozimska - Sandomierska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/50/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.954579,
+            50.668943
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 51,
+          "name": "S14_CCTV3",
+          "description": "Ozimska - Sandomierska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/51/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.95449,
+            50.668784
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 52,
+          "name": "S14_CCTV4",
+          "description": "Ozimska - Sandomierska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/52/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.954246,
+            50.668879
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 53,
+          "name": "S15_CCTV1",
+          "description": "Ozimska - Horoszkiewicza",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/53/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.951057,
+            50.668825
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 54,
+          "name": "S15_CCTV2",
+          "description": "Ozimska - Horoszkiewicza",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/54/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.950982,
+            50.668659
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 55,
+          "name": "S15_CCTV3",
+          "description": "Ozimska - Horoszkiewicza",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/55/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.950748,
+            50.668733
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 56,
+          "name": "S15_CCTV4",
+          "description": "Ozimska - Horoszkiewicza",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/56/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.95064,
+            50.668858
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 57,
+          "name": "S16_CCTV1",
+          "description": "Ozimska - Plebiscytowa",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/57/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.942014,
+            50.66824
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 58,
+          "name": "S16_CCTV2",
+          "description": "Ozimska - Plebiscytowa",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/58/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.942184,
+            50.668157
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 59,
+          "name": "S16_CCTV3",
+          "description": "Ozimska - Plebiscytowa",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/59/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.942066,
+            50.668059
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 60,
+          "name": "S16_CCTV4",
+          "description": "Ozimska - Plebiscytowa",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/60/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.941873,
+            50.66814
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 61,
+          "name": "S17_CCTV1",
+          "description": "Ozimska - Katowicka",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/61/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.935838,
+            50.668065
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 62,
+          "name": "S17_CCTV2",
+          "description": "Ozimska - Katowicka",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/62/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.936035,
+            50.667992
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 63,
+          "name": "S17_CCTV3",
+          "description": "Ozimska - Katowicka",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/63/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.935983,
+            50.667837
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 64,
+          "name": "S17_CCTV4",
+          "description": "Ozimska - Katowicka",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/64/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.935731,
+            50.667914
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 65,
+          "name": "S18_CCTV1",
+          "description": "Ozimska - Reymonta",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/65/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.92842,
+            50.667855
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 66,
+          "name": "S18_CCTV2",
+          "description": "Ozimska - Reymonta",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/66/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.928687,
+            50.667623
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 67,
+          "name": "S18_CCTV3",
+          "description": "Ozimska - Reymonta",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/67/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.928125,
+            50.667697
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 68,
+          "name": "S19_CCTV1",
+          "description": "1 - go Maja - Reymonta",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/68/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.930291,
+            50.663421
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 69,
+          "name": "S19_CCTV2.1",
+          "description": "1 - go Maja - Reymonta",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/69/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.930071,
+            50.663338
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 70,
+          "name": "S19_CCTV2.2",
+          "description": "1 - go Maja - Reymonta",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/70/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.930049,
+            50.663465
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 71,
+          "name": "S21_CCTV1",
+          "description": "Plebiscytowa - 1 Maja - Fabryczna",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/71/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.942337,
+            50.664198
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 72,
+          "name": "S21_CCTV2",
+          "description": "Plebiscytowa - 1 Maja - Fabryczna",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/72/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.942518,
+            50.66417
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 73,
+          "name": "S21_CCTV3",
+          "description": "Plebiscytowa - 1 Maja - Fabryczna",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/73/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.942338,
+            50.663986
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 74,
+          "name": "S21_CCTV4",
+          "description": "Plebiscytowa - 1 Maja - Fabryczna",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/74/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.942108,
+            50.664032
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 75,
+          "name": "S22_CCTV1",
+          "description": "Jerzego i Ryszarda Kowalczyków - Mieszka I - Jagiellonów",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/75/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.954518,
+            50.655112
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 76,
+          "name": "S22_CCTV2",
+          "description": "Jerzego i Ryszarda Kowalczyków - Mieszka I - Jagiellonów",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/76/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.954724,
+            50.654959
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 77,
+          "name": "S22_CCTV3",
+          "description": "Jerzego i Ryszarda Kowalczyków - Mieszka I - Jagiellonów",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/77/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.954463,
+            50.65489
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 78,
+          "name": "S22_CCTV4",
+          "description": "Jerzego i Ryszarda Kowalczyków - Mieszka I - Jagiellonów",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/78/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.954299,
+            50.655027
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 79,
+          "name": "S23_CCTV1",
+          "description": "Strzelecka - Groszowicka",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/79/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.9886,
+            50.6442
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 80,
+          "name": "S23_CCTV2",
+          "description": "Strzelecka - Groszowicka",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/80/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.9885,
+            50.6442
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 81,
+          "name": "S24_CCTV1",
+          "description": "Budowlanych - OBI",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/81/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.916493,
+            50.676285
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 82,
+          "name": "S24_CCTV2",
+          "description": "Budowlanych - OBI",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/82/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.916699,
+            50.676199
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 83,
+          "name": "S24_CCTV3",
+          "description": "Budowlanych - OBI",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/83/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.916673,
+            50.67609
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 84,
+          "name": "S24_CCTV4",
+          "description": "Budowlanych - OBI",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/84/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.91647,
+            50.676181
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 85,
+          "name": "S25_CCTV1",
+          "description": "Budowlanych - Chorzowska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/85/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.913337,
+            50.688298
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 86,
+          "name": "S25_CCTV2",
+          "description": "Budowlanych - Chorzowska",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/86/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.9134,
+            50.688306
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 87,
+          "name": "S26_CCTV1",
+          "description": "Sobieskiego - Sołtysów PDP",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/87/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.9054,
+            50.7059
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 88,
+          "name": "S26_CCTV2",
+          "description": "Sobieskiego - Sołtysów PDP",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/88/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.9055,
+            50.7058
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 89,
+          "name": "S27_CCTV1",
+          "description": "Jagiełły - Wolności (Czarnowąsy)",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/89/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.9,
+            50.7254
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 90,
+          "name": "S27_CCTV2",
+          "description": "Jagiełły - Wolności (Czarnowąsy)",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/90/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.900185,
+            50.725303
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 91,
+          "name": "S27_CCTV3",
+          "description": "Jagiełły - Wolności (Czarnowąsy)",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/91/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.9002,
+            50.7251
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 92,
+          "name": "S27_CCTV4",
+          "description": "Jagiełły - Wolności (Czarnowąsy)",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/92/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.900009,
+            50.725218
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 93,
+          "name": "S29_CCTV1",
+          "description": "Sosnkowskiego - Horoszkiewicza - Szarych Szeregów",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/93/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.950122,
+            50.672625
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 94,
+          "name": "S29_CCTV2",
+          "description": "Sosnkowskiego - Horoszkiewicza - Szarych Szeregów",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/94/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.950372,
+            50.672548
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 95,
+          "name": "S29_CCTV3",
+          "description": "Sosnkowskiego - Horoszkiewicza - Szarych Szeregów",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/95/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.950268,
+            50.672395
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 96,
+          "name": "S29_CCTV4",
+          "description": "Sosnkowskiego - Horoszkiewicza - Szarych Szeregów",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/96/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.950058,
+            50.672478
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 97,
+          "name": "S30_CCTV1.1",
+          "description": "Sosnkowskiego - Real (Auchan)",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/97/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.945573,
+            50.673861
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 98,
+          "name": "S30_CCTV1.2",
+          "description": "Sosnkowskiego - Real (Auchan)",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/98/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.945473,
+            50.673799
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 99,
+          "name": "S30_CCTV2",
+          "description": "Sosnkowskiego - Real (Auchan)",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/99/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.945307,
+            50.673804
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 100,
+          "name": "S31_CCTV1",
+          "description": "Sosnkowskiego - Mikołajczyka",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/100/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.945662,
+            50.682258
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 101,
+          "name": "S31_CCTV2",
+          "description": "Sosnkowskiego - Mikołajczyka",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/101/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.945712,
+            50.682095
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 102,
+          "name": "S31_CCTV3",
+          "description": "Sosnkowskiego - Mikołajczyka",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/102/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.945466,
+            50.682044
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 103,
+          "name": "S31_CCTV4",
+          "description": "Sosnkowskiego - Mikołajczyka",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/103/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.945424,
+            50.68219
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 104,
+          "name": "S32_CCTV1.1",
+          "description": "Sosnkowskiego - Pużaka",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/104/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.950651,
+            50.687299
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 105,
+          "name": "S32_CCTV1.2",
+          "description": "Sosnkowskiego - Pużaka",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/105/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.950559,
+            50.687286
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 106,
+          "name": "S32_CCTV2",
+          "description": "Sosnkowskiego - Pużaka",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/106/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.950985,
+            50.686996
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 107,
+          "name": "S33_CCTV1",
+          "description": "Oleska - Pużaka - Wiejska - Lipowa",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/107/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.949627,
+            50.690283
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 108,
+          "name": "S33_CCTV2",
+          "description": "Oleska - Pużaka - Wiejska - Lipowa",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/108/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.949869,
+            50.690376
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 109,
+          "name": "S33_CCTV3",
+          "description": "Oleska - Pużaka - Wiejska - Lipowa",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/109/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.949917,
+            50.690195
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 110,
+          "name": "S33_CCTV4",
+          "description": "Oleska - Pużaka - Wiejska - Lipowa",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/110/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.949676,
+            50.690175
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 111,
+          "name": "S33_CCTV5",
+          "description": "Oleska - Pużaka - Wiejska - Lipowa",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/111/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.948853,
+            50.689743
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 112,
+          "name": "S33_CCTV6",
+          "description": "Oleska - Pużaka - Wiejska - Lipowa",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/112/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.948708,
+            50.689439
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 113,
+          "name": "S34_CCTV1",
+          "description": "1 - go Maja - Katowicka",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/113/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.936041,
+            50.66385
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 114,
+          "name": "S34_CCTV2",
+          "description": "1 - go Maja - Katowicka",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/114/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.93631,
+            50.663783
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 115,
+          "name": "S34_CCTV3",
+          "description": "1 - go Maja - Katowicka",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/115/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.936195,
+            50.663604
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 116,
+          "name": "S34_CCTV4",
+          "description": "1 - go Maja - Katowicka",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/116/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.93593,
+            50.663696
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 117,
+          "name": "S35_CCTV1",
+          "description": "Piastowska - Zamkowa",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/117/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.920652,
+            50.66738
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 118,
+          "name": "S35_CCTV2",
+          "description": "Piastowska - Zamkowa",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/118/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.920608,
+            50.667339
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 119,
+          "name": "S36_CCTV1.1",
+          "description": "Spychalskiego - pl. Piłsudskiego - Wrocławska - Lubliniecka",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/119/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.914706,
+            50.66896
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 120,
+          "name": "S36_CCTV1.2",
+          "description": "Spychalskiego - pl. Piłsudskiego - Wrocławska - Lubliniecka",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/120/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.914721,
+            50.668939
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 121,
+          "name": "S36_CCTV2",
+          "description": "Spychalskiego - pl. Piłsudskiego - Wrocławska - Lubliniecka",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/121/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.914314,
+            50.668692
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 122,
+          "name": "S37_CCTV1.1",
+          "description": "1 Maja - Korfantego (PDP)",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/122/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.925768,
+            50.662991
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 123,
+          "name": "S37_CCTV1.2",
+          "description": "1 Maja - Korfantego (PDP)",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/123/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.925599,
+            50.662945
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 124,
+          "name": "S38_CCTV1",
+          "description": "1 Maja - Kołłątaja (PDP)",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/124/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.92765,
+            50.66329
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 125,
+          "name": "S38_CCTV2",
+          "description": "1 Maja - Kołłątaja (PDP)",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/125/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.92782,
+            50.66326
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 126,
+          "name": "S38_CCTV3",
+          "description": "1 Maja - Kołłątaja (PDP)",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/126/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.927756,
+            50.663197
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 127,
+          "name": "S38_CCTV4",
+          "description": "1 Maja - Kołłątaja (PDP)",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/127/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.927565,
+            50.663206
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 128,
+          "name": "S39_CCTV1.1",
+          "description": "Pużaka - Grabowa (PDP)",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/128/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.954448,
+            50.682986
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 129,
+          "name": "S39_CCTV1.2",
+          "description": "Pużaka - Grabowa (PDP)",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/129/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.954449,
+            50.682985
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 130,
+          "name": "S40_CCTV1",
+          "description": "Grudzicka",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/130/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.986,
+            50.6661
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 131,
+          "name": "S40_CCTV2",
+          "description": "Grudzicka",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/131/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.9859,
+            50.6661
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 132,
+          "name": "S41_CCTV1",
+          "description": "Oleska - Chabrów - Okulickiego",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/132/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.93728,
+            50.6788
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 133,
+          "name": "S41_CCTV2",
+          "description": "Oleska - Chabrów - Okulickiego",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/133/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.93739,
+            50.678626
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 134,
+          "name": "S41_CCTV3",
+          "description": "Oleska - Chabrów - Okulickiego",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/134/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.937175,
+            50.678543
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 135,
+          "name": "S41_CCTV4",
+          "description": "Oleska - Chabrów - Okulickiego",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/135/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.937013,
+            50.678712
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 136,
+          "name": "S42_CCTV1",
+          "description": "Chabrów - Konwalii (PDP)",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/136/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.92951,
+            50.680641
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 137,
+          "name": "S42_CCTV2",
+          "description": "Chabrów - Konwalii (PDP)",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/137/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.929427,
+            50.680555
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 138,
+          "name": "S43_CCTV1",
+          "description": "Ozimska - Kani",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/138/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.945926,
+            50.668471
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 139,
+          "name": "S43_CCTV2",
+          "description": "Ozimska - Kani",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/139/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.946075,
+            50.668363
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 140,
+          "name": "S44_CCTV1",
+          "description": "Reymonta - wiadukt",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/140/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.930043,
+            50.661189
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 141,
+          "name": "S44_CCTV2",
+          "description": "Reymonta - wiadukt",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/141/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.930117,
+            50.661116
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 142,
+          "name": "S45_CCTV1",
+          "description": "Częstochowska - Górna (PDP)",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/142/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.982511,
+            50.672261
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 143,
+          "name": "S45_CCTV2",
+          "description": "Częstochowska - Górna (PDP)",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/143/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.98208,
+            50.672063
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 144,
+          "name": "S46_CCTV1",
+          "description": "Niemodlińska - Dambonia",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/144/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.887116,
+            50.661365
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 145,
+          "name": "S46_CCTV2.1",
+          "description": "Niemodlińska - Dambonia",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/145/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.886909,
+            50.661328
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 146,
+          "name": "S46_CCTV2.2",
+          "description": "Niemodlińska - Dambonia",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/146/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.886913,
+            50.66131
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 147,
+          "name": "S47_CCTV1",
+          "description": "Strzelecka - Morcinka",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/147/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.985951,
+            50.645167
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 148,
+          "name": "S50_CCTV1",
+          "description": "Szarych Szeregów - Sosnkowskiego",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/148/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.957607,
+            50.672998
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 149,
+          "name": "S50_CCTV2.1",
+          "description": "Szarych Szeregów - Sosnkowskiego",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/149/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.957468,
+            50.672932
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 150,
+          "name": "S50_CCTV2.2",
+          "description": "Szarych Szeregów - Sosnkowskiego",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/150/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.957477,
+            50.672919
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 151,
+          "name": "S51_CCTV1",
+          "description": "Witosa (ok. ul. Tarnopolskiej)",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/151/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.974688,
+            50.677217
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 152,
+          "name": "S51_CCTV2",
+          "description": "Witosa (ok. ul. Tarnopolskiej)",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/152/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.974411,
+            50.677156
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 153,
+          "name": "S52_CCTV1",
+          "description": "Niemodlińska - Styki (PDP)",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/153/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.899423,
+            50.664063
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 154,
+          "name": "S52_CCTV2",
+          "description": "Niemodlińska - Styki (PDP)",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/154/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.899321,
+            50.663977
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 155,
+          "name": "KMeteo01",
+          "description": "KMeteo01",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/155/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.9132,
+            50.6719
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 156,
+          "name": "KMeteo02",
+          "description": "KMeteo02",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/156/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.916444,
+            50.631417
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 158,
+          "name": "S54_CCTV1",
+          "description": "Mehla - Prószkowska - Wyszomirskiego",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/158/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.906772,
+            50.647317
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 159,
+          "name": "S54_CCTV2",
+          "description": "Mehla - Prószkowska - Wyszomirskiego",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/159/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.906813,
+            50.64727
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 160,
+          "name": "S54_CCTV3",
+          "description": "Mehla - Prószkowska - Wyszomirskiego",
+          "state": 1,
+          "type": "fixed",
+          "image": "/cameras/160/images"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            17.906766,
+            50.647289
+          ]
+        }
+      }
+    ]
+  }
+}

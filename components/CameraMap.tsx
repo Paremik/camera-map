@@ -3,18 +3,30 @@
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { categoryLabels, filterCameras, type Camera, type CameraCategory } from "@/lib/camera";
+import { cameraLink, readCameraLink } from "@/lib/camera-preferences";
 import CameraDetails from "./CameraDetails";
 import Icon from "./Icon";
+import { useFavorites } from "./useFavorites";
 
 const MapCanvas = dynamic(() => import("./MapCanvas"), {
   ssr: false, loading: () => <div className="map-loading" role="status">Загружаем карту Opole…</div>,
 });
 
+function updateCameraUrl(id: string | null, replace = false) {
+  const url = cameraLink(window.location.href, id);
+  if (url !== window.location.href) window.history[replace ? "replaceState" : "pushState"](null, "", url);
+}
+
 export default function CameraMap({ cameras }: { cameras: Camera[] }) {
+  const knownIds = useMemo(() => new Set(cameras.map((camera) => camera.id)), [cameras]);
+  const favorites = useFavorites(knownIds);
+  const favoriteIds = useMemo(() => new Set(favorites.ids), [favorites.ids]);
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<CameraCategory | "all">("all");
   const [verifiedOnly, setVerifiedOnly] = useState(false);
-  const [selectedId, setSelectedId] = useState<string | null>(cameras[0]?.id ?? null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [invalidLink, setInvalidLink] = useState(false);
   const [is3D, setIs3D] = useState(false);
   const [showSectors, setShowSectors] = useState(true);
   const [resetRequest, setResetRequest] = useState(0);
@@ -22,18 +34,43 @@ export default function CameraMap({ cameras }: { cameras: Camera[] }) {
   const [mobileList, setMobileList] = useState(false);
   const listButtonRef = useRef<HTMLButtonElement>(null);
   const [pageSize, setPageSize] = useState(50);
-  const visible = useMemo(() => filterCameras(cameras, { query, category, verifiedOnly }), [cameras, query, category, verifiedOnly]);
+  const visible = useMemo(() => filterCameras(cameras, { query, category, verifiedOnly }).filter((camera) => !favoritesOnly || favoriteIds.has(camera.id)), [cameras, query, category, verifiedOnly, favoritesOnly, favoriteIds]);
   const selected = visible.find((camera) => camera.id === selectedId) ?? null;
   const selectCamera = useCallback((camera: Camera) => {
+    updateCameraUrl(camera.id);
+    setInvalidLink(false);
     setSelectedId(camera.id);
     setFocusRequest((value) => value + 1);
     setMobileList(false);
     if (window.innerWidth <= 760) requestAnimationFrame(() => document.getElementById("camera-details-title")?.focus());
   }, []);
-  function resetFilters() {
-    setQuery(""); setCategory("all"); setVerifiedOnly(false); setPageSize(50);
+  const resetFilters = useCallback(() => {
+    setQuery(""); setCategory("all"); setVerifiedOnly(false); setFavoritesOnly(false); setPageSize(50);
+  }, []);
+  function closeCamera() {
+    updateCameraUrl(null);
+    setSelectedId(null);
   }
   const verifiedCount = cameras.filter((camera) => camera.verified).length;
+  useEffect(() => {
+    function navigate() {
+      const link = readCameraLink(window.location.search, knownIds);
+      resetFilters();
+      setSelectedId(link.id);
+      setInvalidLink(link.invalid);
+      setMobileList(false);
+      if (link.id) setFocusRequest((value) => value + 1);
+    }
+    navigate();
+    window.addEventListener("popstate", navigate);
+    return () => window.removeEventListener("popstate", navigate);
+  }, [knownIds, resetFilters]);
+  useEffect(() => {
+    if (selectedId && !visible.some((camera) => camera.id === selectedId)) {
+      setSelectedId(null);
+      updateCameraUrl(null, true);
+    }
+  }, [selectedId, visible]);
   useEffect(() => {
     if (!mobileList) return;
     document.getElementById("camera-search")?.focus();
@@ -73,18 +110,26 @@ export default function CameraMap({ cameras }: { cameras: Camera[] }) {
             <option value="city">Городской мониторинг</option>
           </select>
           <label className="check-row"><input type="checkbox" checked={verifiedOnly} onChange={(event) => { setVerifiedOnly(event.target.checked); setPageSize(50); }} /> Только проверенные точки</label>
+          <div className="catalog-switch" role="group" aria-label="Каталог или избранное">
+            <button aria-pressed={!favoritesOnly} onClick={() => { setFavoritesOnly(false); setPageSize(50); }}>Все камеры</button>
+            <button aria-pressed={favoritesOnly} disabled={!favorites.ready} onClick={() => { setFavoritesOnly(true); setPageSize(50); }}><Icon name="star" /> Избранное <span>{favorites.ids.length}</span></button>
+          </div>
+          {favoritesOnly && <p className="favorites-note">Избранное сохраняется в этом браузере.</p>}
+          {favorites.storageError && <p className="storage-warning" role="status">Браузер не разрешает сохранять избранное. Оно доступно до закрытия или перезагрузки страницы.</p>}
         </div>
         <div className="list-heading"><span>КАМЕРЫ</span><span aria-live="polite">{visible.length} из {cameras.length}</span></div>
         <div className="camera-list">
           {visible.slice(0, pageSize).map((camera) => (
-            <button key={camera.id} className={"camera-item" + (selected?.id === camera.id ? " active" : "")} aria-pressed={selected?.id === camera.id} onClick={() => selectCamera(camera)}>
+            <div key={camera.id} className={"camera-row" + (selected?.id === camera.id ? " active" : "")}>
+            <button className="camera-item" aria-pressed={selected?.id === camera.id} onClick={() => selectCamera(camera)}>
               <span className="item-camera"><Icon name="camera" /></span>
-              <span className="item-copy"><strong>{camera.name}</strong><small>{camera.street}</small><span className="item-type">{categoryLabels[camera.category]} <span aria-hidden="true">·</span> {camera.verified ? "Точка проверена" : "Примерная точка"}</span></span>
-              <span className="item-arrow" aria-hidden="true">↗</span>
+              <span className="item-copy"><strong>{camera.name}</strong><small>{camera.street}</small><span className="item-type">{categoryLabels[camera.category]} <span aria-hidden="true">·</span> {camera.verified ? "Точка проверена" : "Точка не проверена"}</span></span>
             </button>
+            <button className="icon-button favorite-button row-favorite" disabled={!favorites.ready} aria-label={(favoriteIds.has(camera.id) ? "Убрать из избранного: " : "В избранное: ") + camera.name} aria-pressed={favoriteIds.has(camera.id)} onClick={() => favorites.toggle(camera.id)}><Icon name="star" /></button>
+            </div>
           ))}
           {visible.length > pageSize && <button className="secondary-button" onClick={() => setPageSize((value) => value + 50)}>Показать ещё 50</button>}
-          {visible.length === 0 && <div className="empty-state" role="status"><Icon name="search" /><h2>Камеры не найдены</h2><p>{verifiedOnly ? "Проверенных точек для этих условий пока нет." : "Попробуйте другую улицу или тип камеры."}</p><button className="secondary-button" onClick={resetFilters}>Сбросить фильтры</button></div>}
+          {visible.length === 0 && <div className="empty-state" role="status"><Icon name={favoritesOnly ? "star" : "search"} /><h2>{favoritesOnly && favorites.ids.length === 0 ? "В избранном пока пусто" : "Камеры не найдены"}</h2><p>{favoritesOnly && favorites.ids.length === 0 ? "Нажмите звёздочку рядом с камерой, чтобы сохранить её здесь." : verifiedOnly ? "Проверенных точек для этих условий пока нет." : "Попробуйте другую улицу или тип камеры."}</p><button className="secondary-button" onClick={resetFilters}>{favoritesOnly && favorites.ids.length === 0 ? "Показать все камеры" : "Сбросить фильтры"}</button></div>}
         </div>
         <footer className="sidebar-footer"><span className="small-dot" /> Только публичные источники<a href="https://its.mzd.opole.pl/mapa" target="_blank" rel="noopener noreferrer">Портал ITS Opole ↗</a></footer>
       </aside>
@@ -98,11 +143,12 @@ export default function CameraMap({ cameras }: { cameras: Camera[] }) {
             <button className="icon-button center-button" title="В центр Opole" aria-label="В центр Opole" onClick={() => setResetRequest((value) => value + 1)}><Icon name="center" /></button>
           </div>
         </div>
+        {invalidLink && <div className="link-notice" role="status"><p>Камера из ссылки не найдена в каталоге. Выберите доступную камеру на карте или в списке.</p><button className="secondary-button" onClick={() => { setInvalidLink(false); updateCameraUrl(null, true); }}>Понятно</button></div>}
         <div className="map-bottom-tools">
           <button className="sector-toggle" aria-pressed={showSectors} onClick={() => setShowSectors((value) => !value)}><Icon name="sector" /> Секторы обзора <span>{showSectors ? "Вкл" : "Выкл"}</span></button>
           <span className="map-caption">{is3D ? "3D · наклон карты, без объёмных зданий" : "2D · вид сверху"}</span>
         </div>
-        {selected && <CameraDetails camera={selected} onClose={() => setSelectedId(null)} />}
+        {selected && <CameraDetails key={selected.id} camera={selected} onClose={closeCamera} favorite={favoriteIds.has(selected.id)} favoritesReady={favorites.ready} onToggleFavorite={() => favorites.toggle(selected.id)} />}
         <button ref={listButtonRef} className="mobile-list-button" onClick={() => setMobileList(true)}><Icon name="list" /> Камеры и поиск <span>{visible.length}</span></button>
       </main>
     </div>

@@ -84,3 +84,32 @@ export function importItsExport(value: unknown): Camera[] {
     };
   }));
 }
+
+/** Observed public /api/cameras GeoJSON. Metadata only; image paths are not followed. */
+export function importItsGeoJson(value: unknown): Camera[] {
+  const input = object(value, "ITS GeoJSON export");
+  if (input.schemaVersion !== 1 || input.format !== "its-geojson-v1") throw new Error("Unsupported ITS GeoJSON format or schemaVersion");
+  if (input.sourceUrl !== "https://its.mzd.opole.pl/api/cameras") throw new Error("GeoJSON sourceUrl must be the observed official public camera endpoint");
+  const collection = object(input.collection, "collection");
+  if (collection.type !== "FeatureCollection" || !Array.isArray(collection.features) || collection.features.length === 0 || collection.features.length > 10000) {
+    throw new Error("Expected a FeatureCollection with 1–10000 cameras");
+  }
+  const cameras = collection.features.map((entry, index) => {
+    const feature = object(entry, "Feature " + (index + 1));
+    const geometry = object(feature.geometry, "geometry");
+    const properties = object(feature.properties, "properties");
+    if (feature.type !== "Feature" || geometry.type !== "Point" || !Array.isArray(geometry.coordinates) || geometry.coordinates.length !== 2) {
+      throw new Error("Camera geometry must be a Point with [longitude, latitude]");
+    }
+    if (typeof properties.id !== "number" || !Number.isSafeInteger(properties.id) || properties.id < 1) throw new Error("Camera id must be a positive safe integer");
+    return {
+      id: String(properties.id), name: properties.name, street: properties.description,
+      lng: geometry.coordinates[0], lat: geometry.coordinates[1],
+      publicViewUrl: "https://its.mzd.opole.pl/mapa",
+    };
+  });
+  return importItsExport({ schemaVersion: 1, sourceUrl: input.sourceUrl, retrievedAt: input.retrievedAt, cameras }).map((camera) => ({
+    ...camera,
+    note: "Координаты и название опубликованы ITS Opole, получены " + input.retrievedAt + ". Точность места установки не проверена. Направление, угол обзора и дальность в источнике не указаны. Просмотр — на карте издателя.",
+  }));
+}
