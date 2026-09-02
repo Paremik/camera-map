@@ -1,28 +1,71 @@
-# Opole Camera Map — MVP
+# Opole Camera Map
 
-Prototype web app for visualizing publicly documented cameras in Opole.
+Карта публично описанных камер Opole на Next.js, TypeScript и MapLibre с подложкой OpenStreetMap. Платный ключ API не нужен.
 
-## What is included
-- Next.js + TypeScript
-- MapLibre map using OpenStreetMap tiles (no Mapbox token needed)
-- Camera markers
-- Approximate field-of-view sectors
-- Camera details panel
-- Link to the official public camera page
+## Возможности MVP
 
-## Run
-```bash
-npm install
-npm run dev
+- Интерактивная карта: масштабирование, перемещение, возврат в центр Opole.
+- Кликабельные точки и группировка близких точек. Камеры с одинаковыми координатами доступны через общий маркер с количеством видов.
+- Поиск по названию/улице, включая польские буквы без диакритики; фильтры публичных видов, ITS, городского мониторинга и проверенных точек.
+- Карточка с координатами, источником, статусом проверки, направлением, углом, дальностью и ссылкой на публичный просмотр.
+- Геодезические секторы, выделение выбранной камеры и переключатель видимости.
+- 2D / 3D: вид сверху или наклонённая перспектива. Объёмных зданий и моделирования реальной видимости пока нет.
+- Мобильный каталог, управление с клавиатуры, состояния загрузки/ошибки и повторная загрузка карты.
+
+## Запуск
+
+Требуются Node.js 24+ и pnpm 11.19.0. Версия менеджера зафиксирована в package.json.
+
+```sh
+npm install -g pnpm@11.19.0
+pnpm install --frozen-lockfile
+pnpm dev
 ```
-Then open http://localhost:3000
 
-## Data policy
-Only add camera coordinates / streams / optical parameters from lawful public sources. Do not infer or publish hidden feeds, credentials, or non-public access paths.
+Откройте http://localhost:3000. Переменные окружения и учётные записи для MVP не нужны.
 
-## Next steps
-1. Import public ITS camera coordinates from the official map/network payload.
-2. Add `verified` and `sourceUrl` fields.
-3. Embed video only where the publisher permits iframe/hls embedding; otherwise open the official source.
-4. Add search, filters, camera types and a 2D/3D toggle.
-5. Replace approximate FOV/range with verified values when available.
+```sh
+pnpm typecheck
+pnpm test
+pnpm build
+pnpm start
+```
+
+Не запускайте dev и start на одном порту. Можно задать другой: `pnpm start --port 3001`.
+Сборка и тесты также включены в GitHub Actions.
+
+## Что известно о данных
+
+Четыре вида с ратуши описаны на [официальной странице города](https://www.opole.pl/dla-turysty/opole-okiem-kamery). Общая точка 50.66855, 17.92240 приблизительно обозначает [здание Ratusz в OpenStreetMap](https://www.openstreetmap.org/way/207031541), а не места крепления камер. Исходная точка была примерно на 260 м южнее и исправлена. Оптика остаётся иллюстративной; все записи имеют `verified: false` и `opticsVerified: false`.
+
+`verified` означает, что координаты сверены с публичным источником, а не просто что существует страница камеры. `opticsVerified` — отдельная проверка направления, угла и дальности по техническому источнику. Сектор без подтверждения служит иллюстрацией; здания, препятствия и поворот PTZ не учитываются.
+
+Сайт открывает страницу издателя в новой вкладке и не заявляет, что трансляция сейчас работает. Встроенных потоков нет: для них нужно явное разрешение издателя. Фильтры ITS, городского мониторинга и проверенных точек пока закономерно пусты.
+
+## Импорт ITS
+
+[Публичный портал ITS Opole](https://its.mzd.opole.pl/mapa) содержит слой камер. Прямой стабильный API, координаты и условия использования ещё требуют проверки. В MVP нет сканирования потоков, обхода входа или автоматического извлечения закрытых данных.
+
+Подготовлен адаптер для **проверенного вручную экспорта публичной карты**, а не для произвольного ответа неизвестного API. Формат, порядок проверки и команды описаны в [docs/ITS_IMPORT.md](docs/ITS_IMPORT.md).
+
+```sh
+pnpm import:its path/to/public-export.json
+pnpm import:its path/to/public-export.json --write
+```
+
+Первая команда только проверяет файл. Вторая заменяет ITS-набор целиком после успешной проверки всех записей. Ошибки или пустой файл не должны стирать существующие данные. После записи пересоберите приложение.
+
+## Структура и продолжение работы
+
+- `app/page.tsx` получает валидированный каталог через `lib/camera-repository.ts`.
+- `data/cameras.ts` — начальные публичные виды, `data/its-cameras.json` — будущий импорт.
+- `lib/camera.ts` — модель, поиск и группировка; `lib/geometry.ts` — геометрия секторов.
+- `components/CameraMap.tsx` управляет выбором и фильтрами; `MapCanvas.tsx` загружает MapLibre только в браузере; `CameraDetails.tsx` показывает карточку.
+- `lib/import-cameras.ts` валидирует данные, `scripts/import-its.ts` выполняет безопасную запись.
+- `tests/cameras.test.ts` проверяет геометрию, фильтры и защиту импорта от некорректных данных.
+
+Для продолжения прочитайте [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) и [CODEX_PROMPT.md](CODEX_PROMPT.md).
+
+## Внешние зависимости карты
+
+Тайлы загружаются с tile.openstreetmap.org; шрифт чисел на маркерах — с demotiles.maplibre.org. При их недоступности каталог и ссылки остаются доступны. Нет фонового массового скачивания тайлов. Перед масштабным публичным развёртыванием выберите подходящий тайловый сервис с учётом [политики OpenStreetMap](https://operations.osmfoundation.org/policies/tiles/).

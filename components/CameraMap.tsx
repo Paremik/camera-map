@@ -1,185 +1,109 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import maplibregl, { GeoJSONSource, Map as MapLibreMap } from "maplibre-gl";
-import { Camera, cameras } from "@/data/cameras";
+import dynamic from "next/dynamic";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { categoryLabels, filterCameras, type Camera, type CameraCategory } from "@/lib/camera";
+import CameraDetails from "./CameraDetails";
+import Icon from "./Icon";
 
-type Position = [number, number];
+const MapCanvas = dynamic(() => import("./MapCanvas"), {
+  ssr: false, loading: () => <div className="map-loading" role="status">Загружаем карту Opole…</div>,
+});
 
-function destinationPoint(lat: number, lng: number, bearingDeg: number, distanceM: number): Position {
-  const R = 6371000;
-  const brng = (bearingDeg * Math.PI) / 180;
-  const lat1 = (lat * Math.PI) / 180;
-  const lon1 = (lng * Math.PI) / 180;
-  const d = distanceM / R;
-
-  const lat2 = Math.asin(
-    Math.sin(lat1) * Math.cos(d) + Math.cos(lat1) * Math.sin(d) * Math.cos(brng)
-  );
-  const lon2 = lon1 + Math.atan2(
-    Math.sin(brng) * Math.sin(d) * Math.cos(lat1),
-    Math.cos(d) - Math.sin(lat1) * Math.sin(lat2)
-  );
-
-  return [(lon2 * 180) / Math.PI, (lat2 * 180) / Math.PI];
-}
-
-function cameraSector(camera: Camera) {
-  const points: Position[] = [[camera.lng, camera.lat]];
-  const start = camera.heading - camera.fov / 2;
-  const end = camera.heading + camera.fov / 2;
-  const steps = 24;
-
-  for (let i = 0; i <= steps; i++) {
-    const bearing = start + ((end - start) * i) / steps;
-    points.push(destinationPoint(camera.lat, camera.lng, bearing, camera.rangeMeters));
-  }
-  points.push([camera.lng, camera.lat]);
-
-  return {
-    type: "Feature" as const,
-    properties: { id: camera.id, name: camera.name },
-    geometry: { type: "Polygon" as const, coordinates: [points] }
-  };
-}
-
-function sectorsGeoJson() {
-  return {
-    type: "FeatureCollection" as const,
-    features: cameras.map(cameraSector)
-  };
-}
-
-export default function CameraMap() {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<MapLibreMap | null>(null);
-  const [selected, setSelected] = useState<Camera | null>(cameras[0] ?? null);
-
-  useEffect(() => {
-    if (!containerRef.current || mapRef.current) return;
-
-    const map = new maplibregl.Map({
-      container: containerRef.current,
-      center: [17.9232, 50.6663],
-      zoom: 15.2,
-      pitch: 48,
-      bearing: -12,
-      antialias: true,
-      style: {
-        version: 8,
-        sources: {
-          osm: {
-            type: "raster",
-            tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
-            tileSize: 256,
-            attribution: "© OpenStreetMap contributors"
-          }
-        },
-        layers: [{ id: "osm", type: "raster", source: "osm" }]
-      }
-    });
-
-    map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "top-right");
-
-    map.on("load", () => {
-      map.addSource("camera-sectors", { type: "geojson", data: sectorsGeoJson() });
-      map.addLayer({
-        id: "camera-sectors-fill",
-        type: "fill",
-        source: "camera-sectors",
-        paint: { "fill-color": "#ff4d4f", "fill-opacity": 0.18 }
-      });
-      map.addLayer({
-        id: "camera-sectors-line",
-        type: "line",
-        source: "camera-sectors",
-        paint: { "line-color": "#ff4d4f", "line-width": 1.5, "line-opacity": 0.8 }
-      });
-
-      cameras.forEach((camera) => {
-        const button = document.createElement("button");
-        button.className = "camera-marker";
-        button.type = "button";
-        button.title = camera.name;
-        button.innerHTML = "◉";
-        button.addEventListener("click", () => {
-          setSelected(camera);
-          map.flyTo({ center: [camera.lng, camera.lat], zoom: Math.max(map.getZoom(), 16), essential: true });
-        });
-
-        new maplibregl.Marker({ element: button, anchor: "center" })
-          .setLngLat([camera.lng, camera.lat])
-          .addTo(map);
-      });
-    });
-
-    mapRef.current = map;
-    return () => {
-      map.remove();
-      mapRef.current = null;
-    };
+export default function CameraMap({ cameras }: { cameras: Camera[] }) {
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState<CameraCategory | "all">("all");
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(cameras[0]?.id ?? null);
+  const [is3D, setIs3D] = useState(false);
+  const [showSectors, setShowSectors] = useState(true);
+  const [resetRequest, setResetRequest] = useState(0);
+  const [focusRequest, setFocusRequest] = useState(0);
+  const [mobileList, setMobileList] = useState(false);
+  const listButtonRef = useRef<HTMLButtonElement>(null);
+  const [pageSize, setPageSize] = useState(50);
+  const visible = useMemo(() => filterCameras(cameras, { query, category, verifiedOnly }), [cameras, query, category, verifiedOnly]);
+  const selected = visible.find((camera) => camera.id === selectedId) ?? null;
+  const selectCamera = useCallback((camera: Camera) => {
+    setSelectedId(camera.id);
+    setFocusRequest((value) => value + 1);
+    setMobileList(false);
+    if (window.innerWidth <= 760) requestAnimationFrame(() => document.getElementById("camera-details-title")?.focus());
   }, []);
-
-  function selectCamera(camera: Camera) {
-    setSelected(camera);
-    mapRef.current?.flyTo({ center: [camera.lng, camera.lat], zoom: 16.5, pitch: 55, essential: true });
+  function resetFilters() {
+    setQuery(""); setCategory("all"); setVerifiedOnly(false); setPageSize(50);
   }
+  const verifiedCount = cameras.filter((camera) => camera.verified).length;
+  useEffect(() => {
+    if (!mobileList) return;
+    document.getElementById("camera-search")?.focus();
+    function onEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") { setMobileList(false); requestAnimationFrame(() => listButtonRef.current?.focus()); }
+    }
+    function onResize() {
+      if (window.innerWidth > 760) setMobileList(false);
+    }
+    window.addEventListener("keydown", onEscape);
+    window.addEventListener("resize", onResize);
+    return () => { window.removeEventListener("keydown", onEscape); window.removeEventListener("resize", onResize); };
+  }, [mobileList]);
 
   return (
     <div className="shell">
-      <aside className="sidebar">
-        <div className="brand-row">
-          <div>
-            <p className="eyebrow">OPole / MVP</p>
-            <h1>Camera Map</h1>
-          </div>
-          <span className="status-dot" title="MVP" />
+      <a className="skip-link" href="#camera-search" onClick={() => { if (window.innerWidth <= 760) setMobileList(true); }}>К поиску камер</a>
+      <aside className={"sidebar" + (mobileList ? " mobile-open" : "")} aria-label="Каталог камер">
+        <header className="brand">
+          <span className="brand-icon"><Icon name="camera" /></span>
+          <div><p className="eyebrow">ГОРОД В ОБЪЕКТИВЕ</p><h1>Opole<span> / cameras</span></h1></div>
+          <button className="icon-button mobile-close" aria-label="Закрыть список" onClick={() => { setMobileList(false); requestAnimationFrame(() => listButtonRef.current?.focus()); }}><Icon name="close" /></button>
+        </header>
+        <div className="sidebar-intro">
+          <p>Публичные камеры на одной карте.</p>
+          <div className="catalog-stats"><span><b>{cameras.length}</b> камер</span><span><b>{verifiedCount}</b> точек проверено</span></div>
         </div>
-
-        <p className="intro">
-          Публичные камеры и ориентировочные сектора обзора. Точные углы и дальность добавляем только после проверки источника.
-        </p>
-
+        <div className="filters">
+          <label className="search-field" htmlFor="camera-search"><Icon name="search" />
+            <input id="camera-search" type="search" aria-label="Название камеры или улица" placeholder="Название или улица…" value={query} onChange={(event) => { setQuery(event.target.value); setPageSize(50); }} />
+          </label>
+          <label className="sr-only" htmlFor="camera-category">Тип камеры</label>
+          <select id="camera-category" value={category} onChange={(event) => { setCategory(event.target.value as CameraCategory | "all"); setPageSize(50); }}>
+            <option value="all">Все типы камер</option>
+            <option value="public">Публичный вид</option>
+            <option value="its">ITS Opole</option>
+            <option value="city">Городской мониторинг</option>
+          </select>
+          <label className="check-row"><input type="checkbox" checked={verifiedOnly} onChange={(event) => { setVerifiedOnly(event.target.checked); setPageSize(50); }} /> Только проверенные точки</label>
+        </div>
+        <div className="list-heading"><span>КАМЕРЫ</span><span aria-live="polite">{visible.length} из {cameras.length}</span></div>
         <div className="camera-list">
-          {cameras.map((camera) => (
-            <button
-              key={camera.id}
-              className={selected?.id === camera.id ? "camera-item active" : "camera-item"}
-              onClick={() => selectCamera(camera)}
-            >
-              <span className="camera-icon">●</span>
-              <span>
-                <strong>{camera.name}</strong>
-                <small>{camera.rangeMeters} м · {camera.fov}°</small>
-              </span>
+          {visible.slice(0, pageSize).map((camera) => (
+            <button key={camera.id} className={"camera-item" + (selected?.id === camera.id ? " active" : "")} aria-pressed={selected?.id === camera.id} onClick={() => selectCamera(camera)}>
+              <span className="item-camera"><Icon name="camera" /></span>
+              <span className="item-copy"><strong>{camera.name}</strong><small>{camera.street}</small><span className="item-type">{categoryLabels[camera.category]} <span aria-hidden="true">·</span> {camera.verified ? "Точка проверена" : "Примерная точка"}</span></span>
+              <span className="item-arrow" aria-hidden="true">↗</span>
             </button>
           ))}
+          {visible.length > pageSize && <button className="secondary-button" onClick={() => setPageSize((value) => value + 50)}>Показать ещё 50</button>}
+          {visible.length === 0 && <div className="empty-state" role="status"><Icon name="search" /><h2>Камеры не найдены</h2><p>{verifiedOnly ? "Проверенных точек для этих условий пока нет." : "Попробуйте другую улицу или тип камеры."}</p><button className="secondary-button" onClick={resetFilters}>Сбросить фильтры</button></div>}
         </div>
-
-        {selected && (
-          <section className="details-card">
-            <div className="details-title">
-              <span>Выбрана камера</span>
-              <strong>{selected.name}</strong>
-            </div>
-            <dl>
-              <div><dt>Направление</dt><dd>{selected.heading}°</dd></div>
-              <div><dt>Угол</dt><dd>{selected.fov}°</dd></div>
-              <div><dt>Дальность</dt><dd>~{selected.rangeMeters} м</dd></div>
-            </dl>
-            {selected.note && <p className="note">{selected.note}</p>}
-            {selected.publicViewUrl && (
-              <a href={selected.publicViewUrl} target="_blank" rel="noreferrer" className="view-button">
-                Открыть публичный вид ↗
-              </a>
-            )}
-          </section>
-        )}
+        <footer className="sidebar-footer"><span className="small-dot" /> Только публичные источники<a href="https://its.mzd.opole.pl/mapa" target="_blank" rel="noopener noreferrer">Портал ITS Opole ↗</a></footer>
       </aside>
 
-      <main className="map-wrap">
-        <div ref={containerRef} className="map" />
-        <div className="map-badge">3D prototype · MapLibre + OSM</div>
+      <main className="map-workspace" aria-label="Карта камер Opole" inert={mobileList}>
+        <MapCanvas cameras={visible} selected={selected} onSelect={selectCamera} is3D={is3D} showSectors={showSectors} resetRequest={resetRequest} focusRequest={focusRequest} />
+        <div className="map-topbar">
+          <div className="location-chip"><Icon name="pin" /><div><strong>Opole</strong><span>Польша · {visible.length} камер</span></div></div>
+          <div className="map-actions">
+            <div className="mode-switch" role="group" aria-label="Режим карты"><button aria-pressed={!is3D} onClick={() => setIs3D(false)}>2D</button><button aria-pressed={is3D} onClick={() => setIs3D(true)} title="Наклон карты без объёмных зданий">3D</button></div>
+            <button className="icon-button center-button" title="В центр Opole" aria-label="В центр Opole" onClick={() => setResetRequest((value) => value + 1)}><Icon name="center" /></button>
+          </div>
+        </div>
+        <div className="map-bottom-tools">
+          <button className="sector-toggle" aria-pressed={showSectors} onClick={() => setShowSectors((value) => !value)}><Icon name="sector" /> Секторы обзора <span>{showSectors ? "Вкл" : "Выкл"}</span></button>
+          <span className="map-caption">{is3D ? "3D · наклон карты, без объёмных зданий" : "2D · вид сверху"}</span>
+        </div>
+        {selected && <CameraDetails camera={selected} onClose={() => setSelectedId(null)} />}
+        <button ref={listButtonRef} className="mobile-list-button" onClick={() => setMobileList(true)}><Icon name="list" /> Камеры и поиск <span>{visible.length}</span></button>
       </main>
     </div>
   );
