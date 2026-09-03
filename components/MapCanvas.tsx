@@ -4,10 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import maplibregl, { type GeoJSONSource, type Map as LibreMap } from "maplibre-gl";
 import { catalogCountLabel, countCameras, countDocumentedSites, groupCameraSites, type Camera } from "@/lib/camera";
 import { directionGeoJson, sectorsGeoJson } from "@/lib/geometry";
+import type { StreetHighlight } from "@/lib/street-search";
 
 type Props = {
   cameras: Camera[]; selected: Camera | null; onSelect: (camera: Camera) => void;
   is3D: boolean; showSectors: boolean; resetRequest: number; focusRequest: number;
+  street: StreetHighlight | null; streetFocusRequest: number;
 };
 const center: [number, number] = [17.92240, 50.66855];
 const empty = { type: "FeatureCollection" as const, features: [] };
@@ -27,6 +29,7 @@ function syncData(map: LibreMap, props: Props) {
   (map.getSource("camera-points") as GeoJSONSource)?.setData(siteData(props.cameras));
   (map.getSource("camera-sectors") as GeoJSONSource)?.setData(props.showSectors ? sectorsGeoJson(props.cameras) : empty);
   (map.getSource("camera-direction") as GeoJSONSource)?.setData(props.showSectors ? directionGeoJson(props.selected) : empty);
+  (map.getSource("street-highlight") as GeoJSONSource)?.setData(props.street?.geometry ?? empty);
   if (map.getLayer("sector-fill")) {
     map.setPaintProperty("sector-fill", "fill-color", ["case", ["==", ["get", "id"], props.selected?.id ?? ""], "#087a62", "#487b8c"]);
     map.setPaintProperty("sector-fill", "fill-opacity", ["case", ["==", ["get", "id"], props.selected?.id ?? ""], 0.32, 0.09]);
@@ -84,8 +87,12 @@ export default function MapCanvas(props: Props) {
         window.clearTimeout(timeout);
         map.addSource("camera-sectors", { type: "geojson", data: empty });
         map.addSource("camera-direction", { type: "geojson", data: empty });
+        map.addSource("street-highlight", { type: "geojson", data: empty });
         map.addSource("camera-points", { type: "geojson", data: empty, cluster: true, clusterMaxZoom: 16, clusterRadius: 48,
           clusterProperties: { cameraCount: ["+", ["get", "cameraCount"]], reportedCount: ["+", ["get", "reportedCount"]], documentedSiteCount: ["+", ["get", "documentedSiteCount"]] } });
+        map.addLayer({ id: "street-highlight-casing", type: "line", source: "street-highlight", paint: { "line-color": "#ffffff", "line-width": ["interpolate", ["linear"], ["zoom"], 10, 5, 18, 12], "line-opacity": 0.95 } });
+        map.addLayer({ id: "street-highlight-line", type: "line", source: "street-highlight", paint: { "line-color": "#1686ff", "line-width": ["interpolate", ["linear"], ["zoom"], 10, 3, 18, 8], "line-opacity": 0.9 } });
+        map.addLayer({ id: "street-highlight-label", type: "symbol", source: "street-highlight", layout: { "symbol-placement": "line", "text-field": ["get", "name"], "text-font": ["Open Sans Semibold"], "text-size": 13, "symbol-spacing": 350 }, paint: { "text-color": "#ffffff", "text-halo-color": "#096ec5", "text-halo-width": 2 } });
         map.addLayer({ id: "sector-fill", type: "fill", source: "camera-sectors", paint: { "fill-color": "#087a62", "fill-opacity": 0.15 } });
         map.addLayer({ id: "sector-line", type: "line", source: "camera-sectors", paint: { "line-color": "#087a62", "line-width": 1.5 } });
         map.addLayer({ id: "direction-line", type: "line", source: "camera-direction", paint: { "line-color": "#075a49", "line-width": 2.5, "line-dasharray": [3, 2] } });
@@ -135,7 +142,7 @@ export default function MapCanvas(props: Props) {
     };
   }, [attempt]);
 
-  useEffect(() => { if (ready && mapRef.current) syncData(mapRef.current, props); }, [ready, props.cameras, props.selected, props.showSectors]);
+  useEffect(() => { if (ready && mapRef.current) syncData(mapRef.current, props); }, [ready, props.cameras, props.selected, props.showSectors, props.street]);
   useEffect(() => {
     if (ready) mapRef.current?.easeTo({ pitch: props.is3D ? 55 : 0, bearing: props.is3D ? -12 : 0, duration: 650 });
   }, [ready, props.is3D]);
@@ -146,11 +153,17 @@ export default function MapCanvas(props: Props) {
     const selected = latest.current.selected;
     if (ready && props.focusRequest && selected) mapRef.current?.flyTo({ center: [selected.lng, selected.lat], zoom: 16.4 });
   }, [ready, props.focusRequest]);
+  useEffect(() => {
+    if (!ready || !props.streetFocusRequest || !props.street) return;
+    const [minLng, minLat, maxLng, maxLat] = props.street.bbox;
+    const mobile = window.matchMedia("(max-width: 760px)").matches;
+    mapRef.current?.fitBounds([[minLng, minLat], [maxLng, maxLat]], { padding: mobile ? { top: 110, right: 35, bottom: 95, left: 35 } : 80, maxZoom: 17, duration: 850 });
+  }, [ready, props.streetFocusRequest, props.street]);
   function retry() { setReady(false); setError(null); setActiveSiteId(null); setAttempt((value) => value + 1); }
 
   return (
     <>
-      <div ref={containerRef} className="map" data-ready={ready} data-mode={props.is3D ? "3d" : "2d"} data-camera-count={countCameras(props.cameras)} data-object-count={countDocumentedSites(props.cameras)} />
+      <div ref={containerRef} className="map" data-ready={ready} data-mode={props.is3D ? "3d" : "2d"} data-camera-count={countCameras(props.cameras)} data-object-count={countDocumentedSites(props.cameras)} data-street={props.street?.name ?? ""} data-street-segments={props.street?.geometry.features.length ?? 0} />
       {!ready && !error && <div className="map-loading" role="status">Загружаем карту Opole…</div>}
       {error && <div className="map-error" role="alert"><p>{error}</p><button className="secondary-button" onClick={retry}>Повторить загрузку карты</button></div>}
       {activeSite && <section className="site-picker" aria-label="Камеры в этой точке"><div><strong>В этой точке · {catalogCountLabel(activeSite.cameras)}</strong><button aria-label="Закрыть выбор камер" onClick={() => setActiveSiteId(null)}>×</button></div><p>Камеры, группы и объекты с одним ориентиром</p>{activeSite.cameras.map((camera) => <button key={camera.id} onClick={() => { props.onSelect(camera); setActiveSiteId(null); }}>{camera.name}<span>↗</span></button>)}</section>}

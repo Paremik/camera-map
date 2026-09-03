@@ -1,5 +1,15 @@
 # Verification — 2026-09-03
 
+## Street highlighting — latest verification
+
+- Добавлен отдельный поиск улиц Opole с явной отправкой формы, без автодополнения. Ответ Nominatim сокращается до именованных дорожных LineString/MultiLineString внутри заданных границ города; несколько сегментов одного названия объединяются.
+- Найденная улица выделяется синей линией с белой обводкой и подписями, карта показывает всю её доступную геометрию. Результат можно убрать из формы или с карты.
+- Серверная точка поиска проверяет ввод и ответ, выдерживает паузу между внешними запросами и кеширует результат. Внешний адрес можно заменить через `STREET_GEOCODER_URL`.
+- Typecheck, **36 тестов** и production build прошли. Новая серверная точка `/api/streets` собирается как динамический маршрут; главная страница остаётся статической.
+- В production Edge поиск `Armii Krajowej` вернул 23 одноимённых дорожных сегмента. До Enter внешний запрос не выполнялся; после отправки вся полученная геометрия появилась на карте, сохранилась в 3D и очистилась одной кнопкой.
+- Desktop 1440×1000 и mobile 390×844 проверены визуально. На мобильном экране после поиска каталог закрывается, улица видна на карте, горизонтальной прокрутки нет. Ошибок страницы и Next overlay не было.
+- Полный прежний production-сценарий прошёл повторно: избранное, ссылки и история, фильтры, выбор общего маркера, 2D/3D, секторы, мобильный поиск камер, состояния хранилища/буфера и восстановление карты после ошибки.
+
 ## Direct camera views — latest verification
 
 - **33 tests passed** after adding the source-locked ITS snapshot contract and four distinct town-hall player URLs. Tests cover mismatched camera IDs, unrelated sources/categories, unsafe filenames, invalid response shapes, empty publications and publisher timestamps across time zones.

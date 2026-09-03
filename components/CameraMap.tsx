@@ -10,6 +10,8 @@ import { useFavorites } from "./useFavorites";
 import SourceOverview from "./SourceOverview";
 import CameraViewAction from "./CameraViewAction";
 import CameraSnapshotViewer from "./CameraSnapshotViewer";
+import StreetSearch from "./StreetSearch";
+import type { StreetHighlight } from "@/lib/street-search";
 
 const MapCanvas = dynamic(() => import("./MapCanvas"), {
   ssr: false, loading: () => <div className="map-loading" role="status">Загружаем карту Opole…</div>,
@@ -36,6 +38,8 @@ export default function CameraMap({ cameras }: { cameras: Camera[] }) {
   const [focusRequest, setFocusRequest] = useState(0);
   const [mobileList, setMobileList] = useState(false);
   const [snapshotCamera, setSnapshotCamera] = useState<Camera | null>(null);
+  const [street, setStreet] = useState<StreetHighlight | null>(null);
+  const [streetFocusRequest, setStreetFocusRequest] = useState(0);
   const listButtonRef = useRef<HTMLButtonElement>(null);
   const [pageSize, setPageSize] = useState(50);
   const visible = useMemo(() => filterCameras(cameras, { query, category, verifiedOnly }).filter((camera) => !favoritesOnly || favoriteIds.has(camera.id)), [cameras, query, category, verifiedOnly, favoritesOnly, favoriteIds]);
@@ -60,6 +64,14 @@ export default function CameraMap({ cameras }: { cameras: Camera[] }) {
   function closeCamera() {
     updateCameraUrl(null);
     setSelectedId(null);
+  }
+  function showStreet(result: StreetHighlight) {
+    setStreet(result);
+    setStreetFocusRequest(value => value + 1);
+    setSelectedId(null);
+    setInvalidLink(false);
+    updateCameraUrl(null, true);
+    setMobileList(false);
   }
   const verifiedCount = countCameras(cameras.filter((camera) => camera.verified));
   useEffect(() => {
@@ -112,9 +124,10 @@ export default function CameraMap({ cameras }: { cameras: Camera[] }) {
           {reportedCount > 0 && <p className="catalog-provenance">Из них со слов пользователей: {reportedCount}</p>}
           <SourceOverview cameras={cameras} />
         </div>
+        <StreetSearch street={street} onFound={showStreet} onClear={() => setStreet(null)} />
         <div className="filters">
           <label className="search-field" htmlFor="camera-search"><Icon name="search" />
-            <input id="camera-search" type="search" aria-label="Название камеры или улица" placeholder="Название или улица…" value={query} onChange={(event) => { setQuery(event.target.value); setPageSize(50); }} />
+            <input id="camera-search" type="search" aria-label="Название камеры или улица" placeholder="Камеры: название или улица…" value={query} onChange={(event) => { setQuery(event.target.value); setPageSize(50); }} />
           </label>
           <label className="sr-only" htmlFor="camera-category">Тип камеры</label>
           <select id="camera-category" value={category} onChange={(event) => { setCategory(event.target.value as CameraCategory | "all"); setPageSize(50); }}>
@@ -152,7 +165,7 @@ export default function CameraMap({ cameras }: { cameras: Camera[] }) {
       </aside>
 
       <main className="map-workspace" aria-label="Карта камер Opole" inert={mobileList}>
-        <MapCanvas cameras={visible} selected={selected} onSelect={selectCamera} is3D={is3D} showSectors={showSectors} resetRequest={resetRequest} focusRequest={focusRequest} />
+        <MapCanvas cameras={visible} selected={selected} onSelect={selectCamera} is3D={is3D} showSectors={showSectors} resetRequest={resetRequest} focusRequest={focusRequest} street={street} streetFocusRequest={streetFocusRequest} />
         <div className="map-topbar">
           <div className="location-chip"><Icon name="pin" /><div><strong>Opole</strong><span>{visibleCount} камер · {visibleSites} объектов</span></div></div>
           <div className="map-actions">
@@ -166,6 +179,7 @@ export default function CameraMap({ cameras }: { cameras: Camera[] }) {
           <span className="map-caption">{is3D ? "3D · наклон карты, без объёмных зданий" : "2D · вид сверху"}</span>
           {visibleReports && <span className="map-caption reported-caption">Оранжевые точки — со слов пользователя</span>}
           {visibleSites > 0 && <span className="map-caption object-caption">i — объекты с видеонаблюдением</span>}
+          {street && <span className="map-caption street-caption"><i /> Синим отмечена: {street.name}<button aria-label="Убрать подсветку улицы" onClick={() => setStreet(null)}>×</button></span>}
         </div>
         {selected && <CameraDetails key={selected.id} camera={selected} onClose={closeCamera} favorite={favoriteIds.has(selected.id)} favoritesReady={favorites.ready} onToggleFavorite={() => favorites.toggle(selected.id)} onSnapshot={setSnapshotCamera} />}
         <button ref={listButtonRef} className="mobile-list-button" onClick={() => setMobileList(true)}><Icon name="list" /> Камеры и поиск <span>{visible.length}</span></button>
