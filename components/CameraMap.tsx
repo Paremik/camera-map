@@ -8,6 +8,8 @@ import CameraDetails from "./CameraDetails";
 import Icon from "./Icon";
 import { useFavorites } from "./useFavorites";
 import SourceOverview from "./SourceOverview";
+import CameraViewAction from "./CameraViewAction";
+import CameraSnapshotViewer from "./CameraSnapshotViewer";
 
 const MapCanvas = dynamic(() => import("./MapCanvas"), {
   ssr: false, loading: () => <div className="map-loading" role="status">Загружаем карту Opole…</div>,
@@ -33,6 +35,7 @@ export default function CameraMap({ cameras }: { cameras: Camera[] }) {
   const [resetRequest, setResetRequest] = useState(0);
   const [focusRequest, setFocusRequest] = useState(0);
   const [mobileList, setMobileList] = useState(false);
+  const [snapshotCamera, setSnapshotCamera] = useState<Camera | null>(null);
   const listButtonRef = useRef<HTMLButtonElement>(null);
   const [pageSize, setPageSize] = useState(50);
   const visible = useMemo(() => filterCameras(cameras, { query, category, verifiedOnly }).filter((camera) => !favoritesOnly || favoriteIds.has(camera.id)), [cameras, query, category, verifiedOnly, favoritesOnly, favoriteIds]);
@@ -66,6 +69,7 @@ export default function CameraMap({ cameras }: { cameras: Camera[] }) {
       setSelectedId(link.id);
       setInvalidLink(link.invalid);
       setMobileList(false);
+      setSnapshotCamera(null);
       if (link.id) setFocusRequest((value) => value + 1);
     }
     navigate();
@@ -138,6 +142,7 @@ export default function CameraMap({ cameras }: { cameras: Camera[] }) {
               <span className="item-copy"><strong>{camera.name}</strong><small>{camera.street}</small><span className="item-type">{cameraCategoryLabel(camera)} <span aria-hidden="true">·</span> {camera.recordKind === "site" ? "Ориентир объекта" : camera.sourceKind === "user-report" ? "Со слов пользователя" : camera.sourceKind === "open-map" ? "Данные сообщества" : camera.verified ? "Точка проверена" : "Точка не проверена"}</span>{camera.reportedCount && <span className="report-count">Камер в группе: {camera.reportedCount}</span>}{camera.recordKind === "site" && <span className="object-count">{camera.cameraCount === null ? "Количество камер неизвестно" : "По источнику: " + camera.cameraCount + " камер"}{camera.sourceDate && " · " + camera.sourceDate.slice(0, 4)}</span>}</span>
             </button>
             <button className="icon-button favorite-button row-favorite" disabled={!favorites.ready} aria-label={(favoriteIds.has(camera.id) ? "Убрать из избранного: " : "В избранное: ") + camera.name} aria-pressed={favoriteIds.has(camera.id)} onClick={() => favorites.toggle(camera.id)}><Icon name="star" /></button>
+            <CameraViewAction camera={camera} onSnapshot={setSnapshotCamera} compact />
             </div>
           ))}
           {visible.length > pageSize && <button className="secondary-button" onClick={() => setPageSize((value) => value + 50)}>Показать ещё 50</button>}
@@ -162,9 +167,10 @@ export default function CameraMap({ cameras }: { cameras: Camera[] }) {
           {visibleReports && <span className="map-caption reported-caption">Оранжевые точки — со слов пользователя</span>}
           {visibleSites > 0 && <span className="map-caption object-caption">i — объекты с видеонаблюдением</span>}
         </div>
-        {selected && <CameraDetails key={selected.id} camera={selected} onClose={closeCamera} favorite={favoriteIds.has(selected.id)} favoritesReady={favorites.ready} onToggleFavorite={() => favorites.toggle(selected.id)} />}
+        {selected && <CameraDetails key={selected.id} camera={selected} onClose={closeCamera} favorite={favoriteIds.has(selected.id)} favoritesReady={favorites.ready} onToggleFavorite={() => favorites.toggle(selected.id)} onSnapshot={setSnapshotCamera} />}
         <button ref={listButtonRef} className="mobile-list-button" onClick={() => setMobileList(true)}><Icon name="list" /> Камеры и поиск <span>{visible.length}</span></button>
       </main>
+      {snapshotCamera && <CameraSnapshotViewer key={snapshotCamera.id} camera={snapshotCamera} onClose={() => setSnapshotCamera(null)} />}
     </div>
   );
 }

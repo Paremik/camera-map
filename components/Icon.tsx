@@ -1,5 +1,6 @@
-type IconName = "camera" | "search" | "pin" | "center" | "close" | "sector" | "list" | "star" | "link";
+type IconName = "camera" | "search" | "pin" | "center" | "close" | "sector" | "list" | "star" | "link" | "play";
 const paths: Record<IconName, React.ReactNode> = {
+  play: <path d="m8 4 12 8-12 8Z" />,
   camera: <><rect x="3" y="6" width="13" height="12" rx="3" /><path d="m16 10 5-3v10l-5-3" /><circle cx="9.5" cy="12" r="2.5" /></>,
   search: <><circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 5 5" /></>,
   pin: <><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z" /><circle cx="12" cy="10" r="2" /></>,

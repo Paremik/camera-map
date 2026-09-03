@@ -5,10 +5,11 @@ import type { Camera } from "@/lib/camera";
 import { cameraCategoryLabel } from "@/lib/camera";
 import { cameraLink, isLocalLink } from "@/lib/camera-preferences";
 import Icon from "./Icon";
+import CameraViewAction from "./CameraViewAction";
 
-type Props = { camera: Camera; onClose: () => void; favorite: boolean; favoritesReady: boolean; onToggleFavorite: () => void };
+type Props = { camera: Camera; onClose: () => void; favorite: boolean; favoritesReady: boolean; onToggleFavorite: () => void; onSnapshot: (camera: Camera) => void };
 
-export default function CameraDetails({ camera, onClose, favorite, favoritesReady, onToggleFavorite }: Props) {
+export default function CameraDetails({ camera, onClose, favorite, favoritesReady, onToggleFavorite, onSnapshot }: Props) {
   const [share, setShare] = useState<{ url: string; copied: boolean } | null>(null);
   const [copying, setCopying] = useState(false);
   async function copyLink() {
@@ -54,7 +55,7 @@ export default function CameraDetails({ camera, onClose, favorite, favoritesRead
       {camera.positionSourceUrl && <p className="position-source"><a href={camera.positionSourceUrl} target="_blank" rel="noopener noreferrer">{camera.positionSourceLabel ?? "Положение здания · OpenStreetMap"} ↗</a></p>}
       {camera.note && <p className="camera-note">{camera.note}</p>}
       </div>
-      {camera.publicViewUrl ? <a href={camera.publicViewUrl} target="_blank" rel="noopener noreferrer" className="view-button">{camera.publicViewUrl === "https://its.mzd.opole.pl/mapa" ? "Открыть карту ITS" : "Открыть публичный вид"} <span aria-hidden="true">↗</span></a> : <p className="no-stream">Публичный просмотр не указан источником.</p>}
+      {camera.publicViewUrl || camera.snapshotSourceUrl ? <CameraViewAction camera={camera} onSnapshot={onSnapshot} /> : <p className="no-stream">Публичный просмотр не указан источником.</p>}
     </section>
   );
 }

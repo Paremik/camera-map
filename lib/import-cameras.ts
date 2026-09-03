@@ -1,4 +1,5 @@
 import type { Camera } from "./camera.ts";
+import { validateSnapshotSource } from "./camera-view.ts";
 type Row = Record<string, unknown>;
 function object(value: unknown, label: string): Row {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error(label + ": expected an object");
@@ -53,6 +54,10 @@ export function validateCameraDataset(value: unknown): Camera[] {
     const reported = row.sourceKind === "user-report";
     if (row.recordKind !== undefined && row.recordKind !== "site") throw new Error(id + ": invalid recordKind");
     const site = row.recordKind === "site";
+    if (row.snapshotSourceUrl !== undefined) {
+      if (site || reported || row.sourceKind === "open-map" || row.category !== "its" || row.sourceUrl !== "https://its.mzd.opole.pl/api/cameras") throw new Error(id + ": snapshots require a documented ITS camera");
+      validateSnapshotSource(id, row.snapshotSourceUrl);
+    }
     let cameraCount: number | null = null;
     if (site) {
       if (reported || row.sourceKind === "open-map" || verified || opticsVerified || heading !== null || fov !== null || rangeMeters !== null || row.publicViewUrl !== undefined) throw new Error(id + ": documented sites require a public source, approximate location and unknown optics without a viewing link");
@@ -90,6 +95,7 @@ export function validateCameraDataset(value: unknown): Camera[] {
       ...(row.positionSourceUrl === undefined ? {} : { positionSourceUrl: publicUrl(row.positionSourceUrl, id + ".positionSourceUrl") }),
       ...(row.positionSourceLabel === undefined ? {} : { positionSourceLabel: text(row.positionSourceLabel, id + ".positionSourceLabel", 200) }),
       ...(row.publicViewUrl === undefined ? {} : { publicViewUrl: publicUrl(row.publicViewUrl, id + ".publicViewUrl") }),
+      ...(row.snapshotSourceUrl === undefined ? {} : { snapshotSourceUrl: validateSnapshotSource(id, row.snapshotSourceUrl) }),
       ...(row.note === undefined ? {} : { note: text(row.note, id + ".note", 2000) }),
     };
   });
@@ -116,12 +122,13 @@ export function importItsExport(value: unknown): Camera[] {
       verified: false, opticsVerified: false,
       sourceLabel: "ITS Opole · Miejski Zarząd Dróg", sourceUrl,
       ...(row.publicViewUrl === undefined ? {} : { publicViewUrl: row.publicViewUrl }),
+      ...(row.snapshotSourceUrl === undefined ? {} : { snapshotSourceUrl: row.snapshotSourceUrl }),
       note: "Импорт из публичного источника от " + input.retrievedAt + ". Координаты и параметры требуют проверки.",
     };
   }));
 }
 
-/** Observed public /api/cameras GeoJSON. Metadata only; image paths are not followed. */
+/** Observed public /api/cameras GeoJSON. Import remains offline; snapshots load only on user action. */
 export function importItsGeoJson(value: unknown): Camera[] {
   const input = object(value, "ITS GeoJSON export");
   if (input.schemaVersion !== 1 || input.format !== "its-geojson-v1") throw new Error("Unsupported ITS GeoJSON format or schemaVersion");
@@ -142,10 +149,11 @@ export function importItsGeoJson(value: unknown): Camera[] {
       id: String(properties.id), name: properties.name, street: properties.description,
       lng: geometry.coordinates[0], lat: geometry.coordinates[1],
       publicViewUrl: "https://its.mzd.opole.pl/mapa",
+      ...(properties.image === `/cameras/${properties.id}/images` ? { snapshotSourceUrl: `https://its.mzd.opole.pl/api${properties.image}` } : {}),
     };
   });
   return importItsExport({ schemaVersion: 1, sourceUrl: input.sourceUrl, retrievedAt: input.retrievedAt, cameras }).map((camera) => ({
     ...camera,
-    note: "Координаты и название опубликованы ITS Opole, получены " + input.retrievedAt + ". Точность места установки не проверена. Направление, угол обзора и дальность в источнике не указаны. Просмотр — на карте издателя.",
+    note: "Координаты и название опубликованы ITS Opole, получены " + input.retrievedAt + ". Точность места установки не проверена. Направление, угол обзора и дальность в источнике не указаны. Доступность снимка проверяется при открытии просмотра.",
   }));
 }

@@ -23,6 +23,7 @@ export type Camera = {
   positionSourceUrl?: string;
   positionSourceLabel?: string;
   publicViewUrl?: string;
+  snapshotSourceUrl?: string;
   note?: string;
 };
 export const categoryLabels: Record<CameraCategory, string> = {

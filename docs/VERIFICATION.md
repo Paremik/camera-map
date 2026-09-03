@@ -1,5 +1,17 @@
 # Verification — 2026-09-03
 
+## Direct camera views — latest verification
+
+- **33 tests passed** after adding the source-locked ITS snapshot contract and four distinct town-hall player URLs. Tests cover mismatched camera IDs, unrelated sources/categories, unsafe filenames, invalid response shapes, empty publications and publisher timestamps across time zones.
+- Typecheck and the production build passed without dependency changes. The site remains statically prerendered; individual ITS metadata and JPEG requests originate in the visitor's browser only after a view action.
+- A live public ITS response and JPEG for camera `its:1` were displayed in the production UI. The image URL matched the newest valid response item and the displayed `<time>` preserved the publisher's `addTime`. Refresh, close, Escape, focus restoration and the same action from the selected card passed.
+- Before the view action, no ITS image API requests occurred. Simulated empty metadata, failed metadata and failed JPEG all displayed bounded, recoverable states with retry and the publisher-map fallback. Retry returned to the real public image.
+- All four town-hall list shortcuts opened distinct player pages published in the city's four iframes. Each direct page returned HTTP 200 in ordinary Edge; the app does not embed the video players.
+- Desktop 1440×1000 and mobile 390×844 screenshots were inspected. The snapshot dialog, image, source time and actions fit without horizontal overflow. Opening from the mobile list and closing the dialog returned to the still-open list.
+- The full existing production scenario passed again: favorites and storage fallbacks, deep links/history, filters, map selection, 2D/3D, sectors, mobile search, clipboard fallback and map error recovery. No unhandled page errors or Next error overlay appeared.
+
+Source evidence and runtime boundaries are in [CAMERA_VIEW_SOURCES.md](CAMERA_VIEW_SOURCES.md).
+
 ## Public inventory update — latest verification
 
 The current catalog validates **225 records: 175 individual/reported cameras and 53 documented objects**. Added 61 records (8 OSM points and 53 objects); existing source IDs and the four-camera report are preserved. Details and evidence: [PUBLIC_SOURCE_REVIEW.md](PUBLIC_SOURCE_REVIEW.md).
