@@ -2,14 +2,14 @@
 
 Continue the existing Next.js + TypeScript project `opole-camera-map`.
 
-Goal: build a polished web app that visualizes publicly documented cameras in Opole, Poland.
+Goal: build a polished web app that visualizes publicly documented cameras in Opole, Poland, and clearly distinguished user reports authorized on 2026-09-03.
 
 Requirements:
 - Keep MapLibre + OpenStreetMap; no mandatory paid API key.
 - Preserve the current camera marker and field-of-view sector behavior.
 - Treat `heading`, `fov`, and `rangeMeters` as approximate unless a public technical source verifies them.
-- Add a `verified` boolean and `sourceUrl` to each camera record.
-- Add filters: public live view / ITS / city monitoring / verified only.
+- Keep `verified` and the public `sourceUrl` for sourced records. User reports use `sourceKind: "user-report"`, a source label and reported count instead of an invented public URL; keep their verification false and optics unknown. A position source establishes only the map anchor.
+- Add filters: public live view / ITS / city monitoring / private cameras / verified only. Label uncertain private ownership as a supposition.
 - Add a search box by camera name/street.
 - Add a 2D/3D toggle and a button to reset to central Opole.
 - Add a camera popup/card with: name, coordinates, source, verification status, direction, FOV, range, and public-view link.

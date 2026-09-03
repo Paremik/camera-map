@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import maplibregl, { type GeoJSONSource, type Map as LibreMap } from "maplibre-gl";
-import { groupCameraSites, type Camera } from "@/lib/camera";
+import { countCameras, groupCameraSites, type Camera } from "@/lib/camera";
 import { directionGeoJson, sectorsGeoJson } from "@/lib/geometry";
 
 type Props = {
@@ -18,7 +18,7 @@ function syncPadding(map: LibreMap, selected: Camera | null) {
 }
 function siteData(cameras: Camera[]) {
   return { type: "FeatureCollection" as const, features: groupCameraSites(cameras).map((site) => ({
-    type: "Feature" as const, properties: { siteId: site.id, cameraCount: site.cameras.length },
+    type: "Feature" as const, properties: { siteId: site.id, cameraCount: site.cameraCount, reportedCount: site.reportedCount },
     geometry: { type: "Point" as const, coordinates: [site.lng, site.lat] },
   })) };
 }
@@ -85,14 +85,14 @@ export default function MapCanvas(props: Props) {
         map.addSource("camera-sectors", { type: "geojson", data: empty });
         map.addSource("camera-direction", { type: "geojson", data: empty });
         map.addSource("camera-points", { type: "geojson", data: empty, cluster: true, clusterMaxZoom: 16, clusterRadius: 48,
-          clusterProperties: { cameraCount: ["+", ["get", "cameraCount"]] } });
+          clusterProperties: { cameraCount: ["+", ["get", "cameraCount"]], reportedCount: ["+", ["get", "reportedCount"]] } });
         map.addLayer({ id: "sector-fill", type: "fill", source: "camera-sectors", paint: { "fill-color": "#087a62", "fill-opacity": 0.15 } });
         map.addLayer({ id: "sector-line", type: "line", source: "camera-sectors", paint: { "line-color": "#087a62", "line-width": 1.5 } });
         map.addLayer({ id: "direction-line", type: "line", source: "camera-direction", paint: { "line-color": "#075a49", "line-width": 2.5, "line-dasharray": [3, 2] } });
         map.addLayer({ id: "camera-clusters", type: "circle", source: "camera-points", filter: ["has", "point_count"],
-          paint: { "circle-color": "#142e33", "circle-radius": 24, "circle-stroke-color": "#b8f285", "circle-stroke-width": 3 } });
+          paint: { "circle-color": "#142e33", "circle-radius": 24, "circle-stroke-color": ["case", [">", ["get", "reportedCount"], 0], "#f2bb6d", "#b8f285"], "circle-stroke-width": 3 } });
         map.addLayer({ id: "camera-sites", type: "circle", source: "camera-points", filter: ["!", ["has", "point_count"]],
-          paint: { "circle-color": "#142e33", "circle-radius": 20, "circle-stroke-color": "#b8f285", "circle-stroke-width": 3 } });
+          paint: { "circle-color": "#142e33", "circle-radius": 20, "circle-stroke-color": ["case", [">", ["get", "reportedCount"], 0], "#f2bb6d", "#b8f285"], "circle-stroke-width": 3 } });
         map.addLayer({ id: "camera-count", type: "symbol", source: "camera-points",
           layout: { "text-field": ["to-string", ["get", "cameraCount"]], "text-font": ["Open Sans Semibold"], "text-size": 14, "text-allow-overlap": true },
           paint: { "text-color": "#ffffff" } });
@@ -150,10 +150,10 @@ export default function MapCanvas(props: Props) {
 
   return (
     <>
-      <div ref={containerRef} className="map" data-ready={ready} data-mode={props.is3D ? "3d" : "2d"} data-camera-count={props.cameras.length} />
+      <div ref={containerRef} className="map" data-ready={ready} data-mode={props.is3D ? "3d" : "2d"} data-camera-count={countCameras(props.cameras)} />
       {!ready && !error && <div className="map-loading" role="status">Загружаем карту Opole…</div>}
       {error && <div className="map-error" role="alert"><p>{error}</p><button className="secondary-button" onClick={retry}>Повторить загрузку карты</button></div>}
-      {activeSite && <section className="site-picker" aria-label="Камеры в этой точке"><div><strong>В этой точке · {activeSite.cameras.length}</strong><button aria-label="Закрыть выбор камер" onClick={() => setActiveSiteId(null)}>×</button></div><p>Несколько направлений с одного места</p>{activeSite.cameras.map((camera) => <button key={camera.id} onClick={() => { props.onSelect(camera); setActiveSiteId(null); }}>{camera.name}<span>↗</span></button>)}</section>}
+      {activeSite && <section className="site-picker" aria-label="Камеры в этой точке"><div><strong>В этой точке · {activeSite.cameraCount}</strong><button aria-label="Закрыть выбор камер" onClick={() => setActiveSiteId(null)}>×</button></div><p>Камеры и группы с одним ориентиром</p>{activeSite.cameras.map((camera) => <button key={camera.id} onClick={() => { props.onSelect(camera); setActiveSiteId(null); }}>{camera.name}<span>↗</span></button>)}</section>}
     </>
   );
 }

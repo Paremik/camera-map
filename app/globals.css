@@ -24,6 +24,14 @@ h1 span { color: var(--muted); font-size: 19px; font-weight: 400; }
 .sidebar-intro p { margin: 0 0 18px; color: #c3ccce; font-size: 13px; }
 .catalog-stats { display: flex; gap: 22px; color: var(--muted); font-size: 11px; }
 .catalog-stats b { color: var(--text); font-size: 20px; font-weight: 500; margin-right: 5px; }
+.sidebar-intro .catalog-provenance { margin: 12px 0 0; font-size: 10px; color: #f2bb6d; }
+.camera-row.reported .item-camera, .reported .item-type { color: #f2bb6d; }
+.camera-row.reported.active { border-color: #a17b45; background: #342e23; }
+.report-count { display: inline-block; font-size: 10px; color: #f2bb6d; margin-top: 6px; }
+.report-notice { padding: 10px; border: 1px solid #a17b45; border-radius: 7px; color: #f2ce99; background: #342e23; font-size: 10px; line-height: 1.5; margin: 0 0 12px; }
+.report-notice strong, .report-notice span { display: block; }
+.report-notice span { margin-top: 5px; }
+.map-caption.reported-caption { color: #f2ce99; }
 .filters { padding: 0 24px 23px; border-bottom: 1px solid var(--line); }
 .search-field { display: flex; align-items: center; gap: 9px; border: 1px solid #3d4d51; border-radius: 9px; background: #1b2528; padding: 0 12px; color: var(--muted); }
 .search-field:focus-within { border-color: var(--accent); }

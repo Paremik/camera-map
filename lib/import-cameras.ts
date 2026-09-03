@@ -39,20 +39,34 @@ export function validateCameraDataset(value: unknown): Camera[] {
     const id = text(row.id, "id", 150);
     if (!/^[a-zA-Z0-9._:-]+$/.test(id) || ids.has(id)) throw new Error("Invalid or duplicate camera id: " + id);
     ids.add(id);
-    if (row.category !== "public" && row.category !== "its" && row.category !== "city") throw new Error(id + ": invalid category");
+    if (row.category !== "public" && row.category !== "its" && row.category !== "city" && row.category !== "private") throw new Error(id + ": invalid category");
     const heading = optionalNumber(row.heading, id + ".heading", 0, 359.999999);
     const fov = optionalNumber(row.fov, id + ".fov", 1, 180);
     const rangeMeters = optionalNumber(row.rangeMeters, id + ".rangeMeters", 1, 5000);
     const opticsVerified = boolean(row.opticsVerified, id + ".opticsVerified");
+    const verified = boolean(row.verified, id + ".verified");
+    if (row.sourceKind !== undefined && row.sourceKind !== "user-report") throw new Error(id + ": invalid sourceKind");
+    const reported = row.sourceKind === "user-report";
+    const reportedCount = reported ? number(row.reportedCount, id + ".reportedCount", 1, 1000) : undefined;
+    if (reported) {
+      if (!Number.isInteger(reportedCount)) throw new Error(id + ": reportedCount must be an integer");
+      if (verified || opticsVerified) throw new Error(id + ": user reports cannot be verified without a public source");
+      if (row.sourceUrl !== undefined || row.publicViewUrl !== undefined) throw new Error(id + ": user reports must not imply a public source or viewing link");
+      if (heading !== null || fov !== null || rangeMeters !== null) throw new Error(id + ": reported groups require unknown optics");
+    } else if (row.reportedCount !== undefined) {
+      throw new Error(id + ": reportedCount requires a user-report source");
+    }
     if (opticsVerified && [heading, fov, rangeMeters].includes(null)) throw new Error(id + ": verified optics require all three parameters");
     return {
       id, name: text(row.name, id + ".name", 200), street: text(row.street, id + ".street", 200),
       // Opole and nearby approaches; reject swapped coordinates and unrelated cities.
       lat: number(row.lat, id + ".lat", 50.5, 50.85), lng: number(row.lng, id + ".lng", 17.7, 18.15),
       category: row.category, heading, fov, rangeMeters,
-      verified: boolean(row.verified, id + ".verified"), opticsVerified,
-      sourceLabel: text(row.sourceLabel, id + ".sourceLabel", 200), sourceUrl: publicUrl(row.sourceUrl, id + ".sourceUrl"),
+      verified, opticsVerified,
+      sourceLabel: text(row.sourceLabel, id + ".sourceLabel", 200),
+      ...(reported ? { sourceKind: "user-report" as const, reportedCount } : { sourceUrl: publicUrl(row.sourceUrl, id + ".sourceUrl") }),
       ...(row.positionSourceUrl === undefined ? {} : { positionSourceUrl: publicUrl(row.positionSourceUrl, id + ".positionSourceUrl") }),
+      ...(row.positionSourceLabel === undefined ? {} : { positionSourceLabel: text(row.positionSourceLabel, id + ".positionSourceLabel", 200) }),
       ...(row.publicViewUrl === undefined ? {} : { publicViewUrl: publicUrl(row.publicViewUrl, id + ".publicViewUrl") }),
       ...(row.note === undefined ? {} : { note: text(row.note, id + ".note", 2000) }),
     };

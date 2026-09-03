@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { Camera } from "@/lib/camera";
-import { categoryLabels } from "@/lib/camera";
+import { cameraCategoryLabel } from "@/lib/camera";
 import { cameraLink, isLocalLink } from "@/lib/camera-preferences";
 import Icon from "./Icon";
 
@@ -24,11 +24,12 @@ export default function CameraDetails({ camera, onClose, favorite, favoritesRead
   const approximate = camera.opticsVerified ? "" : "≈";
   return (
     <section className="details-card" aria-labelledby="camera-details-title" data-camera-id={camera.id}>
-      <div className="details-heading"><span className="eyebrow">ВЫБРАННАЯ КАМЕРА</span><button className="icon-button" aria-label="Закрыть карточку камеры" onClick={onClose}><Icon name="close" /></button></div>
+      <div className="details-heading"><span className="eyebrow">{camera.reportedCount ? "ГРУППА КАМЕР" : "ВЫБРАННАЯ КАМЕРА"}</span><button className="icon-button" aria-label="Закрыть карточку камеры" onClick={onClose}><Icon name="close" /></button></div>
       <div className="details-scroll">
-      <div className="details-type"><Icon name="camera" /> {categoryLabels[camera.category]}</div>
+      <div className="details-type"><Icon name="camera" /> {cameraCategoryLabel(camera)}</div>
       <h2 id="camera-details-title" tabIndex={-1}>{camera.name}</h2>
       <p className="details-location"><Icon name="pin" /> {camera.street}</p>
+      {camera.sourceKind === "user-report" && <p className="report-notice"><strong>Со слов пользователя, не проверено</strong><span>Камер в группе: {camera.reportedCount}. Точка обозначает общий ориентир.</span></p>}
       <div className="camera-actions">
         <button className="utility-button favorite-button" aria-pressed={favorite} disabled={!favoritesReady} onClick={onToggleFavorite}><Icon name="star" /> {favorite ? "В избранном" : "В избранное"}</button>
         <button className="utility-button" disabled={copying} onClick={copyLink}><Icon name="link" /> {copying ? "Копируем…" : "Ссылка"}</button>
@@ -47,8 +48,8 @@ export default function CameraDetails({ camera, onClose, favorite, favoritesRead
         </dl>
       </div>
       <p className="optics-note">{camera.heading === null || camera.fov === null || camera.rangeMeters === null ? "Сектор не построен: в источнике недостаточно данных об оптике." : camera.opticsVerified ? "Оптика подтверждена публичным техническим источником." : "Сектор — иллюстрация, а не точное покрытие камеры."}</p>
-      <dl className="source-details"><div><dt>Координаты · широта, долгота</dt><dd>{camera.lat.toFixed(5)}, {camera.lng.toFixed(5)}</dd></div><div><dt>Источник</dt><dd><a href={camera.sourceUrl} target="_blank" rel="noopener noreferrer">{camera.sourceLabel} ↗</a></dd></div></dl>
-      {camera.positionSourceUrl && <p className="position-source"><a href={camera.positionSourceUrl} target="_blank" rel="noopener noreferrer">Положение здания · OpenStreetMap ↗</a></p>}
+      <dl className="source-details"><div><dt>{camera.sourceKind === "user-report" ? "Ориентир · широта, долгота" : "Координаты · широта, долгота"}</dt><dd>{camera.lat.toFixed(5)}, {camera.lng.toFixed(5)}</dd></div><div><dt>Источник</dt><dd>{camera.sourceUrl ? <a href={camera.sourceUrl} target="_blank" rel="noopener noreferrer">{camera.sourceLabel} ↗</a> : camera.sourceLabel}</dd></div></dl>
+      {camera.positionSourceUrl && <p className="position-source"><a href={camera.positionSourceUrl} target="_blank" rel="noopener noreferrer">{camera.positionSourceLabel ?? "Положение здания · OpenStreetMap"} ↗</a></p>}
       {camera.note && <p className="camera-note">{camera.note}</p>}
       </div>
       {camera.publicViewUrl ? <a href={camera.publicViewUrl} target="_blank" rel="noopener noreferrer" className="view-button">{camera.publicViewUrl === "https://its.mzd.opole.pl/mapa" ? "Открыть карту ITS" : "Открыть публичный вид"} <span aria-hidden="true">↗</span></a> : <p className="no-stream">Публичный просмотр не указан источником.</p>}

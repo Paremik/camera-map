@@ -4,7 +4,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Opole Camera Map",
-  description: "Карта публичных камер Opole: источники, направления обзора и режимы 2D/3D."
+  description: "Карта камер Opole: публичные источники, отметки пользователей и режимы 2D/3D."
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
