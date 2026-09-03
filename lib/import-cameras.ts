@@ -19,6 +19,10 @@ function boolean(value: unknown, label: string) {
   if (typeof value !== "boolean") throw new Error(label + ": expected a boolean");
   return value;
 }
+function date(value: unknown, label: string): string {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value) || !Number.isFinite(Date.parse(value)) || new Date(value).toISOString().slice(0, 10) !== value) throw new Error(label + ": expected a real YYYY-MM-DD date");
+  return value;
+}
 export function publicUrl(value: unknown, label: string) {
   const raw = text(value, label, 2000);
   let url: URL;
@@ -39,14 +43,28 @@ export function validateCameraDataset(value: unknown): Camera[] {
     const id = text(row.id, "id", 150);
     if (!/^[a-zA-Z0-9._:-]+$/.test(id) || ids.has(id)) throw new Error("Invalid or duplicate camera id: " + id);
     ids.add(id);
-    if (row.category !== "public" && row.category !== "its" && row.category !== "city" && row.category !== "private") throw new Error(id + ": invalid category");
+    if (row.category !== "public" && row.category !== "its" && row.category !== "city" && row.category !== "private" && row.category !== "other") throw new Error(id + ": invalid category");
     const heading = optionalNumber(row.heading, id + ".heading", 0, 359.999999);
     const fov = optionalNumber(row.fov, id + ".fov", 1, 180);
     const rangeMeters = optionalNumber(row.rangeMeters, id + ".rangeMeters", 1, 5000);
     const opticsVerified = boolean(row.opticsVerified, id + ".opticsVerified");
     const verified = boolean(row.verified, id + ".verified");
-    if (row.sourceKind !== undefined && row.sourceKind !== "user-report") throw new Error(id + ": invalid sourceKind");
+    if (row.sourceKind !== undefined && row.sourceKind !== "user-report" && row.sourceKind !== "open-map") throw new Error(id + ": invalid sourceKind");
     const reported = row.sourceKind === "user-report";
+    if (row.recordKind !== undefined && row.recordKind !== "site") throw new Error(id + ": invalid recordKind");
+    const site = row.recordKind === "site";
+    let cameraCount: number | null = null;
+    if (site) {
+      if (reported || row.sourceKind === "open-map" || verified || opticsVerified || heading !== null || fov !== null || rangeMeters !== null || row.publicViewUrl !== undefined) throw new Error(id + ": documented sites require a public source, approximate location and unknown optics without a viewing link");
+      if (row.cameraCount !== null) {
+        cameraCount = number(row.cameraCount, id + ".cameraCount", 1, 10000);
+        if (!Number.isInteger(cameraCount)) throw new Error(id + ": cameraCount must be an integer");
+        date(row.sourceDate, id + ".sourceDate");
+      }
+      publicUrl(row.positionSourceUrl, id + ".positionSourceUrl");
+      date(row.retrievedAt, id + ".retrievedAt");
+    } else if (row.cameraCount !== undefined) throw new Error(id + ": cameraCount requires a documented site");
+    if (row.sourceKind === "open-map" && (verified || opticsVerified || row.publicViewUrl !== undefined)) throw new Error(id + ": open-map records cannot imply independently verified locations or public viewing");
     const reportedCount = reported ? number(row.reportedCount, id + ".reportedCount", 1, 1000) : undefined;
     if (reported) {
       if (!Number.isInteger(reportedCount)) throw new Error(id + ": reportedCount must be an integer");
@@ -65,6 +83,10 @@ export function validateCameraDataset(value: unknown): Camera[] {
       verified, opticsVerified,
       sourceLabel: text(row.sourceLabel, id + ".sourceLabel", 200),
       ...(reported ? { sourceKind: "user-report" as const, reportedCount } : { sourceUrl: publicUrl(row.sourceUrl, id + ".sourceUrl") }),
+      ...(row.sourceKind === "open-map" ? { sourceKind: "open-map" as const } : {}),
+      ...(site ? { recordKind: "site" as const, cameraCount } : {}),
+      ...(row.sourceDate === undefined ? {} : { sourceDate: date(row.sourceDate, id + ".sourceDate") }),
+      ...(row.retrievedAt === undefined ? {} : { retrievedAt: date(row.retrievedAt, id + ".retrievedAt") }),
       ...(row.positionSourceUrl === undefined ? {} : { positionSourceUrl: publicUrl(row.positionSourceUrl, id + ".positionSourceUrl") }),
       ...(row.positionSourceLabel === undefined ? {} : { positionSourceLabel: text(row.positionSourceLabel, id + ".positionSourceLabel", 200) }),
       ...(row.publicViewUrl === undefined ? {} : { publicViewUrl: publicUrl(row.publicViewUrl, id + ".publicViewUrl") }),

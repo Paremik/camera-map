@@ -25,6 +25,25 @@ h1 span { color: var(--muted); font-size: 19px; font-weight: 400; }
 .catalog-stats { display: flex; gap: 22px; color: var(--muted); font-size: 11px; }
 .catalog-stats b { color: var(--text); font-size: 20px; font-weight: 500; margin-right: 5px; }
 .sidebar-intro .catalog-provenance { margin: 12px 0 0; font-size: 10px; color: #f2bb6d; }
+.sidebar-intro .catalog-explanation { margin: 12px 0 0; font-size: 10px; line-height: 1.5; color: var(--muted); }
+.sources-button { margin-top: 12px; padding: 0; min-height: 28px; color: #b8dcf0; background: transparent; font-size: 11px; text-decoration: underline; text-underline-offset: 4px; }
+.object-count { display: block; color: #a5d8f4; font-size: 10px; line-height: 1.5; margin-top: 6px; }
+.object-notice { margin: 0 0 12px; border: 1px solid #567f95; border-radius: 7px; padding: 10px; background: #20333d; color: #c3e6fa; font-size: 10px; line-height: 1.6; }
+.object-notice strong, .object-notice span { display: block; }
+.object-notice span { margin-top: 5px; }
+.map-caption.object-caption { color: #a5d8f4; }
+.sources-dialog { color: var(--text); background: var(--panel); border: 1px solid #587582; border-radius: 15px; width: min(680px, calc(100% - 28px)); max-height: calc(100dvh - 40px); padding: 0; }
+.sources-dialog::backdrop { background: #071315bb; }
+.sources-heading { display: flex; align-items: center; gap: 16px; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid var(--line); }
+.sources-heading h2 { margin: 0; font-size: 19px; }
+.sources-heading button { flex-shrink: 0; }
+.sources-scroll { padding: 0 22px 22px; max-height: calc(100dvh - 145px); overflow: auto; }
+.sources-scroll p { font-size: 12px; line-height: 1.7; color: #c2d0d1; }
+.sources-scroll table { width: 100%; border-collapse: collapse; font-size: 12px; line-height: 1.6; }
+.sources-scroll caption { text-align: left; color: var(--muted); padding: 12px 0; font-size: 11px; }
+.sources-scroll th, .sources-scroll td { text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); padding: 12px 8px; overflow-wrap: anywhere; }
+.sources-scroll th:first-child, .sources-scroll td:first-child { width: 39%; padding-left: 0; }
+.sources-scroll a { color: #b8dcf0; text-underline-offset: 3px; }
 .camera-row.reported .item-camera, .reported .item-type { color: #f2bb6d; }
 .camera-row.reported.active { border-color: #a17b45; background: #342e23; }
 .report-count { display: inline-block; font-size: 10px; color: #f2bb6d; margin-top: 6px; }

@@ -11,6 +11,7 @@ Requirements:
 - Keep `verified` and the public `sourceUrl` for sourced records. User reports use `sourceKind: "user-report"`, a source label and reported count instead of an invented public URL; keep their verification false and optics unknown. A position source establishes only the map anchor.
 - Add filters: public live view / ITS / city monitoring / private cameras / verified only. Label uncertain private ownership as a supposition.
 - Add a search box by camera name/street.
+- Preserve the additional public inventory in data/public-cameras.json. Documented objects use recordKind=site, explicit cameraCount=null or a dated published number, and a separate position source. Do not add object-wide counts to individual-camera totals. Keep archival dates and OSM ownership uncertainty visible; consult docs/PUBLIC_SOURCE_REVIEW.md for pending locations and possible duplicates.
 - Add a 2D/3D toggle and a button to reset to central Opole.
 - Add a camera popup/card with: name, coordinates, source, verification status, direction, FOV, range, and public-view link.
 - Only embed a live stream when the official publisher explicitly allows embedding; otherwise open the official page in a new tab.

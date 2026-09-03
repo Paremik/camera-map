@@ -1,0 +1,1235 @@
+{
+  "retrievedAt": "2026-09-03",
+  "license": "ODbL 1.0 · © OpenStreetMap contributors",
+  "attributionUrl": "https://www.openstreetmap.org/copyright",
+  "queries": [
+    "[out:json][timeout:60];\narea[\"boundary\"=\"administrative\"][\"admin_level\"=\"8\"][\"name\"=\"Opole\"]->.city;\n(\n  nwr(area.city)[\"man_made\"=\"surveillance\"];\n  nwr(area.city)[\"highway\"=\"bus_stop\"];\n  nwr(area.city)[\"public_transport\"=\"platform\"];\n  nwr(area.city)[\"name\"~\"Karolinka|Solaris|DeSilva|Itaka|Kolejarz|Parking|Cmentarz\",i];\n  nwr(area.city)[\"addr:street\"~\"^(Chabrów|Powolnego|Cmentarna|Koszalińska|Podmiejska|Przeskok|Wrocławska|Targowa|Kępska|1 Maja|Leonarda Olejnika|Chełmska)$\"][\"addr:housenumber\"~\"^(50A|50a|10|1|1A|1a|6|26|69|4b|4B|158|9|5K|5k|4|152|154|152/154)$\"];\n);out center tags;",
+    "[out:json][timeout:60];area[\"boundary\"=\"administrative\"][\"admin_level\"=\"8\"][\"name\"=\"Opole\"]->.city;\n(\nnwr(area.city)[\"addr:street\"~\"Powolnego|Przeskok|Kępska|Pileckiego\"][\"addr:housenumber\"~\"^(1|5k|5K)$\"];\nnwr(area.city)[\"name\"~\"(Kąpielisko.*Bolko|Zoologiczny|Kolejarz|Stegu Arena|Akwarium|Wodna Nuta|Toropol)\",i];\nnwr(area.city)[\"highway\"=\"bus_stop\"][\"name\"~\"Jemielnicy\"];\nway(area.city)[\"highway\"][\"name\"~\"Chełmska|10 Sudeckiej|Strzelców Bytomskich\"];\n);out center tags;",
+    "[out:json][timeout:60];area[\"boundary\"=\"administrative\"][\"admin_level\"=\"8\"][\"name\"=\"Opole\"]->.city;(nwr(area.city)[\"name\"~\"PSZOK|Selektywnego|Selektywnej\",i];nwr(area.city)[\"addr:street\"~\"Sudeckiej\"][\"addr:housenumber\"=\"31\"];nwr(50.625,17.96,50.632,17.975)[\"building\"];nwr(50.670,17.97,50.675,17.977)[\"amenity\"=\"parking\"];);out center tags;"
+  ],
+  "elements": [
+    {
+      "type": "node",
+      "id": 1828452610,
+      "lat": 50.671039,
+      "lon": 17.9233369,
+      "tags": {
+        "bench": "yes",
+        "bin": "yes",
+        "bus": "yes",
+        "covered": "no",
+        "highway": "bus_stop",
+        "lit": "no",
+        "name": "Sienkiewicza (330)",
+        "operator": "MZK Opole",
+        "public_transport": "platform",
+        "ref": "330",
+        "shelter": "no",
+        "tactile_paving": "yes"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3267808075,
+      "lat": 50.6631998,
+      "lon": 17.9286815,
+      "tags": {
+        "bench": "yes",
+        "bin": "yes",
+        "bus": "yes",
+        "highway": "bus_stop",
+        "lit": "yes",
+        "name": "1 Maja-Dworzec Główny",
+        "operator": "MZK Opole",
+        "public_transport": "platform",
+        "ref": "2",
+        "shelter": "yes",
+        "tactile_paving": "yes"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3372028750,
+      "lat": 50.676786,
+      "lon": 17.9744563,
+      "tags": {
+        "bench": "yes",
+        "bin": "yes",
+        "bus": "yes",
+        "covered": "no",
+        "departures_board": "realtime",
+        "highway": "bus_stop",
+        "lit": "yes",
+        "name": "Witosa-Szpital (376)",
+        "operator": "MZK Opole",
+        "public_transport": "platform",
+        "ref": "376",
+        "shelter": "yes",
+        "tactile_paving": "yes"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3372466353,
+      "lat": 50.6695264,
+      "lon": 17.9678189,
+      "tags": {
+        "bench": "yes",
+        "bin": "yes",
+        "bus": "yes",
+        "covered": "no",
+        "highway": "bus_stop",
+        "lit": "yes",
+        "name": "Ozimska-Malinka (266)",
+        "operator": "MZK Opole",
+        "public_transport": "platform",
+        "ref": "266",
+        "shelter": "no",
+        "tactile_paving": "yes"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3373489973,
+      "lat": 50.6843214,
+      "lon": 17.9480038,
+      "tags": {
+        "bench": "yes",
+        "bin": "yes",
+        "bus": "yes",
+        "covered": "no",
+        "highway": "bus_stop",
+        "lit": "yes",
+        "local_ref": "337",
+        "name": "Sosnkowskiego-Fieldorfa (337)",
+        "operator": "MZK Opole",
+        "public_transport": "platform",
+        "shelter": "no",
+        "tactile_paving": "yes"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3373489975,
+      "lat": 50.6812272,
+      "lon": 17.9444389,
+      "tags": {
+        "bench": "yes",
+        "bin": "yes",
+        "bus": "yes",
+        "covered": "no",
+        "departures_board": "realtime",
+        "highway": "bus_stop",
+        "name": "Sosnkowskiego-Politechnika (342)",
+        "operator": "MZK Opole",
+        "public_transport": "platform",
+        "ref": "342",
+        "shelter": "no",
+        "tactile_paving": "no"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3373489981,
+      "lat": 50.6725902,
+      "lon": 17.9530031,
+      "tags": {
+        "bench": "yes",
+        "bin": "yes",
+        "bus": "yes",
+        "covered": "no",
+        "highway": "bus_stop",
+        "lit": "yes",
+        "name": "Sosnkowskiego-Małopolska (339)",
+        "operator": "MZK Opole",
+        "public_transport": "platform",
+        "ref": "339",
+        "shelter": "no",
+        "tactile_paving": "no"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3373489983,
+      "lat": 50.6728778,
+      "lon": 17.9580506,
+      "tags": {
+        "bench": "yes",
+        "bin": "yes",
+        "bus": "yes",
+        "check_date:bench": "2026-01-25",
+        "covered": "no",
+        "highway": "bus_stop",
+        "lit": "yes",
+        "name": "Sosnkowskiego-Wiejska (343)",
+        "operator": "MZK Opole",
+        "public_transport": "platform",
+        "ref": "343",
+        "shelter": "no",
+        "tactile_paving": "yes"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3373514930,
+      "lat": 50.6682203,
+      "lon": 17.9443551,
+      "tags": {
+        "bench": "yes",
+        "bin": "yes",
+        "bus": "yes",
+        "check_date:bench": "2026-01-13",
+        "covered": "no",
+        "highway": "bus_stop",
+        "lit": "yes",
+        "local_ref": "269",
+        "name": "Ozimska-Plebiscytowa",
+        "network": "MZK Opole",
+        "operator": "MZK Opole",
+        "public_transport": "platform",
+        "ref": "269",
+        "shelter": "no",
+        "tactile_paving": "no"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3373514932,
+      "lat": 50.6679221,
+      "lon": 17.9381356,
+      "tags": {
+        "bench": "yes",
+        "bin": "yes",
+        "bus": "yes",
+        "check_date:bench": "2026-01-13",
+        "covered": "no",
+        "highway": "bus_stop",
+        "lit": "yes",
+        "local_ref": "263",
+        "name": "Ozimska-Katowicka",
+        "network": "MZK Opole",
+        "operator": "MZK Opole",
+        "public_transport": "platform",
+        "ref": "263",
+        "shelter": "no",
+        "tactile_paving": "yes"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3373514936,
+      "lat": 50.6678363,
+      "lon": 17.9337971,
+      "tags": {
+        "bench": "yes",
+        "bin": "yes",
+        "bus": "yes",
+        "covered": "no",
+        "highway": "bus_stop",
+        "lit": "yes",
+        "name": "Ozimska-Dubois (259)",
+        "operator": "MZK Opole",
+        "public_transport": "platform",
+        "ref": "259",
+        "shelter": "no",
+        "tactile_paving": "yes"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3373549902,
+      "lat": 50.6644238,
+      "lon": 17.9300242,
+      "tags": {
+        "bench": "yes",
+        "bin": "yes",
+        "bus": "yes",
+        "highway": "bus_stop",
+        "lit": "yes",
+        "name": "Reymonta (327)",
+        "operator": "MZK Opole",
+        "public_transport": "platform",
+        "ref": "327",
+        "shelter": "yes",
+        "tactile_paving": "yes"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3373549903,
+      "lat": 50.6635555,
+      "lon": 17.9347619,
+      "tags": {
+        "bench": "yes",
+        "bus": "yes",
+        "covered": "no",
+        "highway": "bus_stop",
+        "name": "1 Maja-Katowicka (6)",
+        "operator": "MZK Opole",
+        "public_transport": "platform",
+        "ref": "6",
+        "shelter": "no"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3373549909,
+      "lat": 50.6648149,
+      "lon": 17.9502859,
+      "tags": {
+        "bench": "yes",
+        "bus": "yes",
+        "covered": "no",
+        "highway": "bus_stop",
+        "name": "1 Maja-Szkoła (424)",
+        "operator": "MZK Opole",
+        "public_transport": "platform",
+        "ref": "424",
+        "shelter": "yes"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3373581375,
+      "lat": 50.6693789,
+      "lon": 17.9272829,
+      "tags": {
+        "bench": "yes",
+        "bin": "yes",
+        "bus": "yes",
+        "covered": "no",
+        "departures_board": "realtime",
+        "highway": "bus_stop",
+        "lit": "yes",
+        "name": "Plac Kopernika - Uniwersytet (290)",
+        "operator": "MZK Opole",
+        "public_transport": "platform",
+        "ref": "290",
+        "shelter": "no",
+        "tactile_paving": "yes"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3373581376,
+      "lat": 50.6708022,
+      "lon": 17.9251185,
+      "tags": {
+        "bench": "yes",
+        "bin": "yes",
+        "bus": "yes",
+        "covered": "no",
+        "highway": "bus_stop",
+        "lit": "yes",
+        "name": "Plac Kopernika - Sienkiewicza (287)",
+        "operator": "MZK Opole",
+        "public_transport": "platform",
+        "ref": "287",
+        "shelter": "no",
+        "tactile_paving": "yes"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3377902545,
+      "lat": 50.6730744,
+      "lon": 17.9187985,
+      "tags": {
+        "bench": "yes",
+        "bin": "yes",
+        "bus": "yes",
+        "check_date:shelter": "2026-01-13",
+        "departures_board": "realtime",
+        "highway": "bus_stop",
+        "lit": "yes",
+        "name": "Książąt Opolskich-Rondo (169)",
+        "operator": "MZK Opole",
+        "public_transport": "platform",
+        "ref": "169",
+        "shelter": "yes",
+        "tactile_paving": "yes"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3377902547,
+      "lat": 50.6738083,
+      "lon": 17.9193574,
+      "tags": {
+        "bench": "yes",
+        "bus": "yes",
+        "departures_board": "realtime",
+        "highway": "bus_stop",
+        "local_ref": "223",
+        "name": "Nysy Łużyckiej-Rondo (223)",
+        "operator": "MZK Opole",
+        "public_transport": "platform",
+        "shelter": "yes"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3377940376,
+      "lat": 50.6806729,
+      "lon": 17.9288465,
+      "tags": {
+        "bench": "yes",
+        "bin": "yes",
+        "bus": "yes",
+        "covered": "no",
+        "departures_board": "realtime",
+        "highway": "bus_stop",
+        "name": "Chabrów-Szkoła",
+        "operator": "MZK Opole",
+        "passenger_information_display": "yes",
+        "public_transport": "platform",
+        "ref": "38",
+        "shelter": "yes",
+        "tactile_paving": "no"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3377940378,
+      "lat": 50.6804007,
+      "lon": 17.9329566,
+      "tags": {
+        "bench": "yes",
+        "bin": "yes",
+        "bus": "yes",
+        "covered": "no",
+        "departures_board": "realtime",
+        "highway": "bus_stop",
+        "lit": "yes",
+        "local_ref": "36",
+        "name": "Chabrów",
+        "network": "MZK Opole",
+        "operator": "MZK Opole",
+        "passenger_information_display": "yes",
+        "public_transport": "platform",
+        "ref": "36",
+        "shelter": "yes",
+        "tactile_paving": "no"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3377940380,
+      "lat": 50.6785614,
+      "lon": 17.9390065,
+      "tags": {
+        "bench": "yes",
+        "bus": "yes",
+        "covered": "no",
+        "departures_board": "realtime",
+        "highway": "bus_stop",
+        "name": "Okulickiego - Stegu Arena (238)",
+        "operator": "MZK Opole",
+        "public_transport": "platform",
+        "ref": "238",
+        "shelter": "yes"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3383086226,
+      "lat": 50.6948847,
+      "lon": 17.910352,
+      "tags": {
+        "bench": "yes",
+        "bus": "yes",
+        "covered": "no",
+        "highway": "bus_stop",
+        "name": "Budowlanych-Kępska (31)",
+        "operator": "MZK Opole",
+        "public_transport": "platform",
+        "shelter": "no"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3383086230,
+      "lat": 50.6878436,
+      "lon": 17.9136956,
+      "tags": {
+        "bench": "yes",
+        "bus": "yes",
+        "covered": "no",
+        "highway": "bus_stop",
+        "name": "Budowlanych-Prudnicka (34)",
+        "operator": "MZK Opole",
+        "public_transport": "platform",
+        "shelter": "no"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3385076902,
+      "lat": 50.667133,
+      "lon": 17.9206527,
+      "tags": {
+        "bench": "yes",
+        "bin": "yes",
+        "bus": "yes",
+        "covered": "no",
+        "highway": "bus_stop",
+        "name": "Piastowska (281)",
+        "operator": "MZK Opole",
+        "passenger_information_display": "yes",
+        "public_transport": "platform",
+        "ref": "281",
+        "shelter": "yes",
+        "tactile_paving": "no"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3385076905,
+      "lat": 50.6706227,
+      "lon": 17.9100256,
+      "tags": {
+        "bench": "yes",
+        "bin": "yes",
+        "bus": "yes",
+        "covered": "no",
+        "departures_board": "realtime",
+        "highway": "bus_stop",
+        "lit": "yes",
+        "name": "Plac Jana Kazimierza (286)",
+        "operator": "MZK Opole",
+        "public_transport": "platform",
+        "ref": "286",
+        "shelter": "yes",
+        "tactile_paving": "yes"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3396031120,
+      "lat": 50.6768872,
+      "lon": 17.8814757,
+      "tags": {
+        "bench": "yes",
+        "bin": "yes",
+        "bus": "yes",
+        "covered": "no",
+        "departures_board": "timetable",
+        "highway": "bus_stop",
+        "name": "Cmentarz-Pętla (52)",
+        "operator": "MZK Opole",
+        "public_transport": "platform",
+        "ref": "52",
+        "shelter": "yes"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3397042944,
+      "lat": 50.6617406,
+      "lon": 17.8884909,
+      "tags": {
+        "bench": "yes",
+        "bin": "yes",
+        "bus": "yes",
+        "check_date:bench": "2026-01-13",
+        "covered": "no",
+        "departures_board": "realtime",
+        "highway": "bus_stop",
+        "lit": "yes",
+        "local_ref": "77",
+        "name": "Dambonia-Pętla (77)",
+        "operator": "MZK Opole",
+        "public_transport": "platform",
+        "ref": "77",
+        "shelter": "yes",
+        "tactile_paving": "no"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3402857539,
+      "lat": 50.6632864,
+      "lon": 17.8981273,
+      "tags": {
+        "bench": "yes",
+        "bin": "yes",
+        "bus": "yes",
+        "covered": "no",
+        "departures_board": "realtime",
+        "highway": "bus_stop",
+        "lit": "yes",
+        "local_ref": "221",
+        "name": "Niemodlińska-Szkoła (221)",
+        "operator": "MZK Opole",
+        "public_transport": "platform",
+        "shelter": "yes",
+        "tactile_paving": "yes"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3402857548,
+      "lat": 50.6546236,
+      "lon": 17.9059931,
+      "tags": {
+        "bench": "yes",
+        "bin": "yes",
+        "bus": "yes",
+        "covered": "no",
+        "highway": "bus_stop",
+        "lit": "yes",
+        "name": "Prószkowska-Politechnika (429)",
+        "operator": "MZK Opole",
+        "public_transport": "platform",
+        "ref": "429",
+        "shelter": "yes",
+        "tactile_paving": "yes"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3402857553,
+      "lat": 50.6665173,
+      "lon": 17.9038197,
+      "tags": {
+        "bench": "yes",
+        "bin": "yes",
+        "bus": "yes",
+        "check_date:bench": "2026-01-13",
+        "covered": "no",
+        "departures_board": "realtime",
+        "highway": "bus_stop",
+        "lit": "yes",
+        "name": "Niemodlińska-Koszyka (218)",
+        "operator": "MZK Opole",
+        "public_transport": "platform",
+        "ref": "218",
+        "shelter": "yes",
+        "tactile_paving": "yes"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3402857555,
+      "lat": 50.6684759,
+      "lon": 17.9133744,
+      "tags": {
+        "bench": "yes",
+        "bin": "yes",
+        "bus": "yes",
+        "covered": "no",
+        "highway": "bus_stop",
+        "lit": "yes",
+        "name": "Spychalskiego (348)",
+        "operator": "MZK Opole",
+        "public_transport": "platform",
+        "ref": "348",
+        "shelter": "yes",
+        "tactile_paving": "yes"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3411894904,
+      "lat": 50.6557104,
+      "lon": 17.9346916,
+      "tags": {
+        "bench": "yes",
+        "bus": "yes",
+        "covered": "no",
+        "highway": "bus_stop",
+        "name": "Marka z Jemielnicy-Walecki (198)",
+        "operator": "MZK Opole",
+        "public_transport": "platform",
+        "ref": "198",
+        "shelter": "no"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3411894911,
+      "lat": 50.647186,
+      "lon": 17.9427097,
+      "tags": {
+        "bench": "yes",
+        "bin": "yes",
+        "bus": "yes",
+        "covered": "no",
+        "highway": "bus_stop",
+        "name": "Marka z Jemielnicy - Al. Przyjaźni (196)",
+        "operator": "MZK Opole",
+        "public_transport": "platform",
+        "ref": "196",
+        "shelter": "no"
+      }
+    },
+    {
+      "type": "node",
+      "id": 4113977199,
+      "lat": 50.6830942,
+      "lon": 17.8726604,
+      "tags": {
+        "addr:city": "Opole",
+        "addr:housenumber": "158",
+        "addr:postcode": "45-835",
+        "addr:street": "Wrocławska"
+      }
+    },
+    {
+      "type": "node",
+      "id": 6974073720,
+      "lat": 50.6090321,
+      "lon": 17.974567,
+      "tags": {
+        "bench": "yes",
+        "bin": "yes",
+        "bus": "yes",
+        "departures_board": "timetable",
+        "highway": "bus_stop",
+        "lit": "yes",
+        "name": "Złota - Dworzec Grotowice - Pętla (119)",
+        "operator": "MZK Opole",
+        "public_transport": "platform",
+        "shelter": "yes",
+        "tactile_paving": "yes"
+      }
+    },
+    {
+      "type": "node",
+      "id": 7681141725,
+      "lat": 50.683244,
+      "lon": 17.938219,
+      "tags": {
+        "addr:city": "Opole",
+        "addr:city:simc": "0965016",
+        "addr:housenumber": "50A",
+        "addr:street": "Chabrów",
+        "source:addr": "opole.e-mapa.net"
+      }
+    },
+    {
+      "type": "node",
+      "id": 9927481183,
+      "lat": 50.6642664,
+      "lon": 17.9274353,
+      "tags": {
+        "bench": "yes",
+        "bin": "yes",
+        "bus": "yes",
+        "departures_board": "yes",
+        "highway": "bus_stop",
+        "name": "Kołłątaja - Damrota - Dworzec Główny",
+        "network": "MZK Opole",
+        "operator": "MZK Opole",
+        "public_transport": "platform",
+        "ref": "149",
+        "shelter": "yes"
+      }
+    },
+    {
+      "type": "node",
+      "id": 11150691676,
+      "lat": 50.687486,
+      "lon": 17.8118961,
+      "tags": {
+        "camera:mount": "wall",
+        "camera:type": "fixed",
+        "ele": "3",
+        "man_made": "surveillance",
+        "source": "survey",
+        "surveillance": "outdoor",
+        "surveillance:type": "camera",
+        "surveillance:zone": "parking"
+      }
+    },
+    {
+      "type": "node",
+      "id": 11150778145,
+      "lat": 50.687488,
+      "lon": 17.8119299,
+      "tags": {
+        "camera:angle": "70",
+        "camera:direction": "90",
+        "camera:mount": "wall",
+        "camera:type": "fixed",
+        "ele": "3",
+        "man_made": "surveillance",
+        "surveillance": "outdoor",
+        "surveillance:type": "camera",
+        "surveillance:zone": "area"
+      }
+    },
+    {
+      "type": "node",
+      "id": 11150778146,
+      "lat": 50.6874659,
+      "lon": 17.8118826,
+      "tags": {
+        "camera:angle": "70",
+        "camera:direction": "300",
+        "camera:mount": "wall",
+        "camera:type": "fixed",
+        "ele": "3",
+        "man_made": "surveillance",
+        "surveillance": "outdoor",
+        "surveillance:type": "camera",
+        "surveillance:zone": "area"
+      }
+    },
+    {
+      "type": "node",
+      "id": 12072036022,
+      "lat": 50.6763934,
+      "lon": 17.9701193,
+      "tags": {
+        "man_made": "surveillance",
+        "surveillance:type": "camera"
+      }
+    },
+    {
+      "type": "node",
+      "id": 12072036023,
+      "lat": 50.6765197,
+      "lon": 17.9707171,
+      "tags": {
+        "man_made": "surveillance",
+        "surveillance:type": "camera"
+      }
+    },
+    {
+      "type": "node",
+      "id": 12258771515,
+      "lat": 50.676989,
+      "lon": 17.9704199,
+      "tags": {
+        "man_made": "surveillance",
+        "surveillance:type": "camera"
+      }
+    },
+    {
+      "type": "node",
+      "id": 12258887498,
+      "lat": 50.6774517,
+      "lon": 17.9699118,
+      "tags": {
+        "man_made": "surveillance",
+        "surveillance:type": "camera"
+      }
+    },
+    {
+      "type": "node",
+      "id": 13902073000,
+      "lat": 50.6576873,
+      "lon": 17.9133506,
+      "tags": {
+        "man_made": "surveillance",
+        "surveillance": "public",
+        "surveillance:type": "camera"
+      }
+    },
+    {
+      "type": "node",
+      "id": 13902110444,
+      "lat": 50.6585821,
+      "lon": 17.9127268,
+      "tags": {
+        "man_made": "surveillance",
+        "surveillance": "public",
+        "surveillance:type": "camera"
+      }
+    },
+    {
+      "type": "node",
+      "id": 14056511402,
+      "lat": 50.6613055,
+      "lon": 17.8944208,
+      "tags": {
+        "camera:type": "fixed",
+        "direction": "253",
+        "man_made": "surveillance",
+        "manufacturer": "Rekor",
+        "surveillance": "public",
+        "surveillance:type": "ALPR",
+        "surveillance:zone": "traffic"
+      }
+    },
+    {
+      "type": "node",
+      "id": 14089390001,
+      "lat": 50.6819658,
+      "lon": 17.8766706,
+      "tags": {
+        "camera:type": "fixed",
+        "direction": "108",
+        "man_made": "surveillance",
+        "manufacturer": "Neology, Inc.",
+        "surveillance": "public",
+        "surveillance:type": "ALPR",
+        "surveillance:zone": "traffic"
+      }
+    },
+    {
+      "type": "way",
+      "id": 207015274,
+      "center": {
+        "lat": 50.6639317,
+        "lon": 17.9238908
+      },
+      "tags": {
+        "addr:city": "Opole",
+        "addr:housenumber": "10",
+        "addr:postcode": "45-078",
+        "addr:street": "Leona Powolnego",
+        "building": "hotel",
+        "building:levels": "5",
+        "name": "Hotel DeSilva Premium Opole",
+        "rooms": "109",
+        "source": "UM Opole",
+        "stars": "4",
+        "tourism": "hotel",
+        "website": "https://www.desilva.pl/opole/"
+      }
+    },
+    {
+      "type": "way",
+      "id": 207018219,
+      "center": {
+        "lat": 50.6821676,
+        "lon": 17.8769175
+      },
+      "tags": {
+        "addr:city": "Opole",
+        "addr:housenumber": "154",
+        "addr:postcode": "45-835",
+        "addr:street": "Wrocławska",
+        "building": "yes",
+        "building:levels": "1",
+        "building:usage:pl": "handlowo-usługowy",
+        "name": "Centrum Handlowe Karolinka",
+        "opening_hours": "Mo-Sa 09:00-21:00; Su 09:00-20:00",
+        "operator": "Mayland",
+        "shop": "mall",
+        "source": "UM Opole",
+        "website": "https://ch-karolinka.pl/"
+      }
+    },
+    {
+      "type": "way",
+      "id": 207019812,
+      "center": {
+        "lat": 50.6768542,
+        "lon": 17.8902175
+      },
+      "tags": {
+        "addr:city": "Opole",
+        "addr:housenumber": "1a",
+        "addr:postcode": "45-834",
+        "addr:street": "Cmentarna",
+        "amenity": "police",
+        "building": "yes",
+        "building:levels": "2",
+        "building:usage:pl": "inny niemieszkalny",
+        "opening_hours": "24/7",
+        "source": "UM Opole"
+      }
+    },
+    {
+      "type": "way",
+      "id": 207021827,
+      "center": {
+        "lat": 50.674088,
+        "lon": 17.966737
+      },
+      "tags": {
+        "addr:city": "Opole",
+        "addr:housenumber": "26",
+        "addr:postcode": "45-317",
+        "addr:street": "Koszalińska",
+        "building": "residential",
+        "building:levels": "4",
+        "building:usage:pl": "mieszkalny",
+        "source": "UM Opole"
+      }
+    },
+    {
+      "type": "way",
+      "id": 207025739,
+      "center": {
+        "lat": 50.6767996,
+        "lon": 17.880029
+      },
+      "tags": {
+        "addr:city": "Opole",
+        "addr:housenumber": "4B",
+        "addr:postcode": "45-834",
+        "addr:street": "Cmentarna",
+        "building": "yes",
+        "building:usage:pl": "inny niemieszkalny",
+        "source": "UM Opole"
+      }
+    },
+    {
+      "type": "way",
+      "id": 207027654,
+      "center": {
+        "lat": 50.6797869,
+        "lon": 17.9355232
+      },
+      "tags": {
+        "addr:city": "Opole",
+        "addr:housename": "II Komisariat Policji",
+        "addr:housenumber": "6",
+        "addr:postcode": "45-222",
+        "addr:street": "Chabrów",
+        "amenity": "police",
+        "building": "office",
+        "building:levels": "4",
+        "building:usage:pl": "biurowy",
+        "name": "Policja",
+        "operator": "Policja",
+        "source": "UM Opole"
+      }
+    },
+    {
+      "type": "way",
+      "id": 207028625,
+      "center": {
+        "lat": 50.6348332,
+        "lon": 17.9396489
+      },
+      "tags": {
+        "addr:city": "Opole",
+        "addr:housenumber": "69",
+        "addr:postcode": "45-574",
+        "addr:street": "Podmiejska",
+        "building": "office",
+        "building:levels": "2",
+        "building:usage:pl": "biurowy",
+        "name": "Budynek Biura Obsługi i Siedziba Zakładu Komunalnego",
+        "source": "UM Opole"
+      }
+    },
+    {
+      "type": "way",
+      "id": 207030460,
+      "center": {
+        "lat": 50.6654591,
+        "lon": 17.9318856
+      },
+      "tags": {
+        "addr:city": "Opole",
+        "addr:housenumber": "9",
+        "addr:postcode": "45-067",
+        "addr:street": "Targowa",
+        "building": "office",
+        "building:levels": "1",
+        "building:usage:pl": "biurowy",
+        "source": "UM Opole"
+      }
+    },
+    {
+      "type": "way",
+      "id": 207032239,
+      "center": {
+        "lat": 50.6701939,
+        "lon": 17.9262534
+      },
+      "tags": {
+        "building": "retail",
+        "building:levels": "3",
+        "building:usage:pl": "handlowo-usługowy",
+        "name": "Solaris Center",
+        "shop": "mall",
+        "source": "UM Opole",
+        "wikidata": "Q7557045",
+        "wikipedia": "pl:Solaris Center"
+      }
+    },
+    {
+      "type": "way",
+      "id": 1056198893,
+      "center": {
+        "lat": 50.6629708,
+        "lon": 17.9286711
+      },
+      "tags": {
+        "addr:city": "Opole",
+        "addr:housenumber": "4",
+        "addr:postcode": "45-068",
+        "addr:street": "1 Maja",
+        "building": "bus_station",
+        "building:levels": "3",
+        "opening_hours": "Mo-Su 06:00-22:00"
+      }
+    },
+    {
+      "type": "way",
+      "id": 1286105706,
+      "center": {
+        "lat": 50.6857895,
+        "lon": 17.8738003
+      },
+      "tags": {
+        "addr:city": "Opole",
+        "addr:housenumber": "1",
+        "addr:postcode": "45-835",
+        "addr:street": "Leonarda Olejnika",
+        "leisure": "stadium",
+        "name": "Itaka Arena",
+        "operator": "Zakład Komunalny w Opolu",
+        "sport": "soccer"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3649611309,
+      "lat": 50.6636801,
+      "lon": 17.9248668,
+      "tags": {
+        "addr:city": "Opole",
+        "addr:housenumber": "1",
+        "addr:postcode": "45-078",
+        "addr:street": "Leona Powolnego"
+      }
+    },
+    {
+      "type": "way",
+      "id": 314717774,
+      "center": {
+        "lat": 50.6442547,
+        "lon": 17.9386812
+      },
+      "tags": {
+        "access": "private",
+        "name": "Kąpielisko Bolko",
+        "natural": "beach",
+        "surface": "sand"
+      }
+    },
+    {
+      "type": "node",
+      "id": 7681142344,
+      "lat": 50.669811,
+      "lon": 17.881531,
+      "tags": {
+        "addr:city": "Opole",
+        "addr:city:simc": "0965016",
+        "addr:housenumber": "31",
+        "addr:street": "10 Sudeckiej Dywizji Zmechanizowanej",
+        "source:addr": "opole.e-mapa.net"
+      }
+    }
+  ],
+  "deduplicationReview": [
+    {
+      "osmId": 11150691676,
+      "nearestIts": {
+        "id": "its:21",
+        "street": "Obwodnica Północna - Wrocławska",
+        "distanceMeters": 54
+      },
+      "decision": "pending-possible-duplicate",
+      "reason": "Three close OSM nodes at an ITS intersection; distinct identities not established."
+    },
+    {
+      "osmId": 11150778145,
+      "nearestIts": {
+        "id": "its:21",
+        "street": "Obwodnica Północna - Wrocławska",
+        "distanceMeters": 55
+      },
+      "decision": "pending-possible-duplicate",
+      "reason": "Three close OSM nodes at an ITS intersection; distinct identities not established."
+    },
+    {
+      "osmId": 11150778146,
+      "nearestIts": {
+        "id": "its:21",
+        "street": "Obwodnica Północna - Wrocławska",
+        "distanceMeters": 56
+      },
+      "decision": "pending-possible-duplicate",
+      "reason": "Three close OSM nodes at an ITS intersection; distinct identities not established."
+    },
+    {
+      "osmId": 12072036022,
+      "nearestIts": {
+        "id": "its:152",
+        "street": "Witosa (ok. ul. Tarnopolskiej)",
+        "distanceMeters": 312
+      },
+      "decision": "added",
+      "reason": "Distinct OSM point; nearest ITS is more than 250m away. Ownership unknown."
+    },
+    {
+      "osmId": 12072036023,
+      "nearestIts": {
+        "id": "its:152",
+        "street": "Witosa (ok. ul. Tarnopolskiej)",
+        "distanceMeters": 268
+      },
+      "decision": "added",
+      "reason": "Distinct OSM point; nearest ITS is more than 250m away. Ownership unknown."
+    },
+    {
+      "osmId": 12258771515,
+      "nearestIts": {
+        "id": "its:152",
+        "street": "Witosa (ok. ul. Tarnopolskiej)",
+        "distanceMeters": 280
+      },
+      "decision": "added",
+      "reason": "Distinct OSM point; nearest ITS is more than 250m away. Ownership unknown."
+    },
+    {
+      "osmId": 12258887498,
+      "nearestIts": {
+        "id": "its:152",
+        "street": "Witosa (ok. ul. Tarnopolskiej)",
+        "distanceMeters": 317
+      },
+      "decision": "added",
+      "reason": "Distinct OSM point; nearest ITS is more than 250m away. Ownership unknown."
+    },
+    {
+      "osmId": 13902073000,
+      "nearestIts": {
+        "id": "its:123",
+        "street": "1 Maja - Korfantego (PDP)",
+        "distanceMeters": 1037
+      },
+      "decision": "added",
+      "reason": "Distinct OSM point; nearest ITS is more than 250m away. Ownership unknown."
+    },
+    {
+      "osmId": 13902110444,
+      "nearestIts": {
+        "id": "its:123",
+        "street": "1 Maja - Korfantego (PDP)",
+        "distanceMeters": 1023
+      },
+      "decision": "added",
+      "reason": "Distinct OSM point; nearest ITS is more than 250m away. Ownership unknown."
+    },
+    {
+      "osmId": 14056511402,
+      "nearestIts": {
+        "id": "its:4",
+        "street": "Niemodlińska - Wojska Polskiego - Hallera",
+        "distanceMeters": 254
+      },
+      "decision": "added",
+      "reason": "Distinct OSM point; nearest ITS is more than 250m away. Ownership unknown."
+    },
+    {
+      "osmId": 14089390001,
+      "nearestIts": {
+        "id": "its:26",
+        "street": "Wrocławska - Domańskiego - Partyzancka",
+        "distanceMeters": 1035
+      },
+      "decision": "added",
+      "reason": "Distinct OSM point; nearest ITS is more than 250m away. Ownership unknown."
+    }
+  ]
+}

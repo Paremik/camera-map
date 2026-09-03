@@ -1,5 +1,22 @@
 # Verification — 2026-09-03
 
+## Public inventory update — latest verification
+
+The current catalog validates **225 records: 175 individual/reported cameras and 53 documented objects**. Added 61 records (8 OSM points and 53 objects); existing source IDs and the four-camera report are preserved. Details and evidence: [PUBLIC_SOURCE_REVIEW.md](PUBLIC_SOURCE_REVIEW.md).
+
+- **29 tests passed**, including separation of site quantities from camera totals, explicit unknown counts, dated published quantities, rejected fabricated optics/viewing links, OSM coordinate fidelity, pending duplicates, private filtering and source-name search.
+- **Typecheck and production build passed** on the unchanged locked dependencies. The home page is static. A missing favicon request discovered in the browser was fixed with the Next app icon convention; the final source flow produced no console or unhandled page errors.
+- The full previous feature scenario passed against the production build: favorites/reload/cross-tab updates, history/deep links/unknown IDs, filtering, the shared Ratusz marker, ITS 159, 2D/3D, sectors, mobile layout, blocked-storage/clipboard fallback and map error recovery.
+- The user-report scenario passed again: four cameras remain one unverified group, with no public-source/viewing URL invented, a separate position source, marker selection, favorites and mobile search.
+- New inventory scenario passed: private filter has 5 records (4 documented objects + the reported group), count 4 cameras + 4 objects; OSM filter has 8 records; unknown totals stay unknown; Itaka Arena displays 192 with date while global individual count stays 175.
+- Object marker selection, source dialog opening/closing/Escape, favorites for an object, direct links, archival DIP wording, 2D/3D and mobile search were checked.
+- Desktop 1440×1000 and mobile 390×844 screenshots were inspected, including the arena card, private object card and scrollable source overview. No horizontal overflow; the mobile card and controls fit.
+- A global network-idle wait timed out while the rendered mobile map was already visible. The final check waits for a completed OSM tile near the selected object instead. Canceled obsolete tile requests during navigation are expected; they are not page errors. Live OSM responses and visual screenshots were used, not substitute/mock map images.
+
+Production remains available at port 3001. Current browser verification used standard Playwright with installed Edge because the previously tried native agent-browser connection was unavailable. No TLS exceptions were used. Research dates verify source review, not equipment uptime or exact physical placement.
+
+## Earlier MVP verification
+
 Environment: Windows, Node.js 24.19.0, pnpm 11.19.0, Next.js 16.3.4, MapLibre 5.24.0. Dependencies remain captured in pnpm-lock.yaml; this update adds no packages.
 
 ## Automated checks

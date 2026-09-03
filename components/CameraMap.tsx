@@ -2,11 +2,12 @@
 
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { cameraCategoryLabel, countCameras, filterCameras, type Camera, type CameraCategory } from "@/lib/camera";
+import { cameraCategoryLabel, countCameras, countDocumentedSites, filterCameras, type Camera, type CameraCategory } from "@/lib/camera";
 import { cameraLink, readCameraLink } from "@/lib/camera-preferences";
 import CameraDetails from "./CameraDetails";
 import Icon from "./Icon";
 import { useFavorites } from "./useFavorites";
+import SourceOverview from "./SourceOverview";
 
 const MapCanvas = dynamic(() => import("./MapCanvas"), {
   ssr: false, loading: () => <div className="map-loading" role="status">Загружаем карту Opole…</div>,
@@ -38,6 +39,8 @@ export default function CameraMap({ cameras }: { cameras: Camera[] }) {
   const selected = visible.find((camera) => camera.id === selectedId) ?? null;
   const totalCount = countCameras(cameras);
   const visibleCount = countCameras(visible);
+  const totalSites = countDocumentedSites(cameras);
+  const visibleSites = countDocumentedSites(visible);
   const reportedCount = countCameras(cameras.filter((camera) => camera.sourceKind === "user-report"));
   const visibleReports = visible.some((camera) => camera.sourceKind === "user-report");
   const selectCamera = useCallback((camera: Camera) => {
@@ -100,8 +103,10 @@ export default function CameraMap({ cameras }: { cameras: Camera[] }) {
         </header>
         <div className="sidebar-intro">
           <p>Камеры города на одной карте.</p>
-          <div className="catalog-stats"><span><b>{totalCount}</b> камер</span><span><b>{verifiedCount}</b> точек проверено</span></div>
+          <div className="catalog-stats"><span><b>{totalCount}</b> камер</span><span><b>{totalSites}</b> объектов</span></div>
+          <p className="catalog-explanation">Объекты с видеонаблюдением считаются отдельно. Точек проверено: {verifiedCount}.</p>
           {reportedCount > 0 && <p className="catalog-provenance">Из них со слов пользователей: {reportedCount}</p>}
+          <SourceOverview cameras={cameras} />
         </div>
         <div className="filters">
           <label className="search-field" htmlFor="camera-search"><Icon name="search" />
@@ -112,8 +117,9 @@ export default function CameraMap({ cameras }: { cameras: Camera[] }) {
             <option value="all">Все типы камер</option>
             <option value="public">Публичный вид</option>
             <option value="its">ITS Opole</option>
-            <option value="city">Городской мониторинг</option>
+            <option value="city">Городские и общественные</option>
             <option value="private">Частные камеры</option>
+            <option value="other">Оператор неизвестен</option>
           </select>
           <label className="check-row"><input type="checkbox" checked={verifiedOnly} onChange={(event) => { setVerifiedOnly(event.target.checked); setPageSize(50); }} /> Только проверенные точки</label>
           <div className="catalog-switch" role="group" aria-label="Каталог или избранное">
@@ -123,13 +129,13 @@ export default function CameraMap({ cameras }: { cameras: Camera[] }) {
           {favoritesOnly && <p className="favorites-note">Избранное сохраняется в этом браузере.</p>}
           {favorites.storageError && <p className="storage-warning" role="status">Браузер не разрешает сохранять избранное. Оно доступно до закрытия или перезагрузки страницы.</p>}
         </div>
-        <div className="list-heading"><span>КАМЕРЫ</span><span aria-live="polite">{visibleCount} из {totalCount}</span></div>
+        <div className="list-heading"><span>ЗАПИСИ</span><span aria-live="polite">{visible.length} из {cameras.length}</span></div>
         <div className="camera-list">
           {visible.slice(0, pageSize).map((camera) => (
             <div key={camera.id} className={"camera-row" + (selected?.id === camera.id ? " active" : "") + (camera.sourceKind === "user-report" ? " reported" : "")}>
             <button className="camera-item" aria-pressed={selected?.id === camera.id} onClick={() => selectCamera(camera)}>
               <span className="item-camera"><Icon name="camera" /></span>
-              <span className="item-copy"><strong>{camera.name}</strong><small>{camera.street}</small><span className="item-type">{cameraCategoryLabel(camera)} <span aria-hidden="true">·</span> {camera.sourceKind === "user-report" ? "Со слов пользователя" : camera.verified ? "Точка проверена" : "Точка не проверена"}</span>{camera.reportedCount && <span className="report-count">Камер в группе: {camera.reportedCount}</span>}</span>
+              <span className="item-copy"><strong>{camera.name}</strong><small>{camera.street}</small><span className="item-type">{cameraCategoryLabel(camera)} <span aria-hidden="true">·</span> {camera.recordKind === "site" ? "Ориентир объекта" : camera.sourceKind === "user-report" ? "Со слов пользователя" : camera.sourceKind === "open-map" ? "Данные сообщества" : camera.verified ? "Точка проверена" : "Точка не проверена"}</span>{camera.reportedCount && <span className="report-count">Камер в группе: {camera.reportedCount}</span>}{camera.recordKind === "site" && <span className="object-count">{camera.cameraCount === null ? "Количество камер неизвестно" : "По источнику: " + camera.cameraCount + " камер"}{camera.sourceDate && " · " + camera.sourceDate.slice(0, 4)}</span>}</span>
             </button>
             <button className="icon-button favorite-button row-favorite" disabled={!favorites.ready} aria-label={(favoriteIds.has(camera.id) ? "Убрать из избранного: " : "В избранное: ") + camera.name} aria-pressed={favoriteIds.has(camera.id)} onClick={() => favorites.toggle(camera.id)}><Icon name="star" /></button>
             </div>
@@ -143,7 +149,7 @@ export default function CameraMap({ cameras }: { cameras: Camera[] }) {
       <main className="map-workspace" aria-label="Карта камер Opole" inert={mobileList}>
         <MapCanvas cameras={visible} selected={selected} onSelect={selectCamera} is3D={is3D} showSectors={showSectors} resetRequest={resetRequest} focusRequest={focusRequest} />
         <div className="map-topbar">
-          <div className="location-chip"><Icon name="pin" /><div><strong>Opole</strong><span>Польша · камер: {visibleCount}</span></div></div>
+          <div className="location-chip"><Icon name="pin" /><div><strong>Opole</strong><span>{visibleCount} камер · {visibleSites} объектов</span></div></div>
           <div className="map-actions">
             <div className="mode-switch" role="group" aria-label="Режим карты"><button aria-pressed={!is3D} onClick={() => setIs3D(false)}>2D</button><button aria-pressed={is3D} onClick={() => setIs3D(true)} title="Наклон карты без объёмных зданий">3D</button></div>
             <button className="icon-button center-button" title="В центр Opole" aria-label="В центр Opole" onClick={() => setResetRequest((value) => value + 1)}><Icon name="center" /></button>
@@ -154,9 +160,10 @@ export default function CameraMap({ cameras }: { cameras: Camera[] }) {
           <button className="sector-toggle" aria-pressed={showSectors} onClick={() => setShowSectors((value) => !value)}><Icon name="sector" /> Секторы обзора <span>{showSectors ? "Вкл" : "Выкл"}</span></button>
           <span className="map-caption">{is3D ? "3D · наклон карты, без объёмных зданий" : "2D · вид сверху"}</span>
           {visibleReports && <span className="map-caption reported-caption">Оранжевые точки — со слов пользователя</span>}
+          {visibleSites > 0 && <span className="map-caption object-caption">i — объекты с видеонаблюдением</span>}
         </div>
         {selected && <CameraDetails key={selected.id} camera={selected} onClose={closeCamera} favorite={favoriteIds.has(selected.id)} favoritesReady={favorites.ready} onToggleFavorite={() => favorites.toggle(selected.id)} />}
-        <button ref={listButtonRef} className="mobile-list-button" onClick={() => setMobileList(true)}><Icon name="list" /> Камеры и поиск <span>{visibleCount}</span></button>
+        <button ref={listButtonRef} className="mobile-list-button" onClick={() => setMobileList(true)}><Icon name="list" /> Камеры и поиск <span>{visible.length}</span></button>
       </main>
     </div>
   );

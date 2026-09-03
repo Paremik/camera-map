@@ -1,0 +1,64 @@
+# Public camera inventory — 2026-09-03
+
+The user requested an internet search for cameras in Opole, including publicly documented private cameras, and addition of missing records. This is a bounded review of public sources, not an exhaustive census or verification of operating equipment.
+
+## Result and counting
+
+Added **61 records: 8 individual OSM points and 53 documented objects**. Together with the previous catalog this gives **225 records representing 175 individually listed/reported cameras plus 53 objects**. Four of the 175 remain one explicitly authorized, unverified user report.
+
+Object records do not count as individual cameras, even if an object-wide number is published. Their systems can overlap existing records and figures from different dates. Of the 53 objects, 51 have unknown total counts; Itaka Arena has a published count of 192, and a separate Dambonia installation has one documented camera. These two numbers are displayed in their cards, not added to 175. No city-wide total can be established from these sources.
+
+Every addition has unknown optics and false coordinate/optical verification flags. An address or OSM building/stop position locates the object, not a surveyed camera mount. No video, device endpoints or credentials were accessed.
+
+## Sources used on the map
+
+| Source | Evidence and treatment |
+| --- | --- |
+| [CH Karolinka privacy policy](https://www.ch-karolinka.pl/polityka-prywatnosci) | CCTV at the shopping centre and associated areas. One private object at Wrocławska 152/154; count unknown. |
+| [Solaris Center privacy policy](https://www.solariscenter.pl/polityka-prywatnosci) | CCTV at the shopping centre and associated areas. One private object at Plac Kopernika 16; count unknown. |
+| [Hotel DeSilva Premium Opole privacy policy](https://www.desilva.pl/opole/wp-content/uploads/2023/03/Polityka-prywatnos%CC%81ci-DeSilva-Premium-Opole.pdf) | Names the hotel at Powolnego 10 and CCTV inside/around the property. One private object; count unknown. The file is under a March 2023 path, but no exact issue day is asserted. |
+| [OSM Przyszłość: Parking Chabrów 50A](https://osm.opole.pl/komunikaty/parking-chabrow-50a/) | Cooperative parking behind its administration building, with CCTV. One private object using the administration address as its approximate anchor. The published 50 parking spaces are not a camera count. Here OSM means the cooperative, not OpenStreetMap. |
+| [Zakład Komunalny CCTV policy](https://zk.opole.pl/regulamin-funkcjonowania-monitoringu-wizyjnego/) | Seven located municipal objects: Podmiejska 69, Cmentarna 4B, Wrocławska 158, Targowa 9, 1 Maja 4, Kępska 5K and Przylesie. Counts unknown. Przeskok 1 is documented but awaiting a reliable object anchor. |
+| [KMP Opole public CCTV notice](https://opole.policja.gov.pl/opo/ochro/34992,Klauzula-informacyjna-monitoring-wizyjny-obiektow-KMP-Opole.html) | Four in-city locations: Powolnego 1, Cmentarna 1A, Chabrów 6 and Koszalińska 26. Objects only; quantities unknown. Locations in other towns excluded. |
+| [Czas na Opole: Itaka Arena](https://czasnaopole.pl/taka-jest-itaka-arena/) | 21 March 2025 publication states 192 cameras. One object at Leonarda Olejnika 1; six mobile cameras mentioned in the article are a subset, not an additional six. [Operator regulations](https://itakaarena.com/regulamin/) also establish CCTV and the address. |
+| [2025 budget execution, printed page 159](https://duwo.opole.uw.gov.pl/WDU_O/2026/978/akt.pdf#page=159) | Completed installation of one city camera at Dambonia bus loop and a camera at Kąpielisko Bolko. Two approximate object anchors. Bolko's whole-object count remains unknown. A separate DIP object at Dambonia refers to the stop-board system. |
+| [City DIP notice, November 2021](https://www.archiwum.bip.um.opole.pl/zalaczniki/45612/Klauzula_informacyjna_-_monitoring_Dynamicznej_Informacji_Pasazerskiej-1_02-11-2021_09-35-05.pdf) | Cameras in 45 passenger-information boards at 35 named stop complexes. One archival object per named complex. This does not establish 45 individual cameras or the distribution between platforms. Every card states that present condition, exact board and mounting position are unknown. |
+| [OpenStreetMap](https://www.openstreetmap.org/copyright) | Query of surveillance objects within the Opole administrative boundary returned 11 nodes. Eight were added as unverified community points with unknown operator. Three nearby nodes are pending identity/duplication review. |
+
+The [city report for 2025, PDF page 49](https://www.opole.pl/sites/default/files/field_attachment/2026-05/Raport%20o%20stanie%20Miasta%20Opola%20za%202025%20r..pdf#page=49) states **128 city-monitoring cameras and 154 ITS cameras**. Those dated system-level figures appear in the source overview. No invented markers were generated from them. The existing [ITS snapshot](ITS_SOURCE_REVIEW.md) contains 159 records retrieved on 3 September 2026; 154 and 159 must not be added.
+
+## Location provenance and duplication review
+
+Selected OSM source elements, query texts, retrieval date and the nearest-ITS review are in `data/sources/opole-osm-reviewed-2026-09-03.json`. The dataset is attributed to OpenStreetMap contributors under ODbL 1.0. The source records retain the published coordinates/centres. Only relevant elements are archived, not unrelated results from location searches.
+
+- An OSM camera is identified by its stable node ID. The `surveillance=public` tag is not treated as proof of municipal ownership or public video access.
+- Nodes 11150691676, 11150778145 and 11150778146 are approximately 54–56 metres from the nearest ITS record at Obwodnica Północna / Wrocławska and very close to each other. They may be separate wall-mounted cameras, but this review could not establish distinct identities. They remain in the review snapshot, not the displayed total.
+- The eight added OSM points are at least approximately 254 metres from the nearest current ITS point. This reduces obvious duplication; it is not independent verification of physical identity.
+- Object anchors are kept separate from nearby camera points, so a known camera at/near Karolinka cannot be added to a centre-wide total a second time.
+- OSM stopping points locate each DIP complex only. The selected point is not asserted to be the particular monitored platform or board; source directions remain in the note.
+- The `Marka z Jemielnicy–Aleja Przyjaźni` stop is matched to the OSM abbreviation `Al. Przyjaźni`. Numbered variants of the other stop names are matched by name, not guessed coordinates.
+- The Kępska anchor uses the explicit target **50°41′43.3″N 17°55′00.2″E** in the map embedded by the [operator](https://zk.opole.pl/pszok/), not the shifted Google Maps viewport centre.
+- Przylesie's number 31 is corroborated by the operator's [published location list](https://zk.opole.pl/wp-content/uploads/2022/12/Zapytanie-ofertowe-audyt-informatyczny.pdf). Position remains an approximate OSM address anchor.
+
+## Findings retained for follow-up, without new markers
+
+| Finding | Reason |
+| --- | --- |
+| [Parking Chełmska](https://sm.opole.pl/294/parking-chelmska.html) | Cooperative confirms CCTV and an added camera, but the exact parking area was not reliably distinguished from other nearby lots. Fifteen additional parking spaces are not fifteen cameras. No guessed marker. |
+| Zakład Komunalny, Przeskok 1 | Public CCTV policy and current PSZOK page confirm the object. OSM did not yield a matching address/footprint; the publisher's embedded map viewport is not a reliable exact object coordinate. |
+| City camera at Strzelców Bytomskich; five cameras in the 2025 budget | Street-only location / unclear placement of the five cameras. The document's server-room address is not assumed to be each camera's location. |
+| [MOSiR archived 2017 inventory](https://mosir.opole.pl/wp-content/uploads/2017/11/Szczeg%C3%B3%C5%82owy-opis-przedmiotu-zam%C3%B3wienia.pdf) | Historical quantities: Błękitna Fala 14, old Stadion Miejski 18, Centrum Sportu at Wandy Rutkiewicz 25. Retained as historical findings; no sufficiently recent reconciliation found. Old Stadion Miejski is not Itaka Arena. |
+| Stadion Żużlowy modernization mentioned in the 2022 budget | Four added cameras describe a particular installation, not an established current full-object count. Current inventory reconciliation pending. |
+| 2026 participatory-budget proposal 53/26, other proposed installations, MOSiR technical design | Proposed equipment is not proof of completed installation. |
+| Installer examples for private homes without a published address | Not located by owners' names or inferred from house photos; no association with the user's four-camera report. |
+| Aggregator views of Ratusz / ITS intersections | Existing sources already cover these views; no extra entries simply because another website republishes them. |
+| Police facilities outside Opole; searches returning Opoczno or Strzelce Opolskie | Outside the requested city. |
+| Broad references to monitored neighbourhoods, university buildings or parks without a precise object inventory | Coverage claims are not individual camera coordinates. No invented points or counts. |
+
+## Updating the catalog
+
+`data/public-cameras.json` is a curated source-backed dataset validated with the same repository boundary as ITS. Keep stable IDs. For an object use `recordKind: "site"`, explicit `cameraCount: null` or a dated published integer, `retrievedAt`, a public source and a separate position source. Objects must have unknown optics, false verification and no invented viewing link. Known object quantities are deliberately excluded from `countCameras`.
+
+For new OSM points retain the source node ID, original coordinates and `sourceKind: "open-map"`; do not infer ownership. Review nearby existing cameras before insertion. Refresh source dates only after actually reviewing the source. A count difference, missing marker or geographic proximity requires investigation, not automatic deduplication or creation.
+
+Run typecheck, tests, build and browser checks after changes. No automatic internet crawling or scheduled refresh was introduced.

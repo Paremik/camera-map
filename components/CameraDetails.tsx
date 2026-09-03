@@ -24,12 +24,14 @@ export default function CameraDetails({ camera, onClose, favorite, favoritesRead
   const approximate = camera.opticsVerified ? "" : "≈";
   return (
     <section className="details-card" aria-labelledby="camera-details-title" data-camera-id={camera.id}>
-      <div className="details-heading"><span className="eyebrow">{camera.reportedCount ? "ГРУППА КАМЕР" : "ВЫБРАННАЯ КАМЕРА"}</span><button className="icon-button" aria-label="Закрыть карточку камеры" onClick={onClose}><Icon name="close" /></button></div>
+      <div className="details-heading"><span className="eyebrow">{camera.recordKind === "site" ? "ОБЪЕКТ С ВИДЕОНАБЛЮДЕНИЕМ" : camera.reportedCount ? "ГРУППА КАМЕР" : "ВЫБРАННАЯ КАМЕРА"}</span><button className="icon-button" aria-label="Закрыть карточку камеры" onClick={onClose}><Icon name="close" /></button></div>
       <div className="details-scroll">
       <div className="details-type"><Icon name="camera" /> {cameraCategoryLabel(camera)}</div>
       <h2 id="camera-details-title" tabIndex={-1}>{camera.name}</h2>
       <p className="details-location"><Icon name="pin" /> {camera.street}</p>
       {camera.sourceKind === "user-report" && <p className="report-notice"><strong>Со слов пользователя, не проверено</strong><span>Камер в группе: {camera.reportedCount}. Точка обозначает общий ориентир.</span></p>}
+      {camera.recordKind === "site" && <p className="object-notice"><strong>{camera.cameraCount === null ? "Количество камер неизвестно" : "По источнику: " + camera.cameraCount + " камер"}</strong><span>Отметка обозначает объект. Точные места установки не опубликованы. Число камер объекта не прибавляется к общему счётчику.</span></p>}
+      {camera.sourceKind === "open-map" && <p className="object-notice">Данные сообщества OpenStreetMap. Оператор и актуальность не подтверждены.</p>}
       <div className="camera-actions">
         <button className="utility-button favorite-button" aria-pressed={favorite} disabled={!favoritesReady} onClick={onToggleFavorite}><Icon name="star" /> {favorite ? "В избранном" : "В избранное"}</button>
         <button className="utility-button" disabled={copying} onClick={copyLink}><Icon name="link" /> {copying ? "Копируем…" : "Ссылка"}</button>
@@ -48,7 +50,7 @@ export default function CameraDetails({ camera, onClose, favorite, favoritesRead
         </dl>
       </div>
       <p className="optics-note">{camera.heading === null || camera.fov === null || camera.rangeMeters === null ? "Сектор не построен: в источнике недостаточно данных об оптике." : camera.opticsVerified ? "Оптика подтверждена публичным техническим источником." : "Сектор — иллюстрация, а не точное покрытие камеры."}</p>
-      <dl className="source-details"><div><dt>{camera.sourceKind === "user-report" ? "Ориентир · широта, долгота" : "Координаты · широта, долгота"}</dt><dd>{camera.lat.toFixed(5)}, {camera.lng.toFixed(5)}</dd></div><div><dt>Источник</dt><dd>{camera.sourceUrl ? <a href={camera.sourceUrl} target="_blank" rel="noopener noreferrer">{camera.sourceLabel} ↗</a> : camera.sourceLabel}</dd></div></dl>
+      <dl className="source-details"><div><dt>{camera.sourceKind === "user-report" || camera.recordKind === "site" ? "Ориентир · широта, долгота" : "Координаты · широта, долгота"}</dt><dd>{camera.lat.toFixed(5)}, {camera.lng.toFixed(5)}</dd></div><div><dt>Источник</dt><dd>{camera.sourceUrl ? <a href={camera.sourceUrl} target="_blank" rel="noopener noreferrer">{camera.sourceLabel} ↗</a> : camera.sourceLabel}</dd></div>{camera.sourceDate && <div><dt>Сведения на дату</dt><dd>{camera.sourceDate}</dd></div>}{camera.retrievedAt && <div><dt>Источник просмотрен</dt><dd>{camera.retrievedAt} · работа камер не проверялась</dd></div>}</dl>
       {camera.positionSourceUrl && <p className="position-source"><a href={camera.positionSourceUrl} target="_blank" rel="noopener noreferrer">{camera.positionSourceLabel ?? "Положение здания · OpenStreetMap"} ↗</a></p>}
       {camera.note && <p className="camera-note">{camera.note}</p>}
       </div>
