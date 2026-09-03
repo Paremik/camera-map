@@ -58,13 +58,12 @@ export default function CameraMap() {
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
-    const map = new mapboxgl.Map({
-  container: mapContainer.current,
-  style: 'mapbox://styles/mapbox/streets-v11',
-  center: [17.9213, 50.6721],
-  zoom: 12,
-  antialias: true,
-} as any);
+    const map = new maplibregl.Map({
+      container: containerRef.current,
+      center: [17.9232, 50.6663],
+      zoom: 15.2,
+      pitch: 48,
+      bearing: -12,
       style: {
         version: 8,
         sources: {
@@ -137,7 +136,7 @@ export default function CameraMap() {
         </div>
 
         <p className="intro">
-          Публичные камеры и ориентировочные сектора обзора. Точные углы и дальность добавляем только после проверки источника.
+          Публичные камеры и ориентировочные сектора обзора. Точные углы и дальность добавляем только после пров[...]
         </p>
 
         <div className="camera-list">
