@@ -4,7 +4,10 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Opole Camera Map",
-  description: "Карта камер Opole: публичные источники, отметки пользователей и режимы 2D/3D."
+  description: "Карта камер Opole: публичные источники, отметки пользователей и режимы 2D/3D.",
+  manifest: "/manifest.webmanifest",
+  applicationName: "Opole Camera Map",
+  appleWebApp: { capable: true, title: "Opole Cameras", statusBarStyle: "black-translucent" },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

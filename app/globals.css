@@ -69,6 +69,33 @@ h1 span { color: var(--muted); font-size: 19px; font-weight: 400; }
 .street-result i, .street-caption i { display: inline-block; width: 15px; height: 4px; margin-right: 7px; border-radius: 999px; background: #1686ff; box-shadow: 0 0 0 1px white; flex-shrink: 0; }
 .street-result button { padding: 5px; background: transparent; color: #b8dcf0; text-decoration: underline; text-underline-offset: 3px; font-size: 9px; }
 .street-attribution { display: block; margin-top: 8px; color: var(--muted); font-size: 8px; text-underline-offset: 2px; }
+.experience-tools { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; padding: 0 24px 14px; }
+.experience-tools > label, .experience-tools > div { min-width: 0; }
+.experience-tools span { display: block; margin-bottom: 5px; color: var(--muted); font-size: 8px; }
+.experience-tools select, .experience-tools button { min-height: 32px; border: 1px solid #3d4d51; border-radius: 6px; background: #1b2528; color: var(--text); font-size: 9px; }
+.experience-tools select { width: 100%; padding: 0 6px; }
+.experience-tools > div:not(.install-app) { display: grid; grid-template-columns: 1fr 1fr; }
+.experience-tools > div:not(.install-app) > span { grid-column: 1 / -1; }
+.experience-tools button[aria-pressed="true"] { border-color: var(--accent); background: #2e4939; }
+.install-app { grid-column: 1 / -1; }
+.install-app button { width: 100%; border-color: #75a85d; }
+.install-app p { margin: 6px 0 0; color: var(--muted); font-size: 9px; line-height: 1.4; }
+.layer-filter { margin: 12px 0; padding: 9px; border: 1px solid var(--line); border-radius: 8px; }
+.layer-filter summary { color: #b8dcf0; cursor: pointer; font-size: 10px; }
+.layer-filter > div { display: grid; grid-template-columns: 1fr 1fr; gap: 7px 8px; padding-top: 10px; }
+.layer-filter label { display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 5px; color: #c8d2d3; font-size: 8px; line-height: 1.25; }
+.layer-filter b { color: var(--muted); font-weight: 400; }
+.availability { display: inline-flex; align-items: center; gap: 5px; color: var(--muted); font-size: 10px; }
+.availability i { width: 7px; height: 7px; border-radius: 50%; background: #879294; }
+.availability.working { color: #b8f285; }.availability.working i { background: #72d56d; box-shadow: 0 0 0 3px #72d56d22; }
+.availability.unavailable { color: #ffc18f; }.availability.unavailable i { background: #ef8f5b; }
+.availability.compact { margin-top: 5px; font-size: 8px; }
+.availability-card { margin: 0 0 13px; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: #111a1c; }
+.availability-card > span:first-child { display: block; margin-bottom: 7px; color: var(--muted); font-size: 8px; text-transform: uppercase; letter-spacing: .08em; }
+.availability-card time { display: block; margin-top: 6px; color: #c9d4d1; font-size: 9px; }
+.availability-card p { margin: 7px 0 0; color: var(--muted); font-size: 8px; line-height: 1.45; }
+.map-caption.coverage-known { color: #c9ffd8; border-color: #31b96b; }
+.map-caption.coverage-unknown { color: #ffd7ab; border-color: #d58637; }
 .search-field { display: flex; align-items: center; gap: 9px; border: 1px solid #3d4d51; border-radius: 9px; background: #1b2528; padding: 0 12px; color: var(--muted); }
 .search-field:focus-within { border-color: var(--accent); }
 .search-field input { width: 100%; min-width: 0; border: 0; outline: 0; color: var(--text); background: transparent; height: 43px; font-size: 13px; }
@@ -226,6 +253,8 @@ dd { margin: 0; }
   .shell { display: block; height: 100dvh; min-height: 560px; }
   .sidebar { position: fixed; inset: 0; display: none; z-index: 10; }
   .sidebar.mobile-open { display: flex; }
+  .sidebar.mobile-open { overflow-y: auto; }
+  .sidebar.mobile-open .camera-list { flex: 0 0 auto; min-height: 240px; overflow: visible; }
   .mobile-close { display: grid; margin-left: auto; }
   .brand { padding: 22px; }
   .map-workspace { height: 100%; }

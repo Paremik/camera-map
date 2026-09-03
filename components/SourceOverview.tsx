@@ -3,16 +3,18 @@
 import { useRef } from "react";
 import { countCameras, countDocumentedSites, type Camera } from "@/lib/camera";
 import Icon from "./Icon";
+import { useI18n } from "@/lib/i18n";
 
 export default function SourceOverview({ cameras }: { cameras: Camera[] }) {
+  const { t } = useI18n();
   const dialog = useRef<HTMLDialogElement>(null);
   const itsCount = cameras.filter((camera) => camera.category === "its").length;
   const osmCount = cameras.filter((camera) => camera.sourceKind === "open-map").length;
   const sites = cameras.filter((camera) => camera.recordKind === "site");
   return <>
-    <button className="sources-button" onClick={() => dialog.current?.showModal()}>Источники и количество ↗</button>
+    <button className="sources-button" onClick={() => dialog.current?.showModal()}>{t("sourcesButton")}</button>
     <dialog ref={dialog} className="sources-dialog" aria-labelledby="sources-title">
-      <div className="sources-heading"><h2 id="sources-title">Что известно о камерах Opole</h2><button className="icon-button" aria-label="Закрыть источники" onClick={() => dialog.current?.close()}><Icon name="close" /></button></div>
+      <div className="sources-heading"><h2 id="sources-title">{t("sourcesTitle")}</h2><button className="icon-button" aria-label={t("closeSources")} onClick={() => dialog.current?.close()}><Icon name="close" /></button></div>
       <div className="sources-scroll">
         <p>В каталоге {countCameras(cameras)} камер и {countDocumentedSites(cameras)} объектов с видеонаблюдением. Это неполный перечень из открытых источников, а не число всех работающих камер города.</p>
         <p>Объекты отмечены символом <b>i</b>. Их общие числа не прибавляются к отдельным камерам: системы могут пересекаться, а точные количества часто неизвестны.</p>
