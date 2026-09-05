@@ -2,6 +2,8 @@
 
 Карта камер Opole из публичных источников и отдельных сообщений пользователей на Next.js, TypeScript и MapLibre с подложкой OpenStreetMap. Платный ключ API не нужен.
 
+Публичная версия: [opole-camera-map.vercel.app](https://opole-camera-map.vercel.app).
+
 ## Возможности MVP
 
 - Интерактивная карта: масштабирование, перемещение, возврат в центр Opole.
