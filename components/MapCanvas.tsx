@@ -6,12 +6,16 @@ import { catalogCountLabel, countCameras, countDocumentedSites, groupCameraSites
 import { directionGeoJson, sectorsGeoJson } from "@/lib/geometry";
 import type { StreetHighlight } from "@/lib/street-search";
 import { coverageGeoJson } from "@/lib/map-features";
+import { selectionGeoJson, type AnalysisMode, type AnalysisSelection, type LngLat } from "@/lib/map-analysis";
+import type { MapView } from "@/lib/map-state";
 
 type Props = {
   cameras: Camera[]; selected: Camera | null; onSelect: (camera: Camera) => void;
   is3D: boolean; showSectors: boolean; resetRequest: number; focusRequest: number;
   street: StreetHighlight | null; streetFocusRequest: number;
   mapTheme: "light" | "dark"; coverageMode: boolean;
+  analysisMode: AnalysisMode; analysisPoints: LngLat[]; onAnalysisPoint: (point: LngLat) => void;
+  initialView: MapView | null; viewRequest: { id: number; view: MapView } | null; onViewChange: (view: MapView) => void;
 };
 const center: [number, number] = [17.92240, 50.66855];
 const empty = { type: "FeatureCollection" as const, features: [] };
@@ -34,6 +38,9 @@ function syncData(map: LibreMap, props: Props) {
   (map.getSource("street-highlight") as GeoJSONSource)?.setData(props.street?.geometry ?? empty);
   (map.getSource("coverage-area") as GeoJSONSource)?.setData(props.coverageMode ? coverageGeoJson(props.cameras) : empty);
   (map.getSource("coverage-sectors") as GeoJSONSource)?.setData(props.coverageMode ? sectorsGeoJson(props.cameras) : empty);
+  const selection: AnalysisSelection | null = props.analysisPoints.length === 2 && props.analysisMode !== "none" ? { mode: props.analysisMode, points: [props.analysisPoints[0], props.analysisPoints[1]] } : null;
+  (map.getSource("analysis-shape") as GeoJSONSource)?.setData(selectionGeoJson(selection));
+  (map.getSource("analysis-points") as GeoJSONSource)?.setData({ type: "FeatureCollection", features: props.analysisPoints.map((point, index) => ({ type: "Feature", properties: { index: index + 1 }, geometry: { type: "Point", coordinates: point } })) });
   if (map.getLayer("sector-fill")) {
     map.setPaintProperty("sector-fill", "fill-color", ["case", ["==", ["get", "id"], props.selected?.id ?? ""], "#087a62", "#487b8c"]);
     map.setPaintProperty("sector-fill", "fill-opacity", ["case", ["==", ["get", "id"], props.selected?.id ?? ""], 0.32, 0.09]);
@@ -61,8 +68,8 @@ export default function MapCanvas(props: Props) {
     }, 15000);
     try {
       map = new maplibregl.Map({
-        container: containerRef.current, center, zoom: 15.3,
-        pitch: latest.current.is3D ? 55 : 0, bearing: latest.current.is3D ? -12 : 0,
+        container: containerRef.current, center: latest.current.initialView ? [latest.current.initialView.lng, latest.current.initialView.lat] : center, zoom: latest.current.initialView?.zoom ?? 15.3,
+        pitch: latest.current.initialView?.pitch ?? (latest.current.is3D ? 55 : 0), bearing: latest.current.initialView?.bearing ?? (latest.current.is3D ? -12 : 0),
         canvasContextAttributes: { antialias: true }, maxZoom: 19, minZoom: 10,
         maxBounds: [[17.7, 50.5], [18.15, 50.85]], renderWorldCopies: false,
         dragRotate: false, touchPitch: false, attributionControl: false,
@@ -94,11 +101,16 @@ export default function MapCanvas(props: Props) {
         map.addSource("street-highlight", { type: "geojson", data: empty });
         map.addSource("coverage-area", { type: "geojson", data: empty });
         map.addSource("coverage-sectors", { type: "geojson", data: empty });
+        map.addSource("analysis-shape", { type: "geojson", data: empty });
+        map.addSource("analysis-points", { type: "geojson", data: empty });
         map.addSource("camera-points", { type: "geojson", data: empty, cluster: true, clusterMaxZoom: 16, clusterRadius: 48,
           clusterProperties: { cameraCount: ["+", ["get", "cameraCount"]], reportedCount: ["+", ["get", "reportedCount"]], documentedSiteCount: ["+", ["get", "documentedSiteCount"]] } });
         map.addLayer({ id: "coverage-unknown", type: "fill", source: "coverage-area", paint: { "fill-color": "#d58637", "fill-opacity": 0.13 } });
         map.addLayer({ id: "coverage-known", type: "fill", source: "coverage-sectors", paint: { "fill-color": "#31b96b", "fill-opacity": 0.42 } });
         map.addLayer({ id: "coverage-known-line", type: "line", source: "coverage-sectors", paint: { "line-color": "#1b8f50", "line-width": 2, "line-opacity": 0.9 } });
+        map.addLayer({ id: "analysis-area-fill", type: "fill", source: "analysis-shape", filter: ["==", ["get", "kind"], "area"], paint: { "fill-color": "#8dccff", "fill-opacity": 0.18 } });
+        map.addLayer({ id: "analysis-shape-line", type: "line", source: "analysis-shape", paint: { "line-color": "#59b8ff", "line-width": 4, "line-dasharray": [2, 1.5] } });
+        map.addLayer({ id: "analysis-points-layer", type: "circle", source: "analysis-points", paint: { "circle-radius": 8, "circle-color": "#59b8ff", "circle-stroke-color": "#ffffff", "circle-stroke-width": 3 } });
         map.addLayer({ id: "street-highlight-casing", type: "line", source: "street-highlight", paint: { "line-color": "#ffffff", "line-width": ["interpolate", ["linear"], ["zoom"], 10, 5, 18, 12], "line-opacity": 0.95 } });
         map.addLayer({ id: "street-highlight-line", type: "line", source: "street-highlight", paint: { "line-color": "#1686ff", "line-width": ["interpolate", ["linear"], ["zoom"], 10, 3, 18, 8], "line-opacity": 0.9 } });
         map.addLayer({ id: "street-highlight-label", type: "symbol", source: "street-highlight", layout: { "symbol-placement": "line", "text-field": ["get", "name"], "text-font": ["Open Sans Semibold"], "text-size": 13, "symbol-spacing": 350 }, paint: { "text-color": "#ffffff", "text-halo-color": "#096ec5", "text-halo-width": 2 } });
@@ -116,6 +128,7 @@ export default function MapCanvas(props: Props) {
         setReady(true);
       });
       map.on("click", (event) => {
+        if (latest.current.analysisMode !== "none") { latest.current.onAnalysisPoint([event.lngLat.lng, event.lngLat.lat]); setActiveSiteId(null); return; }
         if (!map.getLayer("camera-sites")) return;
         const features = map.queryRenderedFeatures(event.point, { layers: ["camera-clusters", "camera-sites"] });
         const feature = features[0];
@@ -134,8 +147,10 @@ export default function MapCanvas(props: Props) {
         }
       });
       map.on("mousemove", (event) => {
-        if (map.getLayer("camera-sites")) map.getCanvas().style.cursor = map.queryRenderedFeatures(event.point, { layers: ["camera-clusters", "camera-sites"] }).length ? "pointer" : "";
+        if (latest.current.analysisMode !== "none") map.getCanvas().style.cursor = "crosshair";
+        else if (map.getLayer("camera-sites")) map.getCanvas().style.cursor = map.queryRenderedFeatures(event.point, { layers: ["camera-clusters", "camera-sites"] }).length ? "pointer" : "";
       });
+      map.on("moveend", () => { const point = map.getCenter(); latest.current.onViewChange({ lng: point.lng, lat: point.lat, zoom: map.getZoom(), bearing: map.getBearing(), pitch: map.getPitch() }); });
     } catch {
       window.clearTimeout(timeout);
       mapRef.current?.remove();
@@ -151,7 +166,7 @@ export default function MapCanvas(props: Props) {
     };
   }, [attempt]);
 
-  useEffect(() => { if (ready && mapRef.current) syncData(mapRef.current, props); }, [ready, props.cameras, props.selected, props.showSectors, props.street, props.coverageMode]);
+  useEffect(() => { if (ready && mapRef.current) syncData(mapRef.current, props); }, [ready, props.cameras, props.selected, props.showSectors, props.street, props.coverageMode, props.analysisMode, props.analysisPoints]);
   useEffect(() => {
     const map = mapRef.current;
     if (!ready || !map?.getLayer("osm")) return;
@@ -185,11 +200,15 @@ export default function MapCanvas(props: Props) {
     const lngs = points.map(point => point[0]), lats = points.map(point => point[1]);
     mapRef.current?.fitBounds([[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]], { padding: window.innerWidth <= 760 ? 55 : 120, maxZoom: 16.2, duration: 750 });
   }, [ready, props.coverageMode, props.cameras]);
+  useEffect(() => {
+    if (!ready || !props.viewRequest) return;
+    mapRef.current?.flyTo({ center: [props.viewRequest.view.lng, props.viewRequest.view.lat], zoom: props.viewRequest.view.zoom, bearing: props.viewRequest.view.bearing, pitch: props.viewRequest.view.pitch, duration: 750 });
+  }, [ready, props.viewRequest]);
   function retry() { setReady(false); setError(null); setActiveSiteId(null); setAttempt((value) => value + 1); }
 
   return (
     <>
-      <div ref={containerRef} className="map" data-ready={ready} data-mode={props.is3D ? "3d" : "2d"} data-theme={props.mapTheme} data-coverage={props.coverageMode} data-camera-count={countCameras(props.cameras)} data-object-count={countDocumentedSites(props.cameras)} data-street={props.street?.name ?? ""} data-street-segments={props.street?.geometry.features.length ?? 0} />
+      <div ref={containerRef} className="map" data-ready={ready} data-mode={props.is3D ? "3d" : "2d"} data-theme={props.mapTheme} data-coverage={props.coverageMode} data-analysis={props.analysisMode} data-analysis-points={props.analysisPoints.length} data-camera-count={countCameras(props.cameras)} data-object-count={countDocumentedSites(props.cameras)} data-street={props.street?.name ?? ""} data-street-segments={props.street?.geometry.features.length ?? 0} />
       {!ready && !error && <div className="map-loading" role="status">Загружаем карту Opole…</div>}
       {error && <div className="map-error" role="alert"><p>{error}</p><button className="secondary-button" onClick={retry}>Повторить загрузку карты</button></div>}
       {activeSite && <section className="site-picker" aria-label="Камеры в этой точке"><div><strong>В этой точке · {catalogCountLabel(activeSite.cameras)}</strong><button aria-label="Закрыть выбор камер" onClick={() => setActiveSiteId(null)}>×</button></div><p>Камеры, группы и объекты с одним ориентиром</p>{activeSite.cameras.map((camera) => <button key={camera.id} onClick={() => { props.onSelect(camera); setActiveSiteId(null); }}>{camera.name}<span>↗</span></button>)}</section>}

@@ -1,5 +1,13 @@
 # Verification — 2026-09-03
 
+## Analysis, sharing and source refresh — 2026-09-05
+
+- Добавлены область двумя точками и приблизительный прямой маршрут с коридором 100 м. Подсчёт использует только текущие видимые слои/фильтры; CSV и GeoJSON сохраняют ID, координаты, категорию, проверку и источник.
+- Полная ссылка восстанавливает положение/масштаб, слои, тему, 2D/3D, покрытие, улицу и выбранную камеру. Неверные координаты, масштаб и слои игнорируются.
+- Проверены четыре сохранённых вида, ближайшие публичные камеры, таблица источников, полный экран и клавиши F/R/C/A/T/Escape. Escape больше не закрывает выбранную камеру при закрытии модального снимка.
+- Автоматический ITS workflow сравнивает хеш ответа, валидирует 1–10000 точек и создаёт отдельный pull request. Локальная проба 2026-09-05 безопасно остановилась из-за неверифицируемой цепочки TLS официального сервера; существующие данные не изменились, TLS-проверка не отключалась.
+- Typecheck, **43 теста** и production build прошли. Браузерный сценарий подтвердил область, маршрут, загрузку CSV, копирование/восстановление полной ссылки, клавиши и мобильную прокрутку без горизонтального переполнения. Старые сценарии избранного, фильтров, 2D/3D, покрытия, поиска 23 сегментов Armii Krajowej, ошибок карты и прямого просмотра камер прошли повторно без необработанных ошибок.
+
 ## Themes, languages, install, layers, status and coverage
 
 - Production build включает статический `manifest.webmanifest`, SVG и PNG-иконки 192/512 и локальный service worker. Проверена регистрация service worker и наличие manifest link. Кнопка установки показывает системный prompt, когда браузер его предоставляет, или точную инструкцию через меню/«Добавить на главный экран».
@@ -80,4 +88,4 @@ Checked both development and production with Playwright using installed Edge. ag
 
 See [ITS_SOURCE_REVIEW.md](ITS_SOURCE_REVIEW.md) for the observed public endpoint, snapshot, count and source checksum. The 159 ITS coordinates are source metadata, not an independent survey. The four town-hall views retain an approximate OSM building reference and illustrative optics. All verification flags remain false. The entrance report and search for publicly documented private cameras are recorded in [CAMERA_REPORTS.md](CAMERA_REPORTS.md); OSM verifies the passage location, not camera presence or ownership.
 
-No camera images or video streams were retrieved or embedded. Stream uptime, optical parameters, building/obstacle visibility and permission to redistribute video were not established. The 3D switch provides map tilt without extruded buildings. No scheduled live synchronization is configured.
+No camera images or video streams were embedded. Stream uptime, optical parameters, building/obstacle visibility and permission to redistribute video were not established. The 3D switch provides map tilt without extruded buildings. Scheduled synchronization is review-first and preserves the previous catalogue on any failure.

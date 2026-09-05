@@ -16,6 +16,9 @@ import { I18nProvider, languages, useI18n, type Locale } from "@/lib/i18n";
 import { cameraLayer, cameraLayers, type CameraAvailability, type CameraLayer } from "@/lib/map-features";
 import AppInstall from "./AppInstall";
 import CameraStatusBadge from "./CameraStatusBadge";
+import AnalysisPanel from "./AnalysisPanel";
+import { mapShareLink, readMapShareState, type MapView } from "@/lib/map-state";
+import type { AnalysisMode, AnalysisSelection, LngLat } from "@/lib/map-analysis";
 
 const MapCanvas = dynamic(() => import("./MapCanvas"), {
   ssr: false, loading: () => <div className="map-loading" role="status">Загружаем карту Opole…</div>,
@@ -49,6 +52,10 @@ function CameraMapInner({ cameras }: { cameras: Camera[] }) {
   const [mapTheme, setMapTheme] = useState<"light" | "dark">("light");
   const [coverageMode, setCoverageMode] = useState(false);
   const [availability, setAvailability] = useState<Record<string, CameraAvailability>>({});
+  const [analysisMode, setAnalysisMode] = useState<AnalysisMode>("none");
+  const [analysisPoints, setAnalysisPoints] = useState<LngLat[]>([]);
+  const [mapView, setMapView] = useState<MapView>({ lng: 17.9224, lat: 50.66855, zoom: 15.3, bearing: 0, pitch: 0 });
+  const [viewRequest, setViewRequest] = useState<{ id: number; view: MapView } | null>(null);
   const listButtonRef = useRef<HTMLButtonElement>(null);
   const [pageSize, setPageSize] = useState(50);
   const visible = useMemo(() => filterCameras(cameras, { query, category, verifiedOnly }).filter((camera) => enabledLayers.has(cameraLayer(camera)) && (!favoritesOnly || favoriteIds.has(camera.id))), [cameras, query, category, verifiedOnly, enabledLayers, favoritesOnly, favoriteIds]);
@@ -60,6 +67,7 @@ function CameraMapInner({ cameras }: { cameras: Camera[] }) {
   const reportedCount = countCameras(cameras.filter((camera) => camera.sourceKind === "user-report"));
   const visibleReports = visible.some((camera) => camera.sourceKind === "user-report");
   const coverageHasOptics = visible.some(camera => camera.heading !== null && camera.fov !== null && camera.rangeMeters !== null);
+  const analysisSelection: AnalysisSelection | null = analysisMode !== "none" && analysisPoints.length === 2 ? { mode: analysisMode, points: [analysisPoints[0], analysisPoints[1]] } : null;
   const layerCounts = useMemo(() => Object.fromEntries(cameraLayers.map(layer => [layer, cameras.filter(camera => cameraLayer(camera) === layer).length])) as Record<CameraLayer, number>, [cameras]);
   const selectCamera = useCallback((camera: Camera) => {
     updateCameraUrl(camera.id);
@@ -91,18 +99,31 @@ function CameraMapInner({ cameras }: { cameras: Camera[] }) {
     if (saved === "dark") setMapTheme("dark");
   }, []);
   useEffect(() => {
-    function navigate() {
+    let cancelled = false;
+    async function navigate() {
       const link = readCameraLink(window.location.search, knownIds);
+      const shared = readMapShareState(window.location.search);
       resetFilters();
       setSelectedId(link.id);
       setInvalidLink(link.invalid);
       setMobileList(false);
       setSnapshotCamera(null);
       if (link.id) setFocusRequest((value) => value + 1);
+      if (shared.layers) setEnabledLayers(shared.layers);
+      if (shared.theme) changeTheme(shared.theme);
+      setCoverageMode(shared.coverage);
+      setIs3D(shared.is3D);
+      if (shared.view) requestView(shared.view);
+      if (!shared.street) setStreet(null);
+      else try {
+        const response = await fetch("/api/streets?q=" + encodeURIComponent(shared.street), { credentials: "same-origin" });
+        if (response.ok && !cancelled) { setStreet(await response.json() as StreetHighlight); setStreetFocusRequest(value => value + 1); }
+      } catch { /* The rest of a shared map remains usable if street lookup is offline. */ }
     }
-    navigate();
-    window.addEventListener("popstate", navigate);
-    return () => window.removeEventListener("popstate", navigate);
+    void navigate();
+    const listener = () => void navigate();
+    window.addEventListener("popstate", listener);
+    return () => { cancelled = true; window.removeEventListener("popstate", listener); };
   }, [knownIds, resetFilters]);
   useEffect(() => {
     if (selectedId && !visible.some((camera) => camera.id === selectedId)) {
@@ -124,9 +145,32 @@ function CameraMapInner({ cameras }: { cameras: Camera[] }) {
     return () => { window.removeEventListener("keydown", onEscape); window.removeEventListener("resize", onResize); };
   }, [mobileList]);
   function changeTheme(theme: "light" | "dark") { setMapTheme(theme); try { localStorage.setItem("opole-camera-map:map-theme", theme); } catch { /* Theme still works for this tab. */ } }
+  function requestView(view: MapView) { setMapView(view); setIs3D(view.pitch > 0); setViewRequest(current => ({ id: (current?.id ?? 0) + 1, view })); }
+  function addAnalysisPoint(point: LngLat) { setAnalysisPoints(current => current.length >= 2 ? [point] : [...current, point]); }
+  function changeAnalysisMode(mode: AnalysisMode) { setAnalysisMode(mode); setAnalysisPoints([]); }
+  async function shareMap() {
+    const url = mapShareLink(window.location.href, { cameraId: selectedId, layers: enabledLayers, is3D, theme: mapTheme, coverage: coverageMode, street: street?.name ?? null, view: mapView });
+    try { await navigator.clipboard.writeText(url); return true; } catch { window.prompt(t("copyError"), url); return false; }
+  }
   function toggleLayer(layer: CameraLayer) { setEnabledLayers(current => { const next = new Set(current); if (next.has(layer)) next.delete(layer); else next.add(layer); return next; }); setPageSize(50); }
   function updateAvailability(camera: Camera, value: CameraAvailability) { setAvailability(current => ({ ...current, [camera.id]: value })); }
   function categoryName(camera: Camera) { return camera.category === "its" ? "ITS Opole" : t(camera.category === "public" ? "layerPublic" : camera.category === "city" ? "layerCity" : camera.category === "private" ? "layerPrivate" : "layerOther"); }
+
+  useEffect(() => {
+    function shortcut(event: KeyboardEvent) {
+      if (event.ctrlKey || event.metaKey || event.altKey || event.target instanceof HTMLInputElement || event.target instanceof HTMLSelectElement || event.target instanceof HTMLTextAreaElement) return;
+      if (document.querySelector("dialog[open]")) return;
+      const key = event.key.toLowerCase();
+      if (key === "f") void (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen());
+      if (key === "r") setResetRequest(value => value + 1);
+      if (key === "c") setCoverageMode(value => !value);
+      if (key === "a") changeAnalysisMode("area");
+      if (key === "t") changeAnalysisMode("route");
+      if (event.key === "Escape" && selectedId) closeCamera();
+    }
+    window.addEventListener("keydown", shortcut);
+    return () => window.removeEventListener("keydown", shortcut);
+  }, [selectedId]);
 
   return (
     <div className="shell">
@@ -146,6 +190,7 @@ function CameraMapInner({ cameras }: { cameras: Camera[] }) {
         </div>
         <div className="experience-tools"><label><span>{t("language")}</span><select aria-label={t("language")} value={locale} onChange={event => setLocale(event.target.value as Locale)}>{Object.entries(languages).map(([code, name]) => <option key={code} value={code}>{name}</option>)}</select></label><div><span>{t("mapTheme")}</span><button aria-pressed={mapTheme === "light"} onClick={() => changeTheme("light")}>{t("light")}</button><button aria-pressed={mapTheme === "dark"} onClick={() => changeTheme("dark")}>{t("dark")}</button></div><AppInstall /></div>
         <StreetSearch street={street} onFound={showStreet} onClear={() => setStreet(null)} />
+        <AnalysisPanel cameras={visible} catalog={cameras} mode={analysisMode} selection={analysisSelection} view={mapView} onMode={changeAnalysisMode} onClear={() => { setAnalysisMode("none"); setAnalysisPoints([]); }} onPreset={requestView} onSelect={selectCamera} onSnapshot={setSnapshotCamera} onShare={shareMap} />
         <div className="filters">
           <label className="search-field" htmlFor="camera-search"><Icon name="search" />
             <input id="camera-search" type="search" aria-label={t("cameraSearchLabel")} placeholder={t("cameraSearch")} value={query} onChange={(event) => { setQuery(event.target.value); setPageSize(50); }} />
@@ -187,7 +232,7 @@ function CameraMapInner({ cameras }: { cameras: Camera[] }) {
       </aside>
 
       <main className="map-workspace" aria-label={t("mapLabel")} inert={mobileList}>
-        <MapCanvas cameras={visible} selected={selected} onSelect={selectCamera} is3D={is3D} showSectors={showSectors} resetRequest={resetRequest} focusRequest={focusRequest} street={street} streetFocusRequest={streetFocusRequest} mapTheme={mapTheme} coverageMode={coverageMode} />
+        <MapCanvas cameras={visible} selected={selected} onSelect={selectCamera} is3D={is3D} showSectors={showSectors} resetRequest={resetRequest} focusRequest={focusRequest} street={street} streetFocusRequest={streetFocusRequest} mapTheme={mapTheme} coverageMode={coverageMode} analysisMode={analysisMode} analysisPoints={analysisPoints} onAnalysisPoint={addAnalysisPoint} initialView={null} viewRequest={viewRequest} onViewChange={setMapView} />
         <div className="map-topbar">
           <div className="location-chip"><Icon name="pin" /><div><strong>Opole</strong><span>{visibleCount} {t("cameras")} · {visibleSites} {t("objects")}</span></div></div>
           <div className="map-actions">

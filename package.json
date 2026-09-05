@@ -9,7 +9,8 @@
     "start": "next start",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "node --experimental-strip-types --test tests/*.test.ts",
-    "import:its": "node --experimental-strip-types scripts/import-its.ts"
+    "import:its": "node --experimental-strip-types scripts/import-its.ts",
+    "refresh:its": "node --experimental-strip-types scripts/refresh-its.ts"
   },
   "engines": { "node": ">=24.0.0" },
   "packageManager": "pnpm@11.19.0",

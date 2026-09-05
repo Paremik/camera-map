@@ -38,6 +38,7 @@ export async function GET(request: Request) {
     return result ? NextResponse.json(result, { headers: { "Cache-Control": "private, max-age=3600", "X-Street-Cache": "MISS" } })
       : NextResponse.json({ error: "Улица не найдена в пределах Opole." }, { status: 404 });
   } catch {
+    if (cached?.value) return NextResponse.json(cached.value, { headers: { "Cache-Control": "private, max-age=60", "X-Street-Cache": "STALE" } });
     return NextResponse.json({ error: "Поиск улиц сейчас недоступен. Повторите попытку позже." }, { status: 503 });
   }
 }

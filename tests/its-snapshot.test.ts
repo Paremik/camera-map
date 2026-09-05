@@ -5,7 +5,7 @@ import { importItsGeoJson, validateCameraDataset } from "../lib/import-cameras.t
 import { cameras } from "../data/cameras.ts";
 
 test("shipped ITS dataset exactly matches the archived public source through the adapter", () => {
-  const snapshot = JSON.parse(readFileSync(new URL("../data/sources/its-opole-2026-09-03.json", import.meta.url), "utf8"));
+  const snapshot = JSON.parse(readFileSync(new URL("../data/sources/its-opole-latest.json", import.meta.url), "utf8"));
   const shipped = JSON.parse(readFileSync(new URL("../data/its-cameras.json", import.meta.url), "utf8"));
   assert.ok(shipped.length > 0);
   assert.deepEqual(shipped, importItsGeoJson(snapshot));

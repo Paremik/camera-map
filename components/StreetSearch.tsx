@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import type { StreetHighlight } from "@/lib/street-search";
 import Icon from "./Icon";
 import { useI18n } from "@/lib/i18n";
@@ -9,6 +9,7 @@ export default function StreetSearch({ street, onFound, onClear }: { street: Str
   const { t } = useI18n();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<{ type: "idle" | "loading" | "error"; message?: string }>({ type: "idle" });
+  useEffect(() => { if (street) setQuery(street.name); }, [street]);
   async function submit(event: FormEvent) {
     event.preventDefault();
     const value = query.trim();
