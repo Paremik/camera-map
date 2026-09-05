@@ -130,6 +130,10 @@ h1 span { color: var(--muted); font-size: 19px; font-weight: 400; }
 .map-caption.coverage-known { color: #c9ffd8; border-color: #31b96b; }
 .map-caption.coverage-unknown { color: #ffd7ab; border-color: #d58637; }
 .heatmap-caption { color: #f8dfbb; border: 1px solid #df734f; }
+.drone-toggle[aria-pressed="true"] { border-color: #bd83ee; background: #332342e8; }
+.drone-toggle[aria-pressed="true"] > span { background: #72409b; color: #f4e8ff; }
+.drone-caption { max-width: 390px; color: #f2ddff; border: 1px solid #a96fe0; background: #291a35ed; line-height: 1.45; }
+.drone-caption a { margin-left: 5px; color: #ffffff; font-weight: 700; text-underline-offset: 3px; }
 .admin-dialog { width: min(1060px, calc(100% - 28px)); height: min(760px, calc(100dvh - 28px)); padding: 0; border: 1px solid #526965; border-radius: 16px; background: #111b1e; color: var(--text); overflow: hidden; }
 .admin-dialog::backdrop { background: #071315d9; }
 .admin-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 22px 12px; border-bottom: 1px solid var(--line); }

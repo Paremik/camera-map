@@ -21,6 +21,7 @@ import { mapShareLink, readMapShareState, type MapView } from "@/lib/map-state";
 import type { AnalysisMode, AnalysisSelection, LngLat } from "@/lib/map-analysis";
 import AdminPanel from "./AdminPanel";
 import { adminDraftStorageKey, applyAdminDrafts, parseAdminDrafts, type CameraAdminDrafts, type CameraAdminPatch } from "@/lib/admin-drafts";
+import { droneTowerUrl } from "@/lib/drone-zones";
 
 const MapCanvas = dynamic(() => import("./MapCanvas"), {
   ssr: false, loading: () => <div className="map-loading" role="status">Загружаем карту Opole…</div>,
@@ -57,6 +58,7 @@ function CameraMapInner({ cameras: sourceCameras }: { cameras: Camera[] }) {
   const [mapTheme, setMapTheme] = useState<"light" | "dark">("light");
   const [coverageMode, setCoverageMode] = useState(false);
   const [heatmapMode, setHeatmapMode] = useState(false);
+  const [droneZonesMode, setDroneZonesMode] = useState(false);
   const [availability, setAvailability] = useState<Record<string, CameraAvailability>>({});
   const [analysisMode, setAnalysisMode] = useState<AnalysisMode>("none");
   const [analysisPoints, setAnalysisPoints] = useState<LngLat[]>([]);
@@ -131,6 +133,7 @@ function CameraMapInner({ cameras: sourceCameras }: { cameras: Camera[] }) {
       if (shared.theme) changeTheme(shared.theme);
       setCoverageMode(shared.coverage);
       setHeatmapMode(shared.heatmap);
+      setDroneZonesMode(shared.droneZones);
       setIs3D(shared.is3D);
       if (shared.view) requestView(shared.view);
       if (!shared.street) setStreet(null);
@@ -168,7 +171,7 @@ function CameraMapInner({ cameras: sourceCameras }: { cameras: Camera[] }) {
   function addAnalysisPoint(point: LngLat) { setAnalysisPoints(current => current.length >= 2 ? [point] : [...current, point]); }
   function changeAnalysisMode(mode: AnalysisMode) { setAnalysisMode(mode); setAnalysisPoints([]); }
   async function shareMap() {
-    const url = mapShareLink(window.location.href, { cameraId: selectedId, layers: enabledLayers, is3D, theme: mapTheme, coverage: coverageMode, heatmap: heatmapMode, street: street?.name ?? null, view: mapView });
+    const url = mapShareLink(window.location.href, { cameraId: selectedId, layers: enabledLayers, is3D, theme: mapTheme, coverage: coverageMode, heatmap: heatmapMode, droneZones: droneZonesMode, street: street?.name ?? null, view: mapView });
     try { await navigator.clipboard.writeText(url); return true; } catch { window.prompt(t("copyError"), url); return false; }
   }
   function toggleLayer(layer: CameraLayer) { setEnabledLayers(current => { const next = new Set(current); if (next.has(layer)) next.delete(layer); else next.add(layer); return next; }); setPageSize(50); }
@@ -183,6 +186,7 @@ function CameraMapInner({ cameras: sourceCameras }: { cameras: Camera[] }) {
       if (key === "f") void (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen());
       if (key === "r") setResetRequest(value => value + 1);
       if (key === "c") setCoverageMode(value => !value);
+      if (key === "d") setDroneZonesMode(value => !value);
       if (key === "a") changeAnalysisMode("area");
       if (key === "t") changeAnalysisMode("route");
       if (event.key === "Escape" && selectedId) closeCamera();
@@ -251,7 +255,7 @@ function CameraMapInner({ cameras: sourceCameras }: { cameras: Camera[] }) {
       </aside>
 
       <main className="map-workspace" aria-label={t("mapLabel")} inert={mobileList}>
-        <MapCanvas cameras={visible} selected={selected} onSelect={selectCamera} is3D={is3D} showSectors={showSectors} resetRequest={resetRequest} focusRequest={focusRequest} street={street} streetFocusRequest={streetFocusRequest} mapTheme={mapTheme} coverageMode={coverageMode} heatmapMode={heatmapMode} analysisMode={analysisMode} analysisPoints={analysisPoints} onAnalysisPoint={addAnalysisPoint} initialView={null} viewRequest={viewRequest} onViewChange={setMapView} />
+        <MapCanvas cameras={visible} selected={selected} onSelect={selectCamera} is3D={is3D} showSectors={showSectors} resetRequest={resetRequest} focusRequest={focusRequest} street={street} streetFocusRequest={streetFocusRequest} mapTheme={mapTheme} coverageMode={coverageMode} heatmapMode={heatmapMode} droneZonesMode={droneZonesMode} analysisMode={analysisMode} analysisPoints={analysisPoints} onAnalysisPoint={addAnalysisPoint} initialView={null} viewRequest={viewRequest} onViewChange={setMapView} />
         <div className="map-topbar">
           <div className="location-chip"><Icon name="pin" /><div><strong>Opole</strong><span>{visibleCount} {t("cameras")} · {visibleSites} {t("objects")}</span></div></div>
           <div className="map-actions">
@@ -265,12 +269,14 @@ function CameraMapInner({ cameras: sourceCameras }: { cameras: Camera[] }) {
           <button className="sector-toggle" aria-pressed={showSectors} onClick={() => setShowSectors((value) => !value)}><Icon name="sector" /> {t("sectors")} <span>{showSectors ? t("enabled") : t("disabled")}</span></button>
           <button className="sector-toggle coverage-toggle" aria-pressed={coverageMode} onClick={() => setCoverageMode(value => !value)}>{t("coverage")} <span>{coverageMode ? t("coverageOn") : "—"}</span></button>
           <button className="sector-toggle heatmap-toggle" aria-pressed={heatmapMode} onClick={() => setHeatmapMode(value => !value)}>{t("heatmap")} <span>{heatmapMode ? t("coverageOn") : "—"}</span></button>
+          <button className="sector-toggle drone-toggle" aria-pressed={droneZonesMode} onClick={() => setDroneZonesMode(value => !value)}>{t("droneZones")} <span>{droneZonesMode ? t("coverageOn") : "—"}</span></button>
           <span className="map-caption">{is3D ? t("viewTilt") : t("viewTop")}</span>
           {visibleReports && <span className="map-caption reported-caption">{t("userOrange")}</span>}
           {visibleSites > 0 && <span className="map-caption object-caption">{t("objectMarker")}</span>}
           {street && <span className="map-caption street-caption"><i /> {t("streetMarked")} {street.name}<button aria-label={t("removeStreet")} onClick={() => setStreet(null)}>×</button></span>}
           {coverageMode && (coverageHasOptics ? <><span className="map-caption coverage-known">{t("coverageKnown")}</span><span className="map-caption coverage-unknown">{t("coverageUnknown")}</span></> : <span className="map-caption coverage-unknown">{t("coverageNone")}</span>)}
           {heatmapMode && <span className="map-caption heatmap-caption">{t("heatmapLegend")}</span>}
+          {droneZonesMode && <span className="map-caption drone-caption">{t("droneZoneLegend")} <a href={droneTowerUrl} target="_blank" rel="noopener noreferrer">{t("checkDroneTower")} ↗</a></span>}
         </div>
         {selected && <CameraDetails key={selected.id} camera={selected} availability={availability[selected.id]} onClose={closeCamera} favorite={favoriteIds.has(selected.id)} favoritesReady={favorites.ready} onToggleFavorite={() => favorites.toggle(selected.id)} onSnapshot={setSnapshotCamera} />}
         <button ref={listButtonRef} className="mobile-list-button" onClick={() => setMobileList(true)}><Icon name="list" /> {t("camerasAndSearch")} <span>{visible.length}</span></button>

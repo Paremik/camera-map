@@ -1,7 +1,7 @@
 import type { CameraLayer } from "./map-features.ts";
 
 export type MapView = { lng: number; lat: number; zoom: number; bearing: number; pitch: number };
-export type ShareState = { cameraId: string | null; layers: ReadonlySet<CameraLayer>; is3D: boolean; theme: "light" | "dark"; coverage: boolean; heatmap: boolean; street: string | null; view: MapView };
+export type ShareState = { cameraId: string | null; layers: ReadonlySet<CameraLayer>; is3D: boolean; theme: "light" | "dark"; coverage: boolean; heatmap: boolean; droneZones: boolean; street: string | null; view: MapView };
 const validLayers: CameraLayer[] = ["its", "public", "city", "private", "parking", "police", "reported", "other"];
 const finite = (value: string | null, min: number, max: number) => { const parsed = Number(value); return Number.isFinite(parsed) && parsed >= min && parsed <= max ? parsed : null; };
 
@@ -13,6 +13,7 @@ export function mapShareLink(currentUrl: string, state: ShareState): string {
   if (state.theme === "dark") url.searchParams.set("theme", "dark");
   if (state.coverage) url.searchParams.set("coverage", "1");
   if (state.heatmap) url.searchParams.set("heatmap", "1");
+  if (state.droneZones) url.searchParams.set("drone", "1");
   if (state.street) url.searchParams.set("street", state.street);
   url.searchParams.set("view", [state.view.lng.toFixed(5), state.view.lat.toFixed(5), state.view.zoom.toFixed(2), state.view.bearing.toFixed(1), state.view.pitch.toFixed(1)].join(","));
   return url.href;
@@ -29,6 +30,7 @@ export function readMapShareState(search: string) {
     is3D: params.get("mode") === "3d", theme: params.get("theme") === "dark" ? "dark" as const : null,
     coverage: params.get("coverage") === "1",
     heatmap: params.get("heatmap") === "1",
+    droneZones: params.get("drone") === "1",
     street: (params.get("street")?.trim().slice(0, 80) || null),
     view: viewValues.every(value => value !== null) ? { lng: viewValues[0]!, lat: viewValues[1]!, zoom: viewValues[2]!, bearing: viewValues[3]!, pitch: viewValues[4]! } : null,
   };
