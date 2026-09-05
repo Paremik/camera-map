@@ -24,9 +24,9 @@ function syncPadding(map: LibreMap, selected: Camera | null) {
     ? Math.round(map.getContainer().clientHeight * 0.4) + 60 : 0;
   if (map.getPadding().bottom !== bottom) map.setPadding({ top: 0, bottom, left: 0, right: 0 });
 }
-function siteData(cameras: Camera[]) {
+function siteData(cameras: Camera[], selected: Camera | null) {
   return { type: "FeatureCollection" as const, features: groupCameraSites(cameras).map((site) => ({
-    type: "Feature" as const, properties: { siteId: site.id, cameraCount: site.cameraCount, reportedCount: site.reportedCount, documentedSiteCount: site.documentedSiteCount },
+    type: "Feature" as const, properties: { siteId: site.id, cameraCount: site.cameraCount, reportedCount: site.reportedCount, documentedSiteCount: site.documentedSiteCount, selected: site.cameras.some(camera => camera.id === selected?.id) },
     geometry: { type: "Point" as const, coordinates: [site.lng, site.lat] },
   })) };
 }
@@ -37,7 +37,7 @@ function heatData(cameras: Camera[]) {
 }
 function syncData(map: LibreMap, props: Props) {
   syncPadding(map, props.selected);
-  (map.getSource("camera-points") as GeoJSONSource)?.setData(siteData(props.cameras));
+  (map.getSource("camera-points") as GeoJSONSource)?.setData(siteData(props.cameras, props.selected));
   (map.getSource("camera-heat-points") as GeoJSONSource)?.setData(heatData(props.cameras));
   (map.getSource("camera-sectors") as GeoJSONSource)?.setData(props.showSectors ? sectorsGeoJson(props.cameras) : empty);
   (map.getSource("camera-direction") as GeoJSONSource)?.setData(props.showSectors ? directionGeoJson(props.selected) : empty);
@@ -127,13 +127,15 @@ export default function MapCanvas(props: Props) {
         map.addLayer({ id: "direction-line", type: "line", source: "camera-direction", paint: { "line-color": "#075a49", "line-width": 2.5, "line-dasharray": [3, 2] } });
         map.addLayer({ id: "camera-heat", type: "heatmap", source: "camera-heat-points", layout: { visibility: "none" }, maxzoom: 18,
           paint: { "heatmap-weight": ["interpolate", ["linear"], ["get", "weight"], 1, 0.55, 4, 0.9, 12, 1], "heatmap-intensity": ["interpolate", ["linear"], ["zoom"], 10, 1.4, 17, 2.6], "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 10, 30, 17, 70], "heatmap-opacity": ["interpolate", ["linear"], ["zoom"], 10, 0.86, 18, 0.72], "heatmap-color": ["interpolate", ["linear"], ["heatmap-density"], 0, "rgba(25,52,65,0)", 0.12, "#2c7bb6", 0.3, "#00a6ca", 0.5, "#a8ddb5", 0.68, "#fee08b", 0.84, "#f46d43", 1, "#a50026"] } });
+        map.addLayer({ id: "camera-selected-halo", type: "circle", source: "camera-points", filter: ["all", ["!", ["has", "point_count"]], ["==", ["get", "selected"], true]],
+          paint: { "circle-color": "#b8f285", "circle-radius": 30, "circle-opacity": 0.2, "circle-blur": 0.45 } });
         map.addLayer({ id: "camera-clusters", type: "circle", source: "camera-points", filter: ["has", "point_count"],
-          paint: { "circle-color": "#142e33", "circle-radius": 24, "circle-stroke-color": ["case", [">", ["get", "reportedCount"], 0], "#f2bb6d", [">", ["get", "documentedSiteCount"], 0], "#82c8ef", "#b8f285"], "circle-stroke-width": 3 } });
+          paint: { "circle-color": "#10272c", "circle-radius": 24, "circle-stroke-color": ["case", [">", ["get", "reportedCount"], 0], "#f2bb6d", [">", ["get", "documentedSiteCount"], 0], "#82c8ef", "#b8f285"], "circle-stroke-width": 3 } });
         map.addLayer({ id: "camera-sites", type: "circle", source: "camera-points", filter: ["!", ["has", "point_count"]],
-          paint: { "circle-color": "#142e33", "circle-radius": 20, "circle-stroke-color": ["case", [">", ["get", "reportedCount"], 0], "#f2bb6d", [">", ["get", "documentedSiteCount"], 0], "#82c8ef", "#b8f285"], "circle-stroke-width": 3 } });
+          paint: { "circle-color": ["case", ["==", ["get", "selected"], true], "#b8f285", "#10272c"], "circle-radius": ["case", ["==", ["get", "selected"], true], 24, 20], "circle-stroke-color": ["case", ["==", ["get", "selected"], true], "#ffffff", [">", ["get", "reportedCount"], 0], "#f2bb6d", [">", ["get", "documentedSiteCount"], 0], "#82c8ef", "#b8f285"], "circle-stroke-width": ["case", ["==", ["get", "selected"], true], 4, 3] } });
         map.addLayer({ id: "camera-count", type: "symbol", source: "camera-points",
           layout: { "text-field": ["case", [">", ["get", "documentedSiteCount"], 0], ["case", [">", ["get", "cameraCount"], 0], ["concat", ["to-string", ["get", "cameraCount"]], "+i"], "i"], ["to-string", ["get", "cameraCount"]]], "text-font": ["Open Sans Semibold"], "text-size": 14, "text-allow-overlap": true },
-          paint: { "text-color": "#ffffff" } });
+          paint: { "text-color": ["case", ["==", ["get", "selected"], true], "#102018", "#ffffff"] } });
         syncData(map, latest.current);
         setReady(true);
       });
