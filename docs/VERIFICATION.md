@@ -39,6 +39,14 @@
 
 Source evidence and runtime boundaries are in [CAMERA_VIEW_SOURCES.md](CAMERA_VIEW_SOURCES.md).
 
+## Heatmap and administrator workspace — latest verification
+
+- Typecheck, **46 tests** and the production build passed. New tests cover safe parsing of local drafts, immutable camera IDs, coordinate and optics ranges, draft application and complete map-link restoration of the heatmap.
+- The heatmap renders only camera records from active filters and layers. In Edge, disabling ITS changed both the map total and heat input from 175 to 16 cameras; 2D/3D and the legend remained usable. Documented objects with unknown camera quantities do not increase density.
+- The administrator panel searched by stable ID, edited a record, applied the draft to its map card, persisted it in browser storage, exported a JSON download and reverted it back to the source catalog. The test leaves no saved draft behind.
+- Desktop 1440×1000 and mobile 390×844 screenshots were inspected. The full-screen mobile editor scrolls without horizontal overflow. The existing selection, favorites, filters, shared markers, 2D/3D, ITS deep links and map error recovery scenario also passed with no page errors.
+- Browser edits are deliberately local and are not authentication or a public write API. Source files change only after a human reviews an exported draft and commits it.
+
 ## Public inventory update — latest verification
 
 The current catalog validates **225 records: 175 individual/reported cameras and 53 documented objects**. Added 61 records (8 OSM points and 53 objects); existing source IDs and the four-camera report are preserved. Details and evidence: [PUBLIC_SOURCE_REVIEW.md](PUBLIC_SOURCE_REVIEW.md).

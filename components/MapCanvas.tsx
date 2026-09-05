@@ -13,7 +13,7 @@ type Props = {
   cameras: Camera[]; selected: Camera | null; onSelect: (camera: Camera) => void;
   is3D: boolean; showSectors: boolean; resetRequest: number; focusRequest: number;
   street: StreetHighlight | null; streetFocusRequest: number;
-  mapTheme: "light" | "dark"; coverageMode: boolean;
+  mapTheme: "light" | "dark"; coverageMode: boolean; heatmapMode: boolean;
   analysisMode: AnalysisMode; analysisPoints: LngLat[]; onAnalysisPoint: (point: LngLat) => void;
   initialView: MapView | null; viewRequest: { id: number; view: MapView } | null; onViewChange: (view: MapView) => void;
 };
@@ -30,9 +30,15 @@ function siteData(cameras: Camera[]) {
     geometry: { type: "Point" as const, coordinates: [site.lng, site.lat] },
   })) };
 }
+function heatData(cameras: Camera[]) {
+  return { type: "FeatureCollection" as const, features: groupCameraSites(cameras).filter(site => site.cameraCount > 0).map(site => ({
+    type: "Feature" as const, properties: { weight: site.cameraCount }, geometry: { type: "Point" as const, coordinates: [site.lng, site.lat] },
+  })) };
+}
 function syncData(map: LibreMap, props: Props) {
   syncPadding(map, props.selected);
   (map.getSource("camera-points") as GeoJSONSource)?.setData(siteData(props.cameras));
+  (map.getSource("camera-heat-points") as GeoJSONSource)?.setData(heatData(props.cameras));
   (map.getSource("camera-sectors") as GeoJSONSource)?.setData(props.showSectors ? sectorsGeoJson(props.cameras) : empty);
   (map.getSource("camera-direction") as GeoJSONSource)?.setData(props.showSectors ? directionGeoJson(props.selected) : empty);
   (map.getSource("street-highlight") as GeoJSONSource)?.setData(props.street?.geometry ?? empty);
@@ -41,6 +47,7 @@ function syncData(map: LibreMap, props: Props) {
   const selection: AnalysisSelection | null = props.analysisPoints.length === 2 && props.analysisMode !== "none" ? { mode: props.analysisMode, points: [props.analysisPoints[0], props.analysisPoints[1]] } : null;
   (map.getSource("analysis-shape") as GeoJSONSource)?.setData(selectionGeoJson(selection));
   (map.getSource("analysis-points") as GeoJSONSource)?.setData({ type: "FeatureCollection", features: props.analysisPoints.map((point, index) => ({ type: "Feature", properties: { index: index + 1 }, geometry: { type: "Point", coordinates: point } })) });
+  if (map.getLayer("camera-heat")) map.setLayoutProperty("camera-heat", "visibility", props.heatmapMode ? "visible" : "none");
   if (map.getLayer("sector-fill")) {
     map.setPaintProperty("sector-fill", "fill-color", ["case", ["==", ["get", "id"], props.selected?.id ?? ""], "#087a62", "#487b8c"]);
     map.setPaintProperty("sector-fill", "fill-opacity", ["case", ["==", ["get", "id"], props.selected?.id ?? ""], 0.32, 0.09]);
@@ -105,6 +112,7 @@ export default function MapCanvas(props: Props) {
         map.addSource("analysis-points", { type: "geojson", data: empty });
         map.addSource("camera-points", { type: "geojson", data: empty, cluster: true, clusterMaxZoom: 16, clusterRadius: 48,
           clusterProperties: { cameraCount: ["+", ["get", "cameraCount"]], reportedCount: ["+", ["get", "reportedCount"]], documentedSiteCount: ["+", ["get", "documentedSiteCount"]] } });
+        map.addSource("camera-heat-points", { type: "geojson", data: empty });
         map.addLayer({ id: "coverage-unknown", type: "fill", source: "coverage-area", paint: { "fill-color": "#d58637", "fill-opacity": 0.13 } });
         map.addLayer({ id: "coverage-known", type: "fill", source: "coverage-sectors", paint: { "fill-color": "#31b96b", "fill-opacity": 0.42 } });
         map.addLayer({ id: "coverage-known-line", type: "line", source: "coverage-sectors", paint: { "line-color": "#1b8f50", "line-width": 2, "line-opacity": 0.9 } });
@@ -117,6 +125,8 @@ export default function MapCanvas(props: Props) {
         map.addLayer({ id: "sector-fill", type: "fill", source: "camera-sectors", paint: { "fill-color": "#087a62", "fill-opacity": 0.15 } });
         map.addLayer({ id: "sector-line", type: "line", source: "camera-sectors", paint: { "line-color": "#087a62", "line-width": 1.5 } });
         map.addLayer({ id: "direction-line", type: "line", source: "camera-direction", paint: { "line-color": "#075a49", "line-width": 2.5, "line-dasharray": [3, 2] } });
+        map.addLayer({ id: "camera-heat", type: "heatmap", source: "camera-heat-points", layout: { visibility: "none" }, maxzoom: 18,
+          paint: { "heatmap-weight": ["interpolate", ["linear"], ["get", "weight"], 1, 0.55, 4, 0.9, 12, 1], "heatmap-intensity": ["interpolate", ["linear"], ["zoom"], 10, 1.4, 17, 2.6], "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 10, 30, 17, 70], "heatmap-opacity": ["interpolate", ["linear"], ["zoom"], 10, 0.86, 18, 0.72], "heatmap-color": ["interpolate", ["linear"], ["heatmap-density"], 0, "rgba(25,52,65,0)", 0.12, "#2c7bb6", 0.3, "#00a6ca", 0.5, "#a8ddb5", 0.68, "#fee08b", 0.84, "#f46d43", 1, "#a50026"] } });
         map.addLayer({ id: "camera-clusters", type: "circle", source: "camera-points", filter: ["has", "point_count"],
           paint: { "circle-color": "#142e33", "circle-radius": 24, "circle-stroke-color": ["case", [">", ["get", "reportedCount"], 0], "#f2bb6d", [">", ["get", "documentedSiteCount"], 0], "#82c8ef", "#b8f285"], "circle-stroke-width": 3 } });
         map.addLayer({ id: "camera-sites", type: "circle", source: "camera-points", filter: ["!", ["has", "point_count"]],
@@ -166,7 +176,7 @@ export default function MapCanvas(props: Props) {
     };
   }, [attempt]);
 
-  useEffect(() => { if (ready && mapRef.current) syncData(mapRef.current, props); }, [ready, props.cameras, props.selected, props.showSectors, props.street, props.coverageMode, props.analysisMode, props.analysisPoints]);
+  useEffect(() => { if (ready && mapRef.current) syncData(mapRef.current, props); }, [ready, props.cameras, props.selected, props.showSectors, props.street, props.coverageMode, props.heatmapMode, props.analysisMode, props.analysisPoints]);
   useEffect(() => {
     const map = mapRef.current;
     if (!ready || !map?.getLayer("osm")) return;
@@ -208,7 +218,7 @@ export default function MapCanvas(props: Props) {
 
   return (
     <>
-      <div ref={containerRef} className="map" data-ready={ready} data-mode={props.is3D ? "3d" : "2d"} data-theme={props.mapTheme} data-coverage={props.coverageMode} data-analysis={props.analysisMode} data-analysis-points={props.analysisPoints.length} data-camera-count={countCameras(props.cameras)} data-object-count={countDocumentedSites(props.cameras)} data-street={props.street?.name ?? ""} data-street-segments={props.street?.geometry.features.length ?? 0} />
+      <div ref={containerRef} className="map" data-ready={ready} data-mode={props.is3D ? "3d" : "2d"} data-theme={props.mapTheme} data-coverage={props.coverageMode} data-heatmap={props.heatmapMode} data-analysis={props.analysisMode} data-analysis-points={props.analysisPoints.length} data-camera-count={countCameras(props.cameras)} data-object-count={countDocumentedSites(props.cameras)} data-street={props.street?.name ?? ""} data-street-segments={props.street?.geometry.features.length ?? 0} />
       {!ready && !error && <div className="map-loading" role="status">Загружаем карту Opole…</div>}
       {error && <div className="map-error" role="alert"><p>{error}</p><button className="secondary-button" onClick={retry}>Повторить загрузку карты</button></div>}
       {activeSite && <section className="site-picker" aria-label="Камеры в этой точке"><div><strong>В этой точке · {catalogCountLabel(activeSite.cameras)}</strong><button aria-label="Закрыть выбор камер" onClick={() => setActiveSiteId(null)}>×</button></div><p>Камеры, группы и объекты с одним ориентиром</p>{activeSite.cameras.map((camera) => <button key={camera.id} onClick={() => { props.onSelect(camera); setActiveSiteId(null); }}>{camera.name}<span>↗</span></button>)}</section>}

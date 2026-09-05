@@ -19,6 +19,8 @@ import CameraStatusBadge from "./CameraStatusBadge";
 import AnalysisPanel from "./AnalysisPanel";
 import { mapShareLink, readMapShareState, type MapView } from "@/lib/map-state";
 import type { AnalysisMode, AnalysisSelection, LngLat } from "@/lib/map-analysis";
+import AdminPanel from "./AdminPanel";
+import { adminDraftStorageKey, applyAdminDrafts, parseAdminDrafts, type CameraAdminDrafts, type CameraAdminPatch } from "@/lib/admin-drafts";
 
 const MapCanvas = dynamic(() => import("./MapCanvas"), {
   ssr: false, loading: () => <div className="map-loading" role="status">Загружаем карту Opole…</div>,
@@ -29,9 +31,12 @@ function updateCameraUrl(id: string | null, replace = false) {
   if (url !== window.location.href) window.history[replace ? "replaceState" : "pushState"](null, "", url);
 }
 
-function CameraMapInner({ cameras }: { cameras: Camera[] }) {
+function CameraMapInner({ cameras: sourceCameras }: { cameras: Camera[] }) {
   const { locale, setLocale, t } = useI18n();
-  const knownIds = useMemo(() => new Set(cameras.map((camera) => camera.id)), [cameras]);
+  const knownIds = useMemo(() => new Set(sourceCameras.map((camera) => camera.id)), [sourceCameras]);
+  const [adminDrafts, setAdminDrafts] = useState<CameraAdminDrafts>({});
+  const [adminOpen, setAdminOpen] = useState(false);
+  const cameras = useMemo(() => applyAdminDrafts(sourceCameras, adminDrafts), [sourceCameras, adminDrafts]);
   const favorites = useFavorites(knownIds);
   const favoriteIds = useMemo(() => new Set(favorites.ids), [favorites.ids]);
   const [favoritesOnly, setFavoritesOnly] = useState(false);
@@ -51,6 +56,7 @@ function CameraMapInner({ cameras }: { cameras: Camera[] }) {
   const [enabledLayers, setEnabledLayers] = useState<Set<CameraLayer>>(() => new Set(cameraLayers));
   const [mapTheme, setMapTheme] = useState<"light" | "dark">("light");
   const [coverageMode, setCoverageMode] = useState(false);
+  const [heatmapMode, setHeatmapMode] = useState(false);
   const [availability, setAvailability] = useState<Record<string, CameraAvailability>>({});
   const [analysisMode, setAnalysisMode] = useState<AnalysisMode>("none");
   const [analysisPoints, setAnalysisPoints] = useState<LngLat[]>([]);
@@ -69,6 +75,18 @@ function CameraMapInner({ cameras }: { cameras: Camera[] }) {
   const coverageHasOptics = visible.some(camera => camera.heading !== null && camera.fov !== null && camera.rangeMeters !== null);
   const analysisSelection: AnalysisSelection | null = analysisMode !== "none" && analysisPoints.length === 2 ? { mode: analysisMode, points: [analysisPoints[0], analysisPoints[1]] } : null;
   const layerCounts = useMemo(() => Object.fromEntries(cameraLayers.map(layer => [layer, cameras.filter(camera => cameraLayer(camera) === layer).length])) as Record<CameraLayer, number>, [cameras]);
+  useEffect(() => {
+    let saved: string | null = null;
+    try { saved = localStorage.getItem(adminDraftStorageKey); } catch { /* Admin drafts remain available for this tab. */ }
+    setAdminDrafts(parseAdminDrafts(saved, knownIds));
+  }, [knownIds]);
+  function storeAdminDrafts(next: CameraAdminDrafts) {
+    setAdminDrafts(next);
+    try { localStorage.setItem(adminDraftStorageKey, JSON.stringify(next)); } catch { /* Editing still works until reload. */ }
+  }
+  function saveAdminDraft(id: string, patch: CameraAdminPatch) { storeAdminDrafts({ ...adminDrafts, [id]: patch }); }
+  function deleteAdminDraft(id: string) { const next = { ...adminDrafts }; delete next[id]; storeAdminDrafts(next); }
+  function clearAdminDrafts() { storeAdminDrafts({}); }
   const selectCamera = useCallback((camera: Camera) => {
     updateCameraUrl(camera.id);
     setInvalidLink(false);
@@ -112,6 +130,7 @@ function CameraMapInner({ cameras }: { cameras: Camera[] }) {
       if (shared.layers) setEnabledLayers(shared.layers);
       if (shared.theme) changeTheme(shared.theme);
       setCoverageMode(shared.coverage);
+      setHeatmapMode(shared.heatmap);
       setIs3D(shared.is3D);
       if (shared.view) requestView(shared.view);
       if (!shared.street) setStreet(null);
@@ -149,7 +168,7 @@ function CameraMapInner({ cameras }: { cameras: Camera[] }) {
   function addAnalysisPoint(point: LngLat) { setAnalysisPoints(current => current.length >= 2 ? [point] : [...current, point]); }
   function changeAnalysisMode(mode: AnalysisMode) { setAnalysisMode(mode); setAnalysisPoints([]); }
   async function shareMap() {
-    const url = mapShareLink(window.location.href, { cameraId: selectedId, layers: enabledLayers, is3D, theme: mapTheme, coverage: coverageMode, street: street?.name ?? null, view: mapView });
+    const url = mapShareLink(window.location.href, { cameraId: selectedId, layers: enabledLayers, is3D, theme: mapTheme, coverage: coverageMode, heatmap: heatmapMode, street: street?.name ?? null, view: mapView });
     try { await navigator.clipboard.writeText(url); return true; } catch { window.prompt(t("copyError"), url); return false; }
   }
   function toggleLayer(layer: CameraLayer) { setEnabledLayers(current => { const next = new Set(current); if (next.has(layer)) next.delete(layer); else next.add(layer); return next; }); setPageSize(50); }
@@ -232,11 +251,12 @@ function CameraMapInner({ cameras }: { cameras: Camera[] }) {
       </aside>
 
       <main className="map-workspace" aria-label={t("mapLabel")} inert={mobileList}>
-        <MapCanvas cameras={visible} selected={selected} onSelect={selectCamera} is3D={is3D} showSectors={showSectors} resetRequest={resetRequest} focusRequest={focusRequest} street={street} streetFocusRequest={streetFocusRequest} mapTheme={mapTheme} coverageMode={coverageMode} analysisMode={analysisMode} analysisPoints={analysisPoints} onAnalysisPoint={addAnalysisPoint} initialView={null} viewRequest={viewRequest} onViewChange={setMapView} />
+        <MapCanvas cameras={visible} selected={selected} onSelect={selectCamera} is3D={is3D} showSectors={showSectors} resetRequest={resetRequest} focusRequest={focusRequest} street={street} streetFocusRequest={streetFocusRequest} mapTheme={mapTheme} coverageMode={coverageMode} heatmapMode={heatmapMode} analysisMode={analysisMode} analysisPoints={analysisPoints} onAnalysisPoint={addAnalysisPoint} initialView={null} viewRequest={viewRequest} onViewChange={setMapView} />
         <div className="map-topbar">
           <div className="location-chip"><Icon name="pin" /><div><strong>Opole</strong><span>{visibleCount} {t("cameras")} · {visibleSites} {t("objects")}</span></div></div>
           <div className="map-actions">
             <div className="mode-switch" role="group" aria-label={t("mapMode")}><button aria-pressed={!is3D} onClick={() => setIs3D(false)}>2D</button><button aria-pressed={is3D} onClick={() => setIs3D(true)} title={t("tiltTitle")}>3D</button></div>
+            <button className="admin-button" onClick={() => setAdminOpen(true)}>{t("adminShort")}{Object.keys(adminDrafts).length ? <span>{Object.keys(adminDrafts).length}</span> : null}</button>
             <button className="icon-button center-button" title={t("centerMap")} aria-label={t("centerMap")} onClick={() => setResetRequest((value) => value + 1)}><Icon name="center" /></button>
           </div>
         </div>
@@ -244,16 +264,19 @@ function CameraMapInner({ cameras }: { cameras: Camera[] }) {
         <div className="map-bottom-tools">
           <button className="sector-toggle" aria-pressed={showSectors} onClick={() => setShowSectors((value) => !value)}><Icon name="sector" /> {t("sectors")} <span>{showSectors ? t("enabled") : t("disabled")}</span></button>
           <button className="sector-toggle coverage-toggle" aria-pressed={coverageMode} onClick={() => setCoverageMode(value => !value)}>{t("coverage")} <span>{coverageMode ? t("coverageOn") : "—"}</span></button>
+          <button className="sector-toggle heatmap-toggle" aria-pressed={heatmapMode} onClick={() => setHeatmapMode(value => !value)}>{t("heatmap")} <span>{heatmapMode ? t("coverageOn") : "—"}</span></button>
           <span className="map-caption">{is3D ? t("viewTilt") : t("viewTop")}</span>
           {visibleReports && <span className="map-caption reported-caption">{t("userOrange")}</span>}
           {visibleSites > 0 && <span className="map-caption object-caption">{t("objectMarker")}</span>}
           {street && <span className="map-caption street-caption"><i /> {t("streetMarked")} {street.name}<button aria-label={t("removeStreet")} onClick={() => setStreet(null)}>×</button></span>}
           {coverageMode && (coverageHasOptics ? <><span className="map-caption coverage-known">{t("coverageKnown")}</span><span className="map-caption coverage-unknown">{t("coverageUnknown")}</span></> : <span className="map-caption coverage-unknown">{t("coverageNone")}</span>)}
+          {heatmapMode && <span className="map-caption heatmap-caption">{t("heatmapLegend")}</span>}
         </div>
         {selected && <CameraDetails key={selected.id} camera={selected} availability={availability[selected.id]} onClose={closeCamera} favorite={favoriteIds.has(selected.id)} favoritesReady={favorites.ready} onToggleFavorite={() => favorites.toggle(selected.id)} onSnapshot={setSnapshotCamera} />}
         <button ref={listButtonRef} className="mobile-list-button" onClick={() => setMobileList(true)}><Icon name="list" /> {t("camerasAndSearch")} <span>{visible.length}</span></button>
       </main>
       {snapshotCamera && <CameraSnapshotViewer key={snapshotCamera.id} camera={snapshotCamera} onStatus={value => updateAvailability(snapshotCamera, value)} onClose={() => setSnapshotCamera(null)} />}
+      <AdminPanel cameras={cameras} drafts={adminDrafts} open={adminOpen} initialId={selectedId} onClose={() => setAdminOpen(false)} onSave={saveAdminDraft} onDelete={deleteAdminDraft} onClear={clearAdminDrafts} onSelect={(camera) => { setAdminOpen(false); selectCamera(camera); }} />
     </div>
   );
 }
