@@ -23,7 +23,7 @@ import type { AnalysisMode, AnalysisSelection, LngLat } from "@/lib/map-analysis
 import AdminPanel from "./AdminPanel";
 import { adminDraftStorageKey, applyAdminDrafts, parseAdminDrafts, type CameraAdminDrafts, type CameraAdminPatch } from "@/lib/admin-drafts";
 import { droneTowerUrl } from "@/lib/drone-zones";
-import type { IncidentPoint } from "@/lib/insurance-case";
+import type { IncidentKind, IncidentPoint } from "@/lib/insurance-case";
 
 const MapCanvas = dynamic(() => import("./MapCanvas"), {
   ssr: false, loading: () => <div className="map-loading" role="status">Загружаем карту Opole…</div>,
@@ -66,6 +66,8 @@ function CameraMapInner({ cameras: sourceCameras }: { cameras: Camera[] }) {
   const [analysisPoints, setAnalysisPoints] = useState<LngLat[]>([]);
   const [incidentPoint, setIncidentPoint] = useState<IncidentPoint | null>(null);
   const [incidentPickMode, setIncidentPickMode] = useState(false);
+  const [incidentKind, setIncidentKind] = useState<IncidentKind>("crash");
+  const [incidentAt, setIncidentAt] = useState("");
   const [mapView, setMapView] = useState<MapView>({ lng: 17.9224, lat: 50.66855, zoom: 15.3, bearing: 0, pitch: 0 });
   const [viewRequest, setViewRequest] = useState<{ id: number; view: MapView } | null>(null);
   const listButtonRef = useRef<HTMLButtonElement>(null);
@@ -80,6 +82,7 @@ function CameraMapInner({ cameras: sourceCameras }: { cameras: Camera[] }) {
   const visibleReports = visible.some((camera) => camera.sourceKind === "user-report");
   const coverageHasOptics = visible.some(camera => camera.heading !== null && camera.fov !== null && camera.rangeMeters !== null);
   const analysisSelection: AnalysisSelection | null = analysisMode !== "none" && analysisPoints.length === 2 ? { mode: analysisMode, points: [analysisPoints[0], analysisPoints[1]] } : null;
+  const currentIncident = incidentPoint ? { ...incidentPoint, kind: incidentKind, occurredAt: incidentAt || null } : null;
   const layerCounts = useMemo(() => Object.fromEntries(cameraLayers.map(layer => [layer, cameras.filter(camera => cameraLayer(camera) === layer).length])) as Record<CameraLayer, number>, [cameras]);
   useEffect(() => {
     let saved: string | null = null;
@@ -138,6 +141,9 @@ function CameraMapInner({ cameras: sourceCameras }: { cameras: Camera[] }) {
       setCoverageMode(shared.coverage);
       setHeatmapMode(shared.heatmap);
       setDroneZonesMode(shared.droneZones);
+      setIncidentPoint(shared.incident);
+      setIncidentKind(shared.incident?.kind ?? "crash");
+      setIncidentAt(shared.incident?.occurredAt ?? "");
       setIs3D(shared.is3D);
       if (shared.view) requestView(shared.view);
       if (!shared.street) setStreet(null);
@@ -175,9 +181,9 @@ function CameraMapInner({ cameras: sourceCameras }: { cameras: Camera[] }) {
   function addAnalysisPoint(point: LngLat) { setAnalysisPoints(current => current.length >= 2 ? [point] : [...current, point]); }
   function changeAnalysisMode(mode: AnalysisMode) { setAnalysisMode(mode); setAnalysisPoints([]); }
   function beginIncidentPick() { setIncidentPickMode(value => !value); setAnalysisMode("none"); setAnalysisPoints([]); }
-  function setIncident(point: IncidentPoint) { setIncidentPoint(point); setIncidentPickMode(false); setSelectedId(null); }
+  function setIncident(point: IncidentPoint) { setIncidentPoint({ ...point, kind: incidentKind, occurredAt: incidentAt || null }); setIncidentPickMode(false); setSelectedId(null); }
   async function shareMap() {
-    const url = mapShareLink(window.location.href, { cameraId: selectedId, layers: enabledLayers, is3D, theme: mapTheme, coverage: coverageMode, heatmap: heatmapMode, droneZones: droneZonesMode, street: street?.name ?? null, view: mapView });
+    const url = mapShareLink(window.location.href, { cameraId: selectedId, layers: enabledLayers, is3D, theme: mapTheme, coverage: coverageMode, heatmap: heatmapMode, droneZones: droneZonesMode, street: street?.name ?? null, incident: currentIncident, view: mapView });
     try { await navigator.clipboard.writeText(url); return true; } catch { window.prompt(t("copyError"), url); return false; }
   }
   function toggleLayer(layer: CameraLayer) { setEnabledLayers(current => { const next = new Set(current); if (next.has(layer)) next.delete(layer); else next.add(layer); return next; }); setPageSize(50); }
@@ -220,7 +226,7 @@ function CameraMapInner({ cameras: sourceCameras }: { cameras: Camera[] }) {
         <div className="experience-tools"><label><span>{t("language")}</span><select aria-label={t("language")} value={locale} onChange={event => setLocale(event.target.value as Locale)}>{Object.entries(languages).map(([code, name]) => <option key={code} value={code}>{name}</option>)}</select></label><div><span>{t("mapTheme")}</span><button aria-pressed={mapTheme === "light"} onClick={() => changeTheme("light")}>{t("light")}</button><button aria-pressed={mapTheme === "dark"} onClick={() => changeTheme("dark")}>{t("dark")}</button></div><AppInstall /></div>
         <StreetSearch street={street} onFound={showStreet} onClear={() => setStreet(null)} />
         <AnalysisPanel cameras={visible} catalog={cameras} mode={analysisMode} selection={analysisSelection} view={mapView} onMode={changeAnalysisMode} onClear={() => { setAnalysisMode("none"); setAnalysisPoints([]); }} onPreset={requestView} onSelect={selectCamera} onSnapshot={setSnapshotCamera} onShare={shareMap} />
-        <InsuranceCasePanel cameras={cameras} point={incidentPoint} picking={incidentPickMode} onPick={beginIncidentPick} onClear={() => { setIncidentPoint(null); setIncidentPickMode(false); }} onSelect={selectCamera} />
+          <InsuranceCasePanel cameras={cameras} point={currentIncident} picking={incidentPickMode} onPick={beginIncidentPick} onClear={() => { setIncidentPoint(null); setIncidentPickMode(false); }} onSelect={selectCamera} incidentKind={incidentKind} incidentAt={incidentAt} onIncidentKind={setIncidentKind} onIncidentAt={setIncidentAt} onShareIncident={shareMap} />
         <div className="filters">
           <label className="search-field" htmlFor="camera-search"><Icon name="search" />
             <input id="camera-search" type="search" aria-label={t("cameraSearchLabel")} placeholder={t("cameraSearch")} value={query} onChange={(event) => { setQuery(event.target.value); setPageSize(50); }} />
@@ -262,7 +268,7 @@ function CameraMapInner({ cameras: sourceCameras }: { cameras: Camera[] }) {
       </aside>
 
       <main className="map-workspace" aria-label={t("mapLabel")} inert={mobileList}>
-        <MapCanvas cameras={visible} selected={selected} onSelect={selectCamera} is3D={is3D} showSectors={showSectors} resetRequest={resetRequest} focusRequest={focusRequest} street={street} streetFocusRequest={streetFocusRequest} mapTheme={mapTheme} coverageMode={coverageMode} heatmapMode={heatmapMode} droneZonesMode={droneZonesMode} analysisMode={analysisMode} analysisPoints={analysisPoints} onAnalysisPoint={addAnalysisPoint} incidentPoint={incidentPoint} incidentPickMode={incidentPickMode} onIncidentPoint={setIncident} initialView={null} viewRequest={viewRequest} onViewChange={setMapView} />
+        <MapCanvas cameras={visible} selected={selected} onSelect={selectCamera} is3D={is3D} showSectors={showSectors} resetRequest={resetRequest} focusRequest={focusRequest} street={street} streetFocusRequest={streetFocusRequest} mapTheme={mapTheme} coverageMode={coverageMode} heatmapMode={heatmapMode} droneZonesMode={droneZonesMode} analysisMode={analysisMode} analysisPoints={analysisPoints} onAnalysisPoint={addAnalysisPoint} incidentPoint={currentIncident} incidentPickMode={incidentPickMode} onIncidentPoint={setIncident} initialView={null} viewRequest={viewRequest} onViewChange={setMapView} />
         <div className="map-topbar">
           <div className="location-chip"><Icon name="pin" /><div><strong>Opole</strong><span>{visibleCount} {t("cameras")} · {visibleSites} {t("objects")}</span></div></div>
           <div className="map-actions">

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { Camera } from "@/lib/camera";
-import { insuranceCandidates, insuranceCaseExport, preservationRequest, type IncidentPoint, type InsuranceCandidate } from "@/lib/insurance-case";
+import { incidentKindLabel, incidentKinds, insuranceCandidates, insuranceCaseExport, preservationRequest, type IncidentKind, type IncidentPoint, type InsuranceCandidate } from "@/lib/insurance-case";
 import Icon from "./Icon";
 
 type Props = {
@@ -12,6 +12,11 @@ type Props = {
   onPick: () => void;
   onClear: () => void;
   onSelect: (camera: Camera) => void;
+  incidentKind: IncidentKind;
+  incidentAt: string;
+  onIncidentKind: (kind: IncidentKind) => void;
+  onIncidentAt: (value: string) => void;
+  onShareIncident: () => Promise<boolean>;
 };
 
 function download(name: string, content: string) {
@@ -39,9 +44,8 @@ function printCase(point: IncidentPoint, incidentAt: string, caseReference: stri
   page.document.close(); page.focus(); page.print();
 }
 
-export default function InsuranceCasePanel({ cameras, point, picking, onPick, onClear, onSelect }: Props) {
+export default function InsuranceCasePanel({ cameras, point, picking, onPick, onClear, onSelect, incidentKind, incidentAt, onIncidentKind, onIncidentAt, onShareIncident }: Props) {
   const [radiusMeters, setRadiusMeters] = useState(250);
-  const [incidentAt, setIncidentAt] = useState("");
   const [caseReference, setCaseReference] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const candidates = useMemo(() => insuranceCandidates(cameras, point, radiusMeters), [cameras, point, radiusMeters]);
@@ -53,12 +57,13 @@ export default function InsuranceCasePanel({ cameras, point, picking, onPick, on
       <p className="insurance-intro">Поиск только по опубликованному каталогу. Он не даёт доступ к камерам и не подтверждает, что запись существует.</p>
       <div className="insurance-form">
         <label>Номер дела <input value={caseReference} maxLength={80} placeholder="Например: CLM-2026-014" onChange={event => setCaseReference(event.target.value)} /></label>
-        <label>Дата и время происшествия <input type="datetime-local" value={incidentAt} onChange={event => setIncidentAt(event.target.value)} /></label>
+        <label>Тип происшествия <select value={incidentKind} onChange={event => onIncidentKind(event.target.value as IncidentKind)}>{incidentKinds.map(kind => <option key={kind} value={kind}>{incidentKindLabel(kind)}</option>)}</select></label>
+        <label>Дата и время происшествия <input type="datetime-local" value={incidentAt} onChange={event => onIncidentAt(event.target.value)} /></label>
         <label>Радиус поиска <select value={radiusMeters} onChange={event => setRadiusMeters(Number(event.target.value))}><option value={100}>100 м</option><option value={250}>250 м</option><option value={500}>500 м</option><option value={1000}>1 км</option></select></label>
       </div>
-      <div className="insurance-actions"><button className={picking ? "active" : ""} aria-pressed={picking} onClick={onPick}><Icon name="pin" /> {picking ? "Нажмите точку на карте" : "Отметить место"}</button>{point && <button onClick={onClear}>Очистить случай</button>}</div>
+      <div className="insurance-actions"><button className={picking ? "active" : ""} aria-pressed={picking} onClick={onPick}><Icon name="pin" /> {picking ? "Нажмите место аварии" : "Отметить аварию"}</button>{point && <><button onClick={() => void onShareIncident()}>Скопировать ссылку</button><button onClick={onClear}>Очистить случай</button></>}</div>
       {!point ? <p className="insurance-hint">Выберите точку ДТП или повреждения на карте. Личные данные и записи не сохраняются.</p> : <>
-        <div className="insurance-case" role="status"><strong>{candidates.length} записей в радиусе {radiusMeters} м</strong><span>Координаты: {point.lat.toFixed(5)}, {point.lng.toFixed(5)}</span><span>{usable.length} камер · {candidates.length - usable.length} объектов-ориентиров</span></div>
+        <div className="insurance-case" role="status"><strong>{incidentKindLabel(incidentKind)} · {candidates.length} записей в радиусе {radiusMeters} м</strong><span>Координаты: {point.lat.toFixed(5)}, {point.lng.toFixed(5)}</span><span>{usable.length} камер · {candidates.length - usable.length} объектов-ориентиров</span></div>
         <div className="insurance-export"><button onClick={() => download("opole-insurance-case.json", JSON.stringify(insuranceCaseExport(point, incidentAt, caseReference, radiusMeters, candidates), null, 2))}>Экспорт отчёта JSON</button><button onClick={() => printCase(point, incidentAt, caseReference, radiusMeters, candidates)}>Печать / PDF</button></div>
         <p className="insurance-warning">Время внесено для вашего запроса. В каталоге нет истории работы камер и сроков хранения записей — сразу свяжитесь с владельцем по официальному источнику.</p>
         <div className="insurance-candidates" aria-label="Камеры рядом с происшествием">
