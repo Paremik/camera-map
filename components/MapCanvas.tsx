@@ -9,6 +9,7 @@ import { coverageGeoJson } from "@/lib/map-features";
 import { selectionGeoJson, type AnalysisMode, type AnalysisSelection, type LngLat } from "@/lib/map-analysis";
 import type { MapView } from "@/lib/map-state";
 import { droneZonesGeoJson } from "@/lib/drone-zones";
+import type { IncidentPoint } from "@/lib/insurance-case";
 
 type Props = {
   cameras: Camera[]; selected: Camera | null; onSelect: (camera: Camera) => void;
@@ -16,6 +17,7 @@ type Props = {
   street: StreetHighlight | null; streetFocusRequest: number;
   mapTheme: "light" | "dark"; coverageMode: boolean; heatmapMode: boolean; droneZonesMode: boolean;
   analysisMode: AnalysisMode; analysisPoints: LngLat[]; onAnalysisPoint: (point: LngLat) => void;
+  incidentPoint: IncidentPoint | null; incidentPickMode: boolean; onIncidentPoint: (point: IncidentPoint) => void;
   initialView: MapView | null; viewRequest: { id: number; view: MapView } | null; onViewChange: (view: MapView) => void;
 };
 const center: [number, number] = [17.92240, 50.66855];
@@ -49,6 +51,7 @@ function syncData(map: LibreMap, props: Props) {
   const selection: AnalysisSelection | null = props.analysisPoints.length === 2 && props.analysisMode !== "none" ? { mode: props.analysisMode, points: [props.analysisPoints[0], props.analysisPoints[1]] } : null;
   (map.getSource("analysis-shape") as GeoJSONSource)?.setData(selectionGeoJson(selection));
   (map.getSource("analysis-points") as GeoJSONSource)?.setData({ type: "FeatureCollection", features: props.analysisPoints.map((point, index) => ({ type: "Feature", properties: { index: index + 1 }, geometry: { type: "Point", coordinates: point } })) });
+  (map.getSource("incident-point") as GeoJSONSource)?.setData({ type: "FeatureCollection", features: props.incidentPoint ? [{ type: "Feature", properties: {}, geometry: { type: "Point", coordinates: [props.incidentPoint.lng, props.incidentPoint.lat] } }] : [] });
   if (map.getLayer("camera-heat")) map.setLayoutProperty("camera-heat", "visibility", props.heatmapMode ? "visible" : "none");
   if (map.getLayer("sector-fill")) {
     map.setPaintProperty("sector-fill", "fill-color", ["case", ["==", ["get", "id"], props.selected?.id ?? ""], "#087a62", "#487b8c"]);
@@ -113,6 +116,7 @@ export default function MapCanvas(props: Props) {
         map.addSource("drone-zones", { type: "geojson", data: empty });
         map.addSource("analysis-shape", { type: "geojson", data: empty });
         map.addSource("analysis-points", { type: "geojson", data: empty });
+        map.addSource("incident-point", { type: "geojson", data: empty });
         map.addSource("camera-points", { type: "geojson", data: empty, cluster: true, clusterMaxZoom: 16, clusterRadius: 48,
           clusterProperties: { cameraCount: ["+", ["get", "cameraCount"]], reportedCount: ["+", ["get", "reportedCount"]], documentedSiteCount: ["+", ["get", "documentedSiteCount"]] } });
         map.addSource("camera-heat-points", { type: "geojson", data: empty });
@@ -125,6 +129,8 @@ export default function MapCanvas(props: Props) {
         map.addLayer({ id: "analysis-area-fill", type: "fill", source: "analysis-shape", filter: ["==", ["get", "kind"], "area"], paint: { "fill-color": "#8dccff", "fill-opacity": 0.18 } });
         map.addLayer({ id: "analysis-shape-line", type: "line", source: "analysis-shape", paint: { "line-color": "#59b8ff", "line-width": 4, "line-dasharray": [2, 1.5] } });
         map.addLayer({ id: "analysis-points-layer", type: "circle", source: "analysis-points", paint: { "circle-radius": 8, "circle-color": "#59b8ff", "circle-stroke-color": "#ffffff", "circle-stroke-width": 3 } });
+        map.addLayer({ id: "incident-point-halo", type: "circle", source: "incident-point", paint: { "circle-radius": 20, "circle-color": "#c794ff", "circle-opacity": 0.22, "circle-blur": 0.25 } });
+        map.addLayer({ id: "incident-point-layer", type: "circle", source: "incident-point", paint: { "circle-radius": 9, "circle-color": "#7d4ab6", "circle-stroke-color": "#ffffff", "circle-stroke-width": 3 } });
         map.addLayer({ id: "street-highlight-casing", type: "line", source: "street-highlight", paint: { "line-color": "#ffffff", "line-width": ["interpolate", ["linear"], ["zoom"], 10, 5, 18, 12], "line-opacity": 0.95 } });
         map.addLayer({ id: "street-highlight-line", type: "line", source: "street-highlight", paint: { "line-color": "#1686ff", "line-width": ["interpolate", ["linear"], ["zoom"], 10, 3, 18, 8], "line-opacity": 0.9 } });
         map.addLayer({ id: "street-highlight-label", type: "symbol", source: "street-highlight", layout: { "symbol-placement": "line", "text-field": ["get", "name"], "text-font": ["Open Sans Semibold"], "text-size": 13, "symbol-spacing": 350 }, paint: { "text-color": "#ffffff", "text-halo-color": "#096ec5", "text-halo-width": 2 } });
@@ -146,6 +152,7 @@ export default function MapCanvas(props: Props) {
         setReady(true);
       });
       map.on("click", (event) => {
+        if (latest.current.incidentPickMode) { latest.current.onIncidentPoint({ lng: event.lngLat.lng, lat: event.lngLat.lat }); setActiveSiteId(null); return; }
         if (latest.current.analysisMode !== "none") { latest.current.onAnalysisPoint([event.lngLat.lng, event.lngLat.lat]); setActiveSiteId(null); return; }
         if (!map.getLayer("camera-sites")) return;
         const features = map.queryRenderedFeatures(event.point, { layers: ["camera-clusters", "camera-sites"] });
@@ -165,7 +172,7 @@ export default function MapCanvas(props: Props) {
         }
       });
       map.on("mousemove", (event) => {
-        if (latest.current.analysisMode !== "none") map.getCanvas().style.cursor = "crosshair";
+        if (latest.current.analysisMode !== "none" || latest.current.incidentPickMode) map.getCanvas().style.cursor = "crosshair";
         else if (map.getLayer("camera-sites")) map.getCanvas().style.cursor = map.queryRenderedFeatures(event.point, { layers: ["camera-clusters", "camera-sites"] }).length ? "pointer" : "";
       });
       map.on("moveend", () => { const point = map.getCenter(); latest.current.onViewChange({ lng: point.lng, lat: point.lat, zoom: map.getZoom(), bearing: map.getBearing(), pitch: map.getPitch() }); });
@@ -184,7 +191,7 @@ export default function MapCanvas(props: Props) {
     };
   }, [attempt]);
 
-  useEffect(() => { if (ready && mapRef.current) syncData(mapRef.current, props); }, [ready, props.cameras, props.selected, props.showSectors, props.street, props.coverageMode, props.heatmapMode, props.droneZonesMode, props.analysisMode, props.analysisPoints]);
+  useEffect(() => { if (ready && mapRef.current) syncData(mapRef.current, props); }, [ready, props.cameras, props.selected, props.showSectors, props.street, props.coverageMode, props.heatmapMode, props.droneZonesMode, props.analysisMode, props.analysisPoints, props.incidentPoint]);
   useEffect(() => {
     const map = mapRef.current;
     if (!ready || !map?.getLayer("osm")) return;
@@ -230,7 +237,7 @@ export default function MapCanvas(props: Props) {
 
   return (
     <>
-      <div ref={containerRef} className="map" data-ready={ready} data-mode={props.is3D ? "3d" : "2d"} data-theme={props.mapTheme} data-coverage={props.coverageMode} data-heatmap={props.heatmapMode} data-drone-zones={props.droneZonesMode} data-analysis={props.analysisMode} data-analysis-points={props.analysisPoints.length} data-camera-count={countCameras(props.cameras)} data-object-count={countDocumentedSites(props.cameras)} data-street={props.street?.name ?? ""} data-street-segments={props.street?.geometry.features.length ?? 0} />
+      <div ref={containerRef} className="map" data-ready={ready} data-mode={props.is3D ? "3d" : "2d"} data-theme={props.mapTheme} data-coverage={props.coverageMode} data-heatmap={props.heatmapMode} data-drone-zones={props.droneZonesMode} data-analysis={props.analysisMode} data-analysis-points={props.analysisPoints.length} data-incident={props.incidentPoint ? "true" : "false"} data-camera-count={countCameras(props.cameras)} data-object-count={countDocumentedSites(props.cameras)} data-street={props.street?.name ?? ""} data-street-segments={props.street?.geometry.features.length ?? 0} />
       {!ready && !error && <div className="map-loading" role="status">Загружаем карту Opole…</div>}
       {error && <div className="map-error" role="alert"><p>{error}</p><button className="secondary-button" onClick={retry}>Повторить загрузку карты</button></div>}
       {activeSite && <section className="site-picker" aria-label="Камеры в этой точке"><div><strong>В этой точке · {catalogCountLabel(activeSite.cameras)}</strong><button aria-label="Закрыть выбор камер" onClick={() => setActiveSiteId(null)}>×</button></div><p>Камеры, группы и объекты с одним ориентиром</p>{activeSite.cameras.map((camera) => <button key={camera.id} onClick={() => { props.onSelect(camera); setActiveSiteId(null); }}>{camera.name}<span>↗</span></button>)}</section>}
