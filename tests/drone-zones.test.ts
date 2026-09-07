@@ -9,6 +9,9 @@ test("EPOP ATZ keeps the published AIP centre, radius and conditional activity",
   const feature = droneZonesGeoJson().features[0];
   assert.equal(feature.properties.name, "EPOP ATZ");
   assert.equal(feature.properties.lowerLimit, "GND");
-  assert.deepEqual(feature.geometry.coordinates[0][0], feature.geometry.coordinates[0].at(-1));
+  assert.deepEqual(
+    feature.geometry.coordinates[0][0],
+    feature.geometry.coordinates[0].at(-1),
+  );
   assert.equal(feature.geometry.coordinates[0].length, 91);
 });

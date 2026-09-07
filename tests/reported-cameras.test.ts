@@ -2,7 +2,12 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { cameras } from "../data/cameras.ts";
 import { reportedCameras } from "../data/reported-cameras.ts";
-import { cameraCategoryLabel, countCameras, filterCameras, groupCameraSites } from "../lib/camera.ts";
+import {
+  cameraCategoryLabel,
+  countCameras,
+  filterCameras,
+  groupCameraSites,
+} from "../lib/camera.ts";
 import { cameraSector, directionGeoJson } from "../lib/geometry.ts";
 import { validateCameraDataset } from "../lib/import-cameras.ts";
 
@@ -18,7 +23,10 @@ test("the entrance report preserves one approximate site and four unverified cam
   assert.equal(report.opticsVerified, false);
   assert.equal(report.sourceUrl, undefined);
   assert.equal(report.publicViewUrl, undefined);
-  assert.equal(report.positionSourceUrl, "https://www.openstreetmap.org/way/227002324");
+  assert.equal(
+    report.positionSourceUrl,
+    "https://www.openstreetmap.org/way/227002324",
+  );
   assert.equal(cameraSector(report), null);
   assert.equal(directionGeoJson(report).features.length, 0);
 });
@@ -36,22 +44,57 @@ test("site and catalog counts include a reported group without duplicating its l
 
 test("private reports are searchable but excluded from verified and ITS filters", () => {
   const catalog = [...cameras, ...reportedCameras];
-  assert.deepEqual(filterCameras(catalog, { query: "rodziewiczowny", category: "private", verifiedOnly: false }), reportedCameras);
-  assert.equal(filterCameras(catalog, { query: "", category: "private", verifiedOnly: true }).length, 0);
-  assert.equal(filterCameras(reportedCameras, { query: "", category: "its", verifiedOnly: false }).length, 0);
+  assert.deepEqual(
+    filterCameras(catalog, {
+      query: "rodziewiczowny",
+      category: "private",
+      verifiedOnly: false,
+    }),
+    reportedCameras,
+  );
+  assert.equal(
+    filterCameras(catalog, {
+      query: "",
+      category: "private",
+      verifiedOnly: true,
+    }).length,
+    0,
+  );
+  assert.equal(
+    filterCameras(reportedCameras, {
+      query: "",
+      category: "its",
+      verifiedOnly: false,
+    }).length,
+    0,
+  );
 });
 
 test("validation rejects misleading report counts, provenance, verification and optics", () => {
   const report = reportedCameras[0];
   for (const reportedCount of [undefined, 0, -1, 1.5, 1001, "4", NaN]) {
-    assert.throws(() => validateCameraDataset([{ ...report, reportedCount }]), /reportedCount/);
+    assert.throws(
+      () => validateCameraDataset([{ ...report, reportedCount }]),
+      /reportedCount/,
+    );
   }
   for (const patch of [
-    { verified: true }, { opticsVerified: true }, { heading: 90 }, { fov: 60 }, { rangeMeters: 100 },
+    { verified: true },
+    { opticsVerified: true },
+    { heading: 90 },
+    { fov: 60 },
+    { rangeMeters: 100 },
     { sourceUrl: "https://www.openstreetmap.org/way/227002324" },
     { publicViewUrl: "https://example.com/camera" },
     { sourceKind: "unknown" },
-  ]) assert.throws(() => validateCameraDataset([{ ...report, ...patch }]));
-  assert.throws(() => validateCameraDataset([{ ...cameras[0], reportedCount: 4 }]), /user-report/);
-  assert.throws(() => validateCameraDataset([{ ...cameras[0], sourceUrl: undefined }]), /sourceUrl/);
+  ])
+    assert.throws(() => validateCameraDataset([{ ...report, ...patch }]));
+  assert.throws(
+    () => validateCameraDataset([{ ...cameras[0], reportedCount: 4 }]),
+    /user-report/,
+  );
+  assert.throws(
+    () => validateCameraDataset([{ ...cameras[0], sourceUrl: undefined }]),
+    /sourceUrl/,
+  );
 });

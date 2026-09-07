@@ -2,158 +2,367 @@ import type { Camera } from "./camera.ts";
 import { validateSnapshotSource } from "./camera-view.ts";
 type Row = Record<string, unknown>;
 function object(value: unknown, label: string): Row {
-  if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error(label + ": expected an object");
+  if (!value || typeof value !== "object" || Array.isArray(value))
+    throw new Error(label + ": expected an object");
   return value as Row;
 }
 function text(value: unknown, label: string, max = 500): string {
-  if (typeof value !== "string" || !value.trim() || value.length > max) throw new Error(label + ": expected non-empty text");
+  if (typeof value !== "string" || !value.trim() || value.length > max)
+    throw new Error(label + ": expected non-empty text");
   return value.trim();
 }
-function number(value: unknown, label: string, min: number, max: number): number {
-  if (typeof value !== "number" || !Number.isFinite(value) || value < min || value > max) throw new Error(label + ": number out of range");
+function number(
+  value: unknown,
+  label: string,
+  min: number,
+  max: number,
+): number {
+  if (
+    typeof value !== "number" ||
+    !Number.isFinite(value) ||
+    value < min ||
+    value > max
+  )
+    throw new Error(label + ": number out of range");
   return value;
 }
-function optionalNumber(value: unknown, label: string, min: number, max: number) {
-  return value === undefined || value === null ? null : number(value, label, min, max);
+function optionalNumber(
+  value: unknown,
+  label: string,
+  min: number,
+  max: number,
+) {
+  return value === undefined || value === null
+    ? null
+    : number(value, label, min, max);
 }
 function boolean(value: unknown, label: string) {
-  if (typeof value !== "boolean") throw new Error(label + ": expected a boolean");
+  if (typeof value !== "boolean")
+    throw new Error(label + ": expected a boolean");
   return value;
 }
 function date(value: unknown, label: string): string {
-  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value) || !Number.isFinite(Date.parse(value)) || new Date(value).toISOString().slice(0, 10) !== value) throw new Error(label + ": expected a real YYYY-MM-DD date");
+  if (
+    typeof value !== "string" ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(value) ||
+    !Number.isFinite(Date.parse(value)) ||
+    new Date(value).toISOString().slice(0, 10) !== value
+  )
+    throw new Error(label + ": expected a real YYYY-MM-DD date");
   return value;
 }
 export function publicUrl(value: unknown, label: string) {
   const raw = text(value, label, 2000);
   let url: URL;
-  try { url = new URL(raw); } catch { throw new Error(label + ": invalid URL"); }
-  if (url.protocol !== "https:" || url.username || url.password || !url.hostname.includes(".")
-    || /^[\d.]+$/.test(url.hostname) || url.hostname.includes(":")
-    || /(?:^|\.)(?:localhost|local|internal|test|invalid)$/.test(url.hostname)) {
-    throw new Error(label + ": expected a public HTTPS domain without credentials");
+  try {
+    url = new URL(raw);
+  } catch {
+    throw new Error(label + ": invalid URL");
+  }
+  if (
+    url.protocol !== "https:" ||
+    url.username ||
+    url.password ||
+    !url.hostname.includes(".") ||
+    /^[\d.]+$/.test(url.hostname) ||
+    url.hostname.includes(":") ||
+    /(?:^|\.)(?:localhost|local|internal|test|invalid)$/.test(url.hostname)
+  ) {
+    throw new Error(
+      label + ": expected a public HTTPS domain without credentials",
+    );
   }
   return url.href;
 }
 /** Validate at the repository boundary, including generated JSON edited by hand. */
 export function validateCameraDataset(value: unknown): Camera[] {
-  if (!Array.isArray(value) || value.length > 10000) throw new Error("Dataset must be an array with at most 10000 cameras");
+  if (!Array.isArray(value) || value.length > 10000)
+    throw new Error("Dataset must be an array with at most 10000 cameras");
   const ids = new Set<string>();
   return value.map((entry, index) => {
     const row = object(entry, "Camera " + (index + 1));
     const id = text(row.id, "id", 150);
-    if (!/^[a-zA-Z0-9._:-]+$/.test(id) || ids.has(id)) throw new Error("Invalid or duplicate camera id: " + id);
+    if (!/^[a-zA-Z0-9._:-]+$/.test(id) || ids.has(id))
+      throw new Error("Invalid or duplicate camera id: " + id);
     ids.add(id);
-    if (row.category !== "public" && row.category !== "its" && row.category !== "city" && row.category !== "private" && row.category !== "other") throw new Error(id + ": invalid category");
+    if (
+      row.category !== "public" &&
+      row.category !== "its" &&
+      row.category !== "city" &&
+      row.category !== "private" &&
+      row.category !== "other"
+    )
+      throw new Error(id + ": invalid category");
     const heading = optionalNumber(row.heading, id + ".heading", 0, 359.999999);
     const fov = optionalNumber(row.fov, id + ".fov", 1, 180);
-    const rangeMeters = optionalNumber(row.rangeMeters, id + ".rangeMeters", 1, 5000);
+    const rangeMeters = optionalNumber(
+      row.rangeMeters,
+      id + ".rangeMeters",
+      1,
+      5000,
+    );
     const opticsVerified = boolean(row.opticsVerified, id + ".opticsVerified");
     const verified = boolean(row.verified, id + ".verified");
-    if (row.sourceKind !== undefined && row.sourceKind !== "user-report" && row.sourceKind !== "open-map") throw new Error(id + ": invalid sourceKind");
+    if (
+      row.sourceKind !== undefined &&
+      row.sourceKind !== "user-report" &&
+      row.sourceKind !== "open-map"
+    )
+      throw new Error(id + ": invalid sourceKind");
     const reported = row.sourceKind === "user-report";
-    if (row.recordKind !== undefined && row.recordKind !== "site") throw new Error(id + ": invalid recordKind");
+    if (row.recordKind !== undefined && row.recordKind !== "site")
+      throw new Error(id + ": invalid recordKind");
     const site = row.recordKind === "site";
     if (row.snapshotSourceUrl !== undefined) {
-      if (site || reported || row.sourceKind === "open-map" || row.category !== "its" || row.sourceUrl !== "https://its.mzd.opole.pl/api/cameras") throw new Error(id + ": snapshots require a documented ITS camera");
+      if (
+        site ||
+        reported ||
+        row.sourceKind === "open-map" ||
+        row.category !== "its" ||
+        row.sourceUrl !== "https://its.mzd.opole.pl/api/cameras"
+      )
+        throw new Error(id + ": snapshots require a documented ITS camera");
       validateSnapshotSource(id, row.snapshotSourceUrl);
     }
     let cameraCount: number | null = null;
     if (site) {
-      if (reported || row.sourceKind === "open-map" || verified || opticsVerified || heading !== null || fov !== null || rangeMeters !== null || row.publicViewUrl !== undefined) throw new Error(id + ": documented sites require a public source, approximate location and unknown optics without a viewing link");
+      if (
+        reported ||
+        row.sourceKind === "open-map" ||
+        verified ||
+        opticsVerified ||
+        heading !== null ||
+        fov !== null ||
+        rangeMeters !== null ||
+        row.publicViewUrl !== undefined
+      )
+        throw new Error(
+          id +
+            ": documented sites require a public source, approximate location and unknown optics without a viewing link",
+        );
       if (row.cameraCount !== null) {
         cameraCount = number(row.cameraCount, id + ".cameraCount", 1, 10000);
-        if (!Number.isInteger(cameraCount)) throw new Error(id + ": cameraCount must be an integer");
+        if (!Number.isInteger(cameraCount))
+          throw new Error(id + ": cameraCount must be an integer");
         date(row.sourceDate, id + ".sourceDate");
       }
       publicUrl(row.positionSourceUrl, id + ".positionSourceUrl");
       date(row.retrievedAt, id + ".retrievedAt");
-    } else if (row.cameraCount !== undefined) throw new Error(id + ": cameraCount requires a documented site");
-    if (row.sourceKind === "open-map" && (verified || opticsVerified || row.publicViewUrl !== undefined)) throw new Error(id + ": open-map records cannot imply independently verified locations or public viewing");
-    const reportedCount = reported ? number(row.reportedCount, id + ".reportedCount", 1, 1000) : undefined;
+    } else if (row.cameraCount !== undefined)
+      throw new Error(id + ": cameraCount requires a documented site");
+    if (
+      row.sourceKind === "open-map" &&
+      (verified || opticsVerified || row.publicViewUrl !== undefined)
+    )
+      throw new Error(
+        id +
+          ": open-map records cannot imply independently verified locations or public viewing",
+      );
+    const reportedCount = reported
+      ? number(row.reportedCount, id + ".reportedCount", 1, 1000)
+      : undefined;
     if (reported) {
-      if (!Number.isInteger(reportedCount)) throw new Error(id + ": reportedCount must be an integer");
-      if (verified || opticsVerified) throw new Error(id + ": user reports cannot be verified without a public source");
-      if (row.sourceUrl !== undefined || row.publicViewUrl !== undefined) throw new Error(id + ": user reports must not imply a public source or viewing link");
-      if (heading !== null || fov !== null || rangeMeters !== null) throw new Error(id + ": reported groups require unknown optics");
+      if (!Number.isInteger(reportedCount))
+        throw new Error(id + ": reportedCount must be an integer");
+      if (verified || opticsVerified)
+        throw new Error(
+          id + ": user reports cannot be verified without a public source",
+        );
+      if (row.sourceUrl !== undefined || row.publicViewUrl !== undefined)
+        throw new Error(
+          id + ": user reports must not imply a public source or viewing link",
+        );
+      if (heading !== null || fov !== null || rangeMeters !== null)
+        throw new Error(id + ": reported groups require unknown optics");
     } else if (row.reportedCount !== undefined) {
       throw new Error(id + ": reportedCount requires a user-report source");
     }
-    if (opticsVerified && [heading, fov, rangeMeters].includes(null)) throw new Error(id + ": verified optics require all three parameters");
+    if (opticsVerified && [heading, fov, rangeMeters].includes(null))
+      throw new Error(id + ": verified optics require all three parameters");
     return {
-      id, name: text(row.name, id + ".name", 200), street: text(row.street, id + ".street", 200),
+      id,
+      name: text(row.name, id + ".name", 200),
+      street: text(row.street, id + ".street", 200),
       // Opole and nearby approaches; reject swapped coordinates and unrelated cities.
-      lat: number(row.lat, id + ".lat", 50.5, 50.85), lng: number(row.lng, id + ".lng", 17.7, 18.15),
-      category: row.category, heading, fov, rangeMeters,
-      verified, opticsVerified,
+      lat: number(row.lat, id + ".lat", 50.5, 50.85),
+      lng: number(row.lng, id + ".lng", 17.7, 18.15),
+      category: row.category,
+      heading,
+      fov,
+      rangeMeters,
+      verified,
+      opticsVerified,
       sourceLabel: text(row.sourceLabel, id + ".sourceLabel", 200),
-      ...(reported ? { sourceKind: "user-report" as const, reportedCount } : { sourceUrl: publicUrl(row.sourceUrl, id + ".sourceUrl") }),
-      ...(row.sourceKind === "open-map" ? { sourceKind: "open-map" as const } : {}),
+      ...(reported
+        ? { sourceKind: "user-report" as const, reportedCount }
+        : { sourceUrl: publicUrl(row.sourceUrl, id + ".sourceUrl") }),
+      ...(row.sourceKind === "open-map"
+        ? { sourceKind: "open-map" as const }
+        : {}),
       ...(site ? { recordKind: "site" as const, cameraCount } : {}),
-      ...(row.sourceDate === undefined ? {} : { sourceDate: date(row.sourceDate, id + ".sourceDate") }),
-      ...(row.retrievedAt === undefined ? {} : { retrievedAt: date(row.retrievedAt, id + ".retrievedAt") }),
-      ...(row.positionSourceUrl === undefined ? {} : { positionSourceUrl: publicUrl(row.positionSourceUrl, id + ".positionSourceUrl") }),
-      ...(row.positionSourceLabel === undefined ? {} : { positionSourceLabel: text(row.positionSourceLabel, id + ".positionSourceLabel", 200) }),
-      ...(row.publicViewUrl === undefined ? {} : { publicViewUrl: publicUrl(row.publicViewUrl, id + ".publicViewUrl") }),
-      ...(row.snapshotSourceUrl === undefined ? {} : { snapshotSourceUrl: validateSnapshotSource(id, row.snapshotSourceUrl) }),
-      ...(row.note === undefined ? {} : { note: text(row.note, id + ".note", 2000) }),
+      ...(row.sourceDate === undefined
+        ? {}
+        : { sourceDate: date(row.sourceDate, id + ".sourceDate") }),
+      ...(row.retrievedAt === undefined
+        ? {}
+        : { retrievedAt: date(row.retrievedAt, id + ".retrievedAt") }),
+      ...(row.positionSourceUrl === undefined
+        ? {}
+        : {
+            positionSourceUrl: publicUrl(
+              row.positionSourceUrl,
+              id + ".positionSourceUrl",
+            ),
+          }),
+      ...(row.positionSourceLabel === undefined
+        ? {}
+        : {
+            positionSourceLabel: text(
+              row.positionSourceLabel,
+              id + ".positionSourceLabel",
+              200,
+            ),
+          }),
+      ...(row.publicViewUrl === undefined
+        ? {}
+        : {
+            publicViewUrl: publicUrl(row.publicViewUrl, id + ".publicViewUrl"),
+          }),
+      ...(row.snapshotSourceUrl === undefined
+        ? {}
+        : {
+            snapshotSourceUrl: validateSnapshotSource(
+              id,
+              row.snapshotSourceUrl,
+            ),
+          }),
+      ...(row.note === undefined
+        ? {}
+        : { note: text(row.note, id + ".note", 2000) }),
     };
   });
 }
 /** A curator's export of the documented public ITS map. This adapter never fetches URLs. */
 export function importItsExport(value: unknown): Camera[] {
   const input = object(value, "ITS export");
-  if (input.schemaVersion !== 1) throw new Error("Unsupported schemaVersion; expected 1");
+  if (input.schemaVersion !== 1)
+    throw new Error("Unsupported schemaVersion; expected 1");
   const sourceUrl = publicUrl(input.sourceUrl, "sourceUrl");
-  if (new URL(sourceUrl).hostname !== "its.mzd.opole.pl") throw new Error("ITS sourceUrl must refer to the official public ITS Opole portal");
-  if (typeof input.retrievedAt !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(input.retrievedAt)
-    || !Number.isFinite(Date.parse(input.retrievedAt)) || new Date(input.retrievedAt).toISOString().slice(0, 10) !== input.retrievedAt) {
+  if (new URL(sourceUrl).hostname !== "its.mzd.opole.pl")
+    throw new Error(
+      "ITS sourceUrl must refer to the official public ITS Opole portal",
+    );
+  if (
+    typeof input.retrievedAt !== "string" ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(input.retrievedAt) ||
+    !Number.isFinite(Date.parse(input.retrievedAt)) ||
+    new Date(input.retrievedAt).toISOString().slice(0, 10) !== input.retrievedAt
+  ) {
     throw new Error("retrievedAt must be a real YYYY-MM-DD date");
   }
-  if (!Array.isArray(input.cameras) || input.cameras.length === 0 || input.cameras.length > 10000) {
-    throw new Error("ITS export must contain 1–10000 cameras; empty imports cannot erase the dataset");
+  if (
+    !Array.isArray(input.cameras) ||
+    input.cameras.length === 0 ||
+    input.cameras.length > 10000
+  ) {
+    throw new Error(
+      "ITS export must contain 1–10000 cameras; empty imports cannot erase the dataset",
+    );
   }
-  return validateCameraDataset(input.cameras.map((entry, index) => {
-    const row = object(entry, "ITS row " + (index + 1));
-    return {
-      id: "its:" + text(row.id, "id", 100), name: row.name, street: row.street,
-      lat: row.lat, lng: row.lng, category: "its", heading: row.heading ?? null,
-      fov: row.fov ?? null, rangeMeters: row.rangeMeters ?? null,
-      verified: false, opticsVerified: false,
-      sourceLabel: "ITS Opole · Miejski Zarząd Dróg", sourceUrl,
-      ...(row.publicViewUrl === undefined ? {} : { publicViewUrl: row.publicViewUrl }),
-      ...(row.snapshotSourceUrl === undefined ? {} : { snapshotSourceUrl: row.snapshotSourceUrl }),
-      note: "Импорт из публичного источника от " + input.retrievedAt + ". Координаты и параметры требуют проверки.",
-    };
-  }));
+  return validateCameraDataset(
+    input.cameras.map((entry, index) => {
+      const row = object(entry, "ITS row " + (index + 1));
+      return {
+        id: "its:" + text(row.id, "id", 100),
+        name: row.name,
+        street: row.street,
+        lat: row.lat,
+        lng: row.lng,
+        category: "its",
+        heading: row.heading ?? null,
+        fov: row.fov ?? null,
+        rangeMeters: row.rangeMeters ?? null,
+        verified: false,
+        opticsVerified: false,
+        sourceLabel: "ITS Opole · Miejski Zarząd Dróg",
+        sourceUrl,
+        ...(row.publicViewUrl === undefined
+          ? {}
+          : { publicViewUrl: row.publicViewUrl }),
+        ...(row.snapshotSourceUrl === undefined
+          ? {}
+          : { snapshotSourceUrl: row.snapshotSourceUrl }),
+        note:
+          "Импорт из публичного источника от " +
+          input.retrievedAt +
+          ". Координаты и параметры требуют проверки.",
+      };
+    }),
+  );
 }
 
 /** Observed public /api/cameras GeoJSON. Import remains offline; snapshots load only on user action. */
 export function importItsGeoJson(value: unknown): Camera[] {
   const input = object(value, "ITS GeoJSON export");
-  if (input.schemaVersion !== 1 || input.format !== "its-geojson-v1") throw new Error("Unsupported ITS GeoJSON format or schemaVersion");
-  if (input.sourceUrl !== "https://its.mzd.opole.pl/api/cameras") throw new Error("GeoJSON sourceUrl must be the observed official public camera endpoint");
+  if (input.schemaVersion !== 1 || input.format !== "its-geojson-v1")
+    throw new Error("Unsupported ITS GeoJSON format or schemaVersion");
+  if (input.sourceUrl !== "https://its.mzd.opole.pl/api/cameras")
+    throw new Error(
+      "GeoJSON sourceUrl must be the observed official public camera endpoint",
+    );
   const collection = object(input.collection, "collection");
-  if (collection.type !== "FeatureCollection" || !Array.isArray(collection.features) || collection.features.length === 0 || collection.features.length > 10000) {
+  if (
+    collection.type !== "FeatureCollection" ||
+    !Array.isArray(collection.features) ||
+    collection.features.length === 0 ||
+    collection.features.length > 10000
+  ) {
     throw new Error("Expected a FeatureCollection with 1–10000 cameras");
   }
   const cameras = collection.features.map((entry, index) => {
     const feature = object(entry, "Feature " + (index + 1));
     const geometry = object(feature.geometry, "geometry");
     const properties = object(feature.properties, "properties");
-    if (feature.type !== "Feature" || geometry.type !== "Point" || !Array.isArray(geometry.coordinates) || geometry.coordinates.length !== 2) {
-      throw new Error("Camera geometry must be a Point with [longitude, latitude]");
+    if (
+      feature.type !== "Feature" ||
+      geometry.type !== "Point" ||
+      !Array.isArray(geometry.coordinates) ||
+      geometry.coordinates.length !== 2
+    ) {
+      throw new Error(
+        "Camera geometry must be a Point with [longitude, latitude]",
+      );
     }
-    if (typeof properties.id !== "number" || !Number.isSafeInteger(properties.id) || properties.id < 1) throw new Error("Camera id must be a positive safe integer");
+    if (
+      typeof properties.id !== "number" ||
+      !Number.isSafeInteger(properties.id) ||
+      properties.id < 1
+    )
+      throw new Error("Camera id must be a positive safe integer");
     return {
-      id: String(properties.id), name: properties.name, street: properties.description,
-      lng: geometry.coordinates[0], lat: geometry.coordinates[1],
+      id: String(properties.id),
+      name: properties.name,
+      street: properties.description,
+      lng: geometry.coordinates[0],
+      lat: geometry.coordinates[1],
       publicViewUrl: "https://its.mzd.opole.pl/mapa",
-      ...(properties.image === `/cameras/${properties.id}/images` ? { snapshotSourceUrl: `https://its.mzd.opole.pl/api${properties.image}` } : {}),
+      ...(properties.image === `/cameras/${properties.id}/images`
+        ? {
+            snapshotSourceUrl: `https://its.mzd.opole.pl/api${properties.image}`,
+          }
+        : {}),
     };
   });
-  return importItsExport({ schemaVersion: 1, sourceUrl: input.sourceUrl, retrievedAt: input.retrievedAt, cameras }).map((camera) => ({
+  return importItsExport({
+    schemaVersion: 1,
+    sourceUrl: input.sourceUrl,
+    retrievedAt: input.retrievedAt,
+    cameras,
+  }).map((camera) => ({
     ...camera,
-    note: "Координаты и название опубликованы ITS Opole, получены " + input.retrievedAt + ". Точность места установки не проверена. Направление, угол обзора и дальность в источнике не указаны. Доступность снимка проверяется при открытии просмотра.",
+    note:
+      "Координаты и название опубликованы ITS Opole, получены " +
+      input.retrievedAt +
+      ". Точность места установки не проверена. Направление, угол обзора и дальность в источнике не указаны. Доступность снимка проверяется при открытии просмотра.",
   }));
 }

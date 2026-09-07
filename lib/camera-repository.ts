@@ -5,5 +5,10 @@ import publicCameras from "../data/public-cameras.json";
 import { validateCameraDataset } from "./import-cameras.ts";
 // Replace this boundary with a database/API without changing map components.
 export async function getCameras() {
-  return validateCameraDataset([...cameras, ...importedCameras, ...reportedCameras, ...publicCameras]);
+  return validateCameraDataset([
+    ...cameras,
+    ...importedCameras,
+    ...reportedCameras,
+    ...publicCameras,
+  ]);
 }

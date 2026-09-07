@@ -4,12 +4,12 @@
 
 На [официальной странице города](https://www.opole.pl/opole-okiem-kamery) проверены подписи и адреса четырёх iframe. В обычном Edge каждый адрес плеера отвечает HTTP 200 и открывает отдельный вид:
 
-| Запись | Плеер, опубликованный городом |
-| --- | --- |
-| Aleja Gwiazd | https://player.webcamera.pl/opole_cam_8b53d4 |
-| Wieża Piastowska / Amfiteatr | https://airmax.pl/ratuszopole1.html |
-| Katedra | https://airmax.pl/ratuszopole3.html |
-| ul. Św. Wojciecha / Na Górce | https://airmax.pl/ratuszopole2.html |
+| Запись                       | Плеер, опубликованный городом                |
+| ---------------------------- | -------------------------------------------- |
+| Aleja Gwiazd                 | https://player.webcamera.pl/opole_cam_8b53d4 |
+| Wieża Piastowska / Amfiteatr | https://airmax.pl/ratuszopole1.html          |
+| Katedra                      | https://airmax.pl/ratuszopole3.html          |
+| ul. Św. Wojciecha / Na Górce | https://airmax.pl/ratuszopole2.html          |
 
 `sourceUrl` по-прежнему ведёт на городскую страницу, `publicViewUrl` — на соответствующий плеер. Это обычная ссылка в новой вкладке, без извлечения потока. Кнопки издателя, включая запуск видео, сохраняются. HTTP 200 и наличие плеера не означают гарантированную работу трансляции.
 
