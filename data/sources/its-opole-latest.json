@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "format": "its-geojson-v1",
   "sourceUrl": "https://its.mzd.opole.pl/api/cameras",
-  "retrievedAt": "2026-09-03",
-  "responseSha256": "0aa45044a4bf553ad083bf8e24a4084210881c27b885d2d2443e0eae670f6419",
+  "retrievedAt": "2026-09-07",
+  "responseSha256": "841ace21567baa47757dcb64495734868b619634aef641608771890044c3c863",
   "collection": {
     "type": "FeatureCollection",
     "features": [

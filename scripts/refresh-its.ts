@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
 import { importItsGeoJson } from "../lib/import-cameras.ts";
+import { fetchItsCatalogue } from "./its-request.ts";
 
 const sourceUrl = "https://its.mzd.opole.pl/api/cameras";
 const snapshotUrl = new URL(
@@ -10,16 +11,7 @@ const snapshotUrl = new URL(
 const catalogUrl = new URL("../data/its-cameras.json", import.meta.url);
 
 async function main() {
-  const response = await fetch(sourceUrl, {
-    headers: {
-      Accept: "application/geo+json",
-      "User-Agent":
-        "OpoleCameraMap/0.1 (+https://github.com/Paremik/camera-map)",
-    },
-    signal: AbortSignal.timeout(20_000),
-  });
-  if (!response.ok) throw new Error("ITS returned HTTP " + response.status);
-  const collection: unknown = await response.json();
+  const collection = await fetchItsCatalogue();
   const raw = JSON.stringify(collection);
   const responseSha256 = createHash("sha256").update(raw).digest("hex");
   try {
