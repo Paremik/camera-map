@@ -1,19 +1,29 @@
+import { I18nProvider } from "@/lib/i18n";
 import type { Metadata } from "next";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Opole Camera Map",
-  description: "Карта камер Opole: публичные источники, отметки пользователей и режимы 2D/3D.",
+  description:
+    "Карта камер Opole: публичные источники, отметки пользователей и режимы 2D/3D.",
   manifest: "/manifest.webmanifest",
   applicationName: "Opole Camera Map",
-  appleWebApp: { capable: true, title: "Opole Cameras", statusBarStyle: "black-translucent" },
+  appleWebApp: {
+    capable: true,
+    title: "Opole Cameras",
+    statusBarStyle: "black-translucent",
+  },
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ru">
-      <body>{children}</body>
+      <body>
+        <I18nProvider>{children}</I18nProvider>
+      </body>
     </html>
   );
 }

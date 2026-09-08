@@ -12,3 +12,6 @@ data/*.tmp
 .DS_Store
 
 .vercel
+
+/AGENTS.md
+/CLAUDE.md
