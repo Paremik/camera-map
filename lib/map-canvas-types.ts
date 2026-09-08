@@ -1,0 +1,30 @@
+import type { Camera } from "./camera";
+import type { StreetHighlight } from "./street-search";
+import type { AnalysisMode, LngLat } from "./map-analysis";
+import type { MapView } from "./map-state";
+import type { IncidentPoint } from "./insurance-case";
+
+export type MapCanvasProps = {
+  cameras: Camera[];
+  selected: Camera | null;
+  onSelect: (camera: Camera) => void;
+  is3D: boolean;
+  showSectors: boolean;
+  resetRequest: number;
+  focusRequest: number;
+  street: StreetHighlight | null;
+  streetFocusRequest: number;
+  mapTheme: "light" | "dark";
+  coverageMode: boolean;
+  heatmapMode: boolean;
+  droneZonesMode: boolean;
+  analysisMode: AnalysisMode;
+  analysisPoints: LngLat[];
+  onAnalysisPoint: (point: LngLat) => void;
+  incidentPoint: IncidentPoint | null;
+  incidentPickMode: boolean;
+  onIncidentPoint: (point: IncidentPoint) => void;
+  initialView: MapView | null;
+  viewRequest: { id: number; view: MapView } | null;
+  onViewChange: (view: MapView) => void;
+};

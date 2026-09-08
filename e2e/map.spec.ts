@@ -1,4 +1,44 @@
 import { test, expect } from "@playwright/test";
+const localeCases = [
+  ["en", "Insurance incident", "Zoom in", "What is known about Opole cameras"],
+  [
+    "pl",
+    "Zdarzenie ubezpieczeniowe",
+    "Przybliż",
+    "Co wiadomo o kamerach w Opolu",
+  ],
+  ["uk", "Страховий випадок", "Наблизити", "Що відомо про камери Ополя"],
+  ["ru", "Страховой случай", "Приблизить", "Что известно о камерах Opole"],
+] as const;
+for (const [locale, insurance, zoom, sources] of localeCases) {
+  test(`${locale}: insurance, map controls and sources follow selected language`, async ({
+    page,
+  }, testInfo) => {
+    await page.goto("/");
+    await expect(page.locator(".shell")).toHaveCount(1);
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+    await page.locator(".experience-tools select").selectOption(locale);
+    await expect(page.locator(".map")).toHaveAttribute("data-ready", "true", {
+      timeout: 30000,
+    });
+    await expect(page.locator(".insurance-panel summary")).toContainText(
+      insurance,
+    );
+    await expect(page.locator(".maplibregl-ctrl-zoom-in")).toHaveAttribute(
+      "aria-label",
+      zoom,
+    );
+    await page.locator(".insurance-panel summary").click();
+    await page.screenshot({
+      path: testInfo.outputPath(`${locale}-insurance.png`),
+    });
+    await page.locator(".sources-button").click();
+    await expect(page.locator("#sources-title")).toHaveText(sources);
+    await page.screenshot({
+      path: testInfo.outputPath(`${locale}-sources.png`),
+    });
+  });
+}
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() =>
     localStorage.setItem("opole-camera-map:locale", "en"),
