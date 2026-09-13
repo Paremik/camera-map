@@ -1,7 +1,10 @@
-type IconName = "camera" | "search" | "pin" | "center" | "close" | "sector" | "list" | "star" | "link" | "play" | "shield";
+type IconName = "camera" | "search" | "pin" | "center" | "close" | "sector" | "list" | "star" | "link" | "play" | "shield" | "tools" | "map" | "streetview";
 const paths: Record<IconName, React.ReactNode> = {
   play: <path d="m8 4 12 8-12 8Z" />,
   shield: <path d="M12 3 20 6v5c0 5.1-3.4 8.5-8 10-4.6-1.5-8-4.9-8-10V6Z" />,
+  tools: <><path d="M4 7h16M4 17h16" /><circle cx="9" cy="7" r="2" /><circle cx="15" cy="17" r="2" /></>,
+  map: <><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3Z" /><path d="M9 3v15m6-12v15" /></>,
+  streetview: <><circle cx="12" cy="5.5" r="2.5" /><path d="M8.5 21v-5l1.4-5.5a2.2 2.2 0 0 1 4.2 0l1.4 5.5v5M8 13h8M7 21h10" /></>,
   camera: <><rect x="3" y="6" width="13" height="12" rx="3" /><path d="m16 10 5-3v10l-5-3" /><circle cx="9.5" cy="12" r="2.5" /></>,
   search: <><circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 5 5" /></>,
   pin: <><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z" /><circle cx="12" cy="10" r="2" /></>,

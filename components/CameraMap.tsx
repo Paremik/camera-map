@@ -22,8 +22,9 @@ import { mapShareLink, readMapShareState, type MapView } from "@/lib/map-state";
 import type { AnalysisMode, AnalysisSelection, LngLat } from "@/lib/map-analysis";
 import AdminPanel from "./AdminPanel";
 import { adminDraftStorageKey, applyAdminDrafts, parseAdminDrafts, type CameraAdminDrafts, type CameraAdminPatch } from "@/lib/admin-drafts";
-import { droneTowerUrl } from "@/lib/drone-zones";
+import { airspaceMapUrl, droneTowerUrl, droneZoneSourceUrl, epopAtz } from "@/lib/drone-zones";
 import type { IncidentKind, IncidentPoint } from "@/lib/insurance-case";
+import CatalogGovernancePanel from "./CatalogGovernancePanel";
 
 const MapCanvas = dynamic(() => import("./MapCanvas"), {
   ssr: false, loading: () => <div className="map-loading" role="status">Загружаем карту Opole…</div>,
@@ -53,6 +54,7 @@ function CameraMapInner({ cameras: sourceCameras }: { cameras: Camera[] }) {
   const [resetRequest, setResetRequest] = useState(0);
   const [focusRequest, setFocusRequest] = useState(0);
   const [mobileList, setMobileList] = useState(false);
+  const [sidebarTab, setSidebarTab] = useState<"catalog" | "tools">("catalog");
   const [snapshotCamera, setSnapshotCamera] = useState<Camera | null>(null);
   const [street, setStreet] = useState<StreetHighlight | null>(null);
   const [streetFocusRequest, setStreetFocusRequest] = useState(0);
@@ -61,6 +63,9 @@ function CameraMapInner({ cameras: sourceCameras }: { cameras: Camera[] }) {
   const [coverageMode, setCoverageMode] = useState(false);
   const [heatmapMode, setHeatmapMode] = useState(false);
   const [droneZonesMode, setDroneZonesMode] = useState(false);
+  const [droneInfoOpen, setDroneInfoOpen] = useState(false);
+  const [streetViewMode, setStreetViewMode] = useState(false);
+  const [highContrast, setHighContrast] = useState(false);
   const [availability, setAvailability] = useState<Record<string, CameraAvailability>>({});
   const [analysisMode, setAnalysisMode] = useState<AnalysisMode>("none");
   const [analysisPoints, setAnalysisPoints] = useState<LngLat[]>([]);
@@ -101,6 +106,7 @@ function CameraMapInner({ cameras: sourceCameras }: { cameras: Camera[] }) {
     setInvalidLink(false);
     setSelectedId(camera.id);
     setFocusRequest((value) => value + 1);
+    setDroneInfoOpen(false);
     setMobileList(false);
     if (window.innerWidth <= 760) requestAnimationFrame(() => document.getElementById("camera-details-title")?.focus());
   }, []);
@@ -110,6 +116,22 @@ function CameraMapInner({ cameras: sourceCameras }: { cameras: Camera[] }) {
   function closeCamera() {
     updateCameraUrl(null);
     setSelectedId(null);
+  }
+  function showDroneZone() {
+    if (selectedId) {
+      updateCameraUrl(null);
+      setSelectedId(null);
+    }
+    setDroneInfoOpen(true);
+  }
+  function toggleDroneZones() {
+    const next = !droneZonesMode;
+    setDroneZonesMode(next);
+    setDroneInfoOpen(next);
+    if (next && selectedId) {
+      updateCameraUrl(null);
+      setSelectedId(null);
+    }
   }
   function showStreet(result: StreetHighlight) {
     setStreet(result);
@@ -141,6 +163,7 @@ function CameraMapInner({ cameras: sourceCameras }: { cameras: Camera[] }) {
       setCoverageMode(shared.coverage);
       setHeatmapMode(shared.heatmap);
       setDroneZonesMode(shared.droneZones);
+      setDroneInfoOpen(shared.droneZones);
       setIncidentPoint(shared.incident);
       setIncidentKind(shared.incident?.kind ?? "crash");
       setIncidentAt(shared.incident?.occurredAt ?? "");
@@ -182,6 +205,20 @@ function CameraMapInner({ cameras: sourceCameras }: { cameras: Camera[] }) {
   function changeAnalysisMode(mode: AnalysisMode) { setAnalysisMode(mode); setAnalysisPoints([]); }
   function beginIncidentPick() { setIncidentPickMode(value => !value); setAnalysisMode("none"); setAnalysisPoints([]); }
   function setIncident(point: IncidentPoint) { setIncidentPoint({ ...point, kind: incidentKind, occurredAt: incidentAt || null }); setIncidentPickMode(false); setSelectedId(null); }
+  function openStreetView([lng, lat]: LngLat) {
+    const url = new URL("https://www.google.com/maps/@");
+    url.searchParams.set("api", "1");
+    url.searchParams.set("map_action", "pano");
+    url.searchParams.set("viewpoint", `${lat.toFixed(6)},${lng.toFixed(6)}`);
+    const panoramaWindow = window.open(url.toString(), "_blank");
+    if (panoramaWindow) {
+      panoramaWindow.opener = null;
+      panoramaWindow.focus();
+    } else {
+      window.location.assign(url.toString());
+    }
+    setStreetViewMode(false);
+  }
   async function shareMap() {
     const url = mapShareLink(window.location.href, { cameraId: selectedId, layers: enabledLayers, is3D, theme: mapTheme, coverage: coverageMode, heatmap: heatmapMode, droneZones: droneZonesMode, street: street?.name ?? null, incident: currentIncident, view: mapView });
     try { await navigator.clipboard.writeText(url); return true; } catch { window.prompt(t("copyError"), url); return false; }
@@ -198,17 +235,21 @@ function CameraMapInner({ cameras: sourceCameras }: { cameras: Camera[] }) {
       if (key === "f") void (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen());
       if (key === "r") setResetRequest(value => value + 1);
       if (key === "c") setCoverageMode(value => !value);
-      if (key === "d") setDroneZonesMode(value => !value);
+      if (key === "d") {
+        setDroneZonesMode(value => { setDroneInfoOpen(!value); return !value; });
+        if (selectedId) { updateCameraUrl(null); setSelectedId(null); }
+      }
       if (key === "a") changeAnalysisMode("area");
       if (key === "t") changeAnalysisMode("route");
-      if (event.key === "Escape" && selectedId) closeCamera();
+      if (event.key === "Escape" && streetViewMode) setStreetViewMode(false);
+      else if (event.key === "Escape" && selectedId) closeCamera();
     }
     window.addEventListener("keydown", shortcut);
     return () => window.removeEventListener("keydown", shortcut);
   }, [selectedId]);
 
   return (
-    <div className="shell">
+    <div className={"shell" + (highContrast ? " high-contrast" : "")}>
       <a className="skip-link" href="#camera-search" onClick={() => { if (window.innerWidth <= 760) setMobileList(true); }}>{t("skipSearch")}</a>
       <aside className={"sidebar" + (mobileList ? " mobile-open" : "")} aria-label={t("catalogLabel")}>
         <header className="brand">
@@ -216,18 +257,18 @@ function CameraMapInner({ cameras: sourceCameras }: { cameras: Camera[] }) {
           <div><p className="eyebrow">{t("cityLens")}</p><h1>Opole<span> / cameras</span></h1></div>
           <button className="icon-button mobile-close" aria-label={t("closeList")} onClick={() => { setMobileList(false); requestAnimationFrame(() => listButtonRef.current?.focus()); }}><Icon name="close" /></button>
         </header>
-        <div className="sidebar-intro">
-          <p>{t("cityMap")}</p>
-          <div className="catalog-stats"><span><b>{totalCount}</b> {t("cameras")}</span><span><b>{totalSites}</b> {t("objects")}</span></div>
-          <p className="catalog-explanation">{t("catalogExplanation")} {verifiedCount}.</p>
-          {reportedCount > 0 && <p className="catalog-provenance">{t("reportedPrefix")} {reportedCount}</p>}
-          <SourceOverview cameras={cameras} />
-        </div>
-        <div className="experience-tools"><label><span>{t("language")}</span><select aria-label={t("language")} value={locale} onChange={event => setLocale(event.target.value as Locale)}>{Object.entries(languages).map(([code, name]) => <option key={code} value={code}>{name}</option>)}</select></label><div><span>{t("mapTheme")}</span><button aria-pressed={mapTheme === "light"} onClick={() => changeTheme("light")}>{t("light")}</button><button aria-pressed={mapTheme === "dark"} onClick={() => changeTheme("dark")}>{t("dark")}</button></div><AppInstall /></div>
-        <StreetSearch street={street} onFound={showStreet} onClear={() => setStreet(null)} />
-        <AnalysisPanel cameras={visible} catalog={cameras} mode={analysisMode} selection={analysisSelection} view={mapView} onMode={changeAnalysisMode} onClear={() => { setAnalysisMode("none"); setAnalysisPoints([]); }} onPreset={requestView} onSelect={selectCamera} onSnapshot={setSnapshotCamera} onShare={shareMap} />
-          <InsuranceCasePanel cameras={cameras} point={currentIncident} picking={incidentPickMode} onPick={beginIncidentPick} onClear={() => { setIncidentPoint(null); setIncidentPickMode(false); }} onSelect={selectCamera} incidentKind={incidentKind} incidentAt={incidentAt} onIncidentKind={setIncidentKind} onIncidentAt={setIncidentAt} onShareIncident={shareMap} />
+        <nav className="sidebar-navigation" aria-label={t("sidebarNavigation")}>
+          <button aria-current={sidebarTab === "catalog" ? "page" : undefined} onClick={() => setSidebarTab("catalog")}><Icon name="camera" />{t("sidebarCatalog")}</button>
+          <button aria-current={sidebarTab === "tools" ? "page" : undefined} onClick={() => setSidebarTab("tools")}><Icon name="tools" />{t("sidebarTools")}</button>
+        </nav>
+        {sidebarTab === "catalog" ? <>
+        <section className="user-panel-intro" aria-labelledby="camera-search-title">
+          <p className="eyebrow">{t("userPanelEyebrow")}</p>
+          <h2 id="camera-search-title">{t("userPanelTitle")}</h2>
+          <p>{t("userPanelHint")}</p>
+        </section>
         <div className="filters">
+          <label className="panel-field-label" htmlFor="camera-search">{t("searchCameras")}</label>
           <label className="search-field" htmlFor="camera-search"><Icon name="search" />
             <input id="camera-search" type="search" aria-label={t("cameraSearchLabel")} placeholder={t("cameraSearch")} value={query} onChange={(event) => { setQuery(event.target.value); setPageSize(50); }} />
           </label>
@@ -241,7 +282,6 @@ function CameraMapInner({ cameras: sourceCameras }: { cameras: Camera[] }) {
             <option value="other">{t("layerOther")}</option>
           </select>
           <label className="check-row"><input type="checkbox" checked={verifiedOnly} onChange={(event) => { setVerifiedOnly(event.target.checked); setPageSize(50); }} /> {t("verifiedOnly")}</label>
-          <details className="layer-filter"><summary>{t("layers")}</summary><div>{cameraLayers.map(layer => <label key={layer}><input type="checkbox" checked={enabledLayers.has(layer)} onChange={() => toggleLayer(layer)} /><span>{t("layer" + layer[0].toUpperCase() + layer.slice(1))}</span><b>{layerCounts[layer]}</b></label>)}</div></details>
           <div className="catalog-switch" role="group" aria-label={t("catalogOrFavorites")}>
             <button aria-pressed={!favoritesOnly} onClick={() => { setFavoritesOnly(false); setPageSize(50); }}>{t("allCameras")}</button>
             <button aria-pressed={favoritesOnly} disabled={!favorites.ready} onClick={() => { setFavoritesOnly(true); setPageSize(50); }}><Icon name="star" /> {t("favorites")} <span>{favorites.ids.length}</span></button>
@@ -249,6 +289,21 @@ function CameraMapInner({ cameras: sourceCameras }: { cameras: Camera[] }) {
           {favoritesOnly && <p className="favorites-note">{t("favoriteLocal")}</p>}
           {favorites.storageError && <p className="storage-warning" role="status">{t("storageWarning")}</p>}
         </div>
+        <details className="user-panel-details">
+          <summary><Icon name="tools" /><span>{t("userPanelSettings")}</span><small>{t("userPanelSettingsHint")}</small></summary>
+          <div className="user-panel-settings">
+            <div className="sidebar-intro">
+              <p>{t("cityMap")}</p>
+              <div className="catalog-stats"><span><b>{totalCount}</b> {t("cameras")}</span><span><b>{totalSites}</b> {t("objects")}</span></div>
+              <p className="catalog-explanation">{t("catalogExplanation")} {verifiedCount}.</p>
+              {reportedCount > 0 && <p className="catalog-provenance">{t("reportedPrefix")} {reportedCount}</p>}
+              <SourceOverview cameras={cameras} />
+            </div>
+            <div className="experience-tools"><label><span>{t("language")}</span><select aria-label={t("language")} value={locale} onChange={event => setLocale(event.target.value as Locale)}>{Object.entries(languages).map(([code, name]) => <option key={code} value={code}>{name}</option>)}</select></label><div><span>{t("mapTheme")}</span><button aria-pressed={mapTheme === "light"} onClick={() => changeTheme("light")}>{t("light")}</button><button aria-pressed={mapTheme === "dark"} onClick={() => changeTheme("dark")}>{t("dark")}</button></div><AppInstall /></div>
+            <StreetSearch street={street} onFound={showStreet} onClear={() => setStreet(null)} />
+            <details className="layer-filter"><summary>{t("layers")}</summary><div>{cameraLayers.map(layer => <label key={layer}><input type="checkbox" checked={enabledLayers.has(layer)} onChange={() => toggleLayer(layer)} /><span>{t("layer" + layer[0].toUpperCase() + layer.slice(1))}</span><b>{layerCounts[layer]}</b></label>)}</div></details>
+          </div>
+        </details>
         <div className="list-heading"><span>{t("records")}</span><span aria-live="polite">{visible.length} {t("of")} {cameras.length}</span></div>
         <div className="camera-list">
           {visible.slice(0, pageSize).map((camera) => (
@@ -265,14 +320,21 @@ function CameraMapInner({ cameras: sourceCameras }: { cameras: Camera[] }) {
           {visible.length === 0 && <div className="empty-state" role="status"><Icon name={favoritesOnly ? "star" : "search"} /><h2>{favoritesOnly && favorites.ids.length === 0 ? t("emptyFavorites") : t("noCameras")}</h2><p>{favoritesOnly && favorites.ids.length === 0 ? t("favoriteHint") : verifiedOnly ? t("verifiedEmpty") : t("tryOther")}</p><button className="secondary-button" onClick={resetFilters}>{favoritesOnly && favorites.ids.length === 0 ? t("showAll") : t("resetFilters")}</button></div>}
         </div>
         <footer className="sidebar-footer"><span className="small-dot" /> {t("publicFooter")}<a href="https://its.mzd.opole.pl/mapa" target="_blank" rel="noopener noreferrer">ITS Opole ↗</a></footer>
+        </> : <div className="sidebar-tools">
+          <p className="sidebar-tab-hint">{t("sidebarToolsHint")}</p>
+        <AnalysisPanel cameras={visible} catalog={cameras} mode={analysisMode} selection={analysisSelection} view={mapView} onMode={changeAnalysisMode} onClear={() => { setAnalysisMode("none"); setAnalysisPoints([]); }} onPreset={requestView} onSelect={selectCamera} onSnapshot={setSnapshotCamera} onShare={shareMap} />
+        <InsuranceCasePanel cameras={cameras} point={currentIncident} picking={incidentPickMode} onPick={beginIncidentPick} onClear={() => { setIncidentPoint(null); setIncidentPickMode(false); }} onSelect={selectCamera} incidentKind={incidentKind} incidentAt={incidentAt} onIncidentKind={setIncidentKind} onIncidentAt={setIncidentAt} onShareIncident={shareMap} />
+        <CatalogGovernancePanel cameras={cameras} onSelect={selectCamera} highContrast={highContrast} onHighContrast={() => setHighContrast(value => !value)} />
+        </div>}
       </aside>
 
       <main className="map-workspace" aria-label={t("mapLabel")} inert={mobileList}>
-        <MapCanvas cameras={visible} selected={selected} onSelect={selectCamera} is3D={is3D} showSectors={showSectors} resetRequest={resetRequest} focusRequest={focusRequest} street={street} streetFocusRequest={streetFocusRequest} mapTheme={mapTheme} coverageMode={coverageMode} heatmapMode={heatmapMode} droneZonesMode={droneZonesMode} analysisMode={analysisMode} analysisPoints={analysisPoints} onAnalysisPoint={addAnalysisPoint} incidentPoint={currentIncident} incidentPickMode={incidentPickMode} onIncidentPoint={setIncident} initialView={null} viewRequest={viewRequest} onViewChange={setMapView} />
+        <MapCanvas key={`${mapTheme}-${is3D}`} cameras={visible} selected={selected} onSelect={selectCamera} is3D={is3D} showSectors={showSectors} resetRequest={resetRequest} focusRequest={focusRequest} street={street} streetFocusRequest={streetFocusRequest} mapTheme={mapTheme} coverageMode={coverageMode} heatmapMode={heatmapMode} droneZonesMode={droneZonesMode} droneGeneralLabel={t("droneGeneralMapLabel")} onDroneZoneSelect={showDroneZone} analysisMode={analysisMode} analysisPoints={analysisPoints} onAnalysisPoint={addAnalysisPoint} incidentPoint={currentIncident} incidentPickMode={incidentPickMode} onIncidentPoint={setIncident} streetViewMode={streetViewMode} onStreetViewRequest={openStreetView} initialView={null} viewRequest={viewRequest} onViewChange={setMapView} />
         <div className="map-topbar">
           <div className="location-chip"><Icon name="pin" /><div><strong>Opole</strong><span>{visibleCount} {t("cameras")} · {visibleSites} {t("objects")}</span></div></div>
           <div className="map-actions">
             <div className="mode-switch" role="group" aria-label={t("mapMode")}><button aria-pressed={!is3D} onClick={() => setIs3D(false)}>2D</button><button aria-pressed={is3D} onClick={() => setIs3D(true)} title={t("tiltTitle")}>3D</button></div>
+            <button className="street-view-button" aria-pressed={streetViewMode} title={t("streetView")} onClick={() => { setStreetViewMode(value => !value); setAnalysisMode("none"); setAnalysisPoints([]); setIncidentPickMode(false); }}><Icon name="streetview" /><span>{t("streetViewShort")}</span></button>
             <button className="admin-button" onClick={() => setAdminOpen(true)}>{t("adminShort")}{Object.keys(adminDrafts).length ? <span>{Object.keys(adminDrafts).length}</span> : null}</button>
             <button className="icon-button center-button" title={t("centerMap")} aria-label={t("centerMap")} onClick={() => setResetRequest((value) => value + 1)}><Icon name="center" /></button>
           </div>
@@ -282,17 +344,44 @@ function CameraMapInner({ cameras: sourceCameras }: { cameras: Camera[] }) {
           <button className="sector-toggle" aria-pressed={showSectors} onClick={() => setShowSectors((value) => !value)}><Icon name="sector" /> {t("sectors")} <span>{showSectors ? t("enabled") : t("disabled")}</span></button>
           <button className="sector-toggle coverage-toggle" aria-pressed={coverageMode} onClick={() => setCoverageMode(value => !value)}>{t("coverage")} <span>{coverageMode ? t("coverageOn") : "—"}</span></button>
           <button className="sector-toggle heatmap-toggle" aria-pressed={heatmapMode} onClick={() => setHeatmapMode(value => !value)}>{t("heatmap")} <span>{heatmapMode ? t("coverageOn") : "—"}</span></button>
-          <button className="sector-toggle drone-toggle" aria-pressed={droneZonesMode} onClick={() => setDroneZonesMode(value => !value)}>{t("droneZones")} <span>{droneZonesMode ? t("coverageOn") : "—"}</span></button>
-          <span className="map-caption">{is3D ? t("viewTilt") : t("viewTop")}</span>
+          <button className="sector-toggle drone-toggle" aria-pressed={droneZonesMode} onClick={toggleDroneZones}>{t("droneZones")} <span>{droneZonesMode ? t("coverageOn") : "—"}</span></button>
+          <span className="map-caption">{is3D ? mapTheme === "dark" ? "Ночной 3D · объёмные здания OpenStreetMap" : t("viewTilt") : t("viewTop")}</span>
+          {is3D && <span className="map-caption rotate-hint">{t("rotateHint")}</span>}
+          {streetViewMode && <span className="map-caption street-view-caption"><Icon name="streetview" /> {t("streetViewHint")}</span>}
           {visibleReports && <span className="map-caption reported-caption">{t("userOrange")}</span>}
           {visibleSites > 0 && <span className="map-caption object-caption">{t("objectMarker")}</span>}
           {street && <span className="map-caption street-caption"><i /> {t("streetMarked")} {street.name}<button aria-label={t("removeStreet")} onClick={() => setStreet(null)}>×</button></span>}
           {coverageMode && (coverageHasOptics ? <><span className="map-caption coverage-known">{t("coverageKnown")}</span><span className="map-caption coverage-unknown">{t("coverageUnknown")}</span></> : <span className="map-caption coverage-unknown">{t("coverageNone")}</span>)}
+          <span className="map-caption approximate-coverage-caption">{t("approxCoverageHint")}</span>
           {heatmapMode && <span className="map-caption heatmap-caption">{t("heatmapLegend")}</span>}
-          {droneZonesMode && <span className="map-caption drone-caption">{t("droneZoneLegend")} <a href={droneTowerUrl} target="_blank" rel="noopener noreferrer">{t("checkDroneTower")} ↗</a></span>}
+          {droneZonesMode && <span className="map-caption drone-caption">{t("droneZoneLegend")} <button type="button" onClick={showDroneZone}>{t("droneZoneDetails")}</button></span>}
         </div>
+        {droneZonesMode && droneInfoOpen && !selected && <aside className="drone-zone-card" aria-labelledby="drone-zone-title">
+          <div className="drone-zone-heading"><div><p className="eyebrow">{t("droneZoneEyebrow")}</p><h2 id="drone-zone-title">{epopAtz.name}</h2></div><button className="icon-button" aria-label={t("droneZoneClose")} onClick={() => setDroneInfoOpen(false)}><Icon name="close" /></button></div>
+          <p className="drone-zone-status conditional">{t("droneZoneConditionalStatus")}</p>
+          <dl className="drone-zone-facts">
+            <div><dt>{t("droneZoneRadius")}</dt><dd>{epopAtz.radiusMeters / 1000} km</dd></div>
+            <div><dt>{t("droneZoneHeight")}</dt><dd>{epopAtz.lowerLimit}–{epopAtz.upperLimit}</dd></div>
+            <div><dt>{t("droneZoneActivation")}</dt><dd>{epopAtz.activity}</dd></div>
+            <div><dt>{t("droneZoneClass")}</dt><dd>{epopAtz.airspaceClass}</dd></div>
+          </dl>
+          <div className="drone-zone-contact"><span>{t("droneZoneRadio")}</span><strong>{epopAtz.frequency}</strong><span>{epopAtz.operator}</span></div>
+          <section className="drone-access-legend" aria-labelledby="drone-access-title">
+            <h3 id="drone-access-title">{t("droneLegendTitle")}</h3>
+            <p><i className="prohibited" /><span><strong>{t("droneLegendProhibitedTitle")}</strong>{t("droneLegendProhibited")}</span></p>
+            <p><i className="conditional" /><span><strong>{t("droneLegendConditionalTitle")}</strong>{t("droneLegendConditional")}</span></p>
+            <p><i className="information" /><span><strong>{t("droneLegendInformationTitle")}</strong>{t("droneLegendInformation")}</span></p>
+            <p><i className="general" /><span><strong>{t("droneLegendGeneralTitle")}</strong>{t("droneLegendGeneral")}</span></p>
+          </section>
+          <p className="drone-zone-warning">{t("droneZoneWarning")}</p>
+          <a className="drone-zone-primary" href={droneTowerUrl} target="_blank" rel="noopener noreferrer">{t("checkDroneTower")} <span>↗</span></a>
+          <div className="drone-zone-links"><a href={airspaceMapUrl} target="_blank" rel="noopener noreferrer">{t("droneZoneAupMap")} ↗</a><a href={droneZoneSourceUrl} target="_blank" rel="noopener noreferrer">{t("droneZoneSource")} · {epopAtz.sourceDate} ↗</a></div>
+        </aside>}
         {selected && <CameraDetails key={selected.id} camera={selected} availability={availability[selected.id]} onClose={closeCamera} favorite={favoriteIds.has(selected.id)} favoritesReady={favorites.ready} onToggleFavorite={() => favorites.toggle(selected.id)} onSnapshot={setSnapshotCamera} />}
-        <button ref={listButtonRef} className="mobile-list-button" onClick={() => setMobileList(true)}><Icon name="list" /> {t("camerasAndSearch")} <span>{visible.length}</span></button>
+        <nav className="mobile-navigation" aria-label={t("mobileNavigation")}>
+          <button aria-current="page"><Icon name="map" />{t("map")}</button>
+          <button ref={listButtonRef} onClick={() => setMobileList(true)}><Icon name="list" />{t("menu")} <span>{visible.length}</span></button>
+        </nav>
       </main>
       {snapshotCamera && <CameraSnapshotViewer key={snapshotCamera.id} camera={snapshotCamera} onStatus={value => updateAvailability(snapshotCamera, value)} onClose={() => setSnapshotCamera(null)} />}
       <AdminPanel cameras={cameras} drafts={adminDrafts} open={adminOpen} initialId={selectedId} onClose={() => setAdminOpen(false)} onSave={saveAdminDraft} onDelete={deleteAdminDraft} onClear={clearAdminDrafts} onSelect={(camera) => { setAdminOpen(false); selectCamera(camera); }} />

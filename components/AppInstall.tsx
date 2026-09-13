@@ -10,7 +10,22 @@ export default function AppInstall() {
   const [prompt, setPrompt] = useState<InstallPrompt | null>(null);
   const [message, setMessage] = useState("");
   useEffect(() => {
-    if ("serviceWorker" in navigator) void navigator.serviceWorker.register("/sw.js").catch(() => undefined);
+    if ("serviceWorker" in navigator) {
+      if (process.env.NODE_ENV === "production") {
+        void navigator.serviceWorker.register("/sw.js").catch(() => undefined);
+      } else {
+        // A production service worker must never control the Next.js dev server:
+        // its cached HTML can reference CSS chunks that Turbopack has already replaced.
+        void navigator.serviceWorker.getRegistrations().then(registrations =>
+          Promise.all(registrations.map(registration => registration.unregister())),
+        ).catch(() => undefined);
+        if ("caches" in window) {
+          void caches.keys().then(keys =>
+            Promise.all(keys.filter(key => key.startsWith("opole-camera-map-")).map(key => caches.delete(key))),
+          ).catch(() => undefined);
+        }
+      }
+    }
     const capture = (event: Event) => { event.preventDefault(); setPrompt(event as InstallPrompt); };
     window.addEventListener("beforeinstallprompt", capture);
     return () => window.removeEventListener("beforeinstallprompt", capture);

@@ -18,6 +18,16 @@ export type InsuranceCandidate = {
 const earthRadius = 6_371_000;
 const radians = (value: number) => value * Math.PI / 180;
 
+function bearingTo(point: IncidentPoint, camera: Camera) {
+  const lat1 = radians(camera.lat); const lat2 = radians(point.lat); const delta = radians(point.lng - camera.lng);
+  return (Math.atan2(Math.sin(delta) * Math.cos(lat2), Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(delta)) * 180 / Math.PI + 360) % 360;
+}
+function directionalFit(point: IncidentPoint, camera: Camera) {
+  if (camera.heading === null || camera.fov === null) return null;
+  const difference = Math.abs(((bearingTo(point, camera) - camera.heading + 540) % 360) - 180);
+  return difference <= camera.fov / 2;
+}
+
 export function incidentDistanceMeters(point: IncidentPoint, camera: Camera) {
   const latitude = radians((point.lat + camera.lat) / 2);
   return Math.hypot(radians(camera.lng - point.lng) * earthRadius * Math.cos(latitude), radians(camera.lat - point.lat) * earthRadius);
@@ -27,9 +37,10 @@ export function insuranceCandidates(cameras: readonly Camera[], point: IncidentP
   if (!point) return [];
   return cameras.map(camera => {
     const distanceMeters = incidentDistanceMeters(point, camera);
+    const direction = directionalFit(point, camera);
     if (camera.recordKind === "site") return { camera, distanceMeters, priority: "low" as const, reason: "Объект с видеонаблюдением: количество и положение камер могут быть неизвестны." };
-    if (camera.publicViewUrl || camera.snapshotSourceUrl) return { camera, distanceMeters, priority: "high" as const, reason: "Есть публичный источник просмотра; историческую запись нужно запросить у владельца." };
-    if (camera.heading !== null && camera.fov !== null && camera.rangeMeters !== null) return { camera, distanceMeters, priority: "medium" as const, reason: "Есть ориентировочные параметры оптики, но они не доказывают обзор или наличие записи." };
+    if (camera.publicViewUrl || camera.snapshotSourceUrl) return { camera, distanceMeters, priority: direction === false ? "medium" as const : "high" as const, reason: direction === true ? "Есть публичный источник и опубликованный сектор ориентирован на точку; историческую запись нужно запросить у владельца." : direction === false ? "Есть публичный источник, но указанное направление не включает точку; это не исключает PTZ или другой обзор." : "Есть публичный источник просмотра; историческую запись нужно запросить у владельца." };
+    if (camera.heading !== null && camera.fov !== null && camera.rangeMeters !== null) return { camera, distanceMeters, priority: direction === true ? "high" as const : "medium" as const, reason: direction === true ? "Опубликованный ориентировочный сектор включает точку, но не доказывает обзор или наличие записи." : "Есть ориентировочные параметры оптики, но направление не подтверждает обзор точки." };
     return { camera, distanceMeters, priority: "medium" as const, reason: "Камера находится рядом, но направление и историческая доступность не опубликованы." };
   }).filter(candidate => candidate.distanceMeters <= radiusMeters).sort((a, b) => a.distanceMeters - b.distanceMeters || a.camera.name.localeCompare(b.camera.name));
 }

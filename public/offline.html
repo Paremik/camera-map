@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0b1b1d" />
+    <title>Opole Camera Map — нет соединения</title>
+    <style>
+      :root { color-scheme: dark; font-family: Arial, sans-serif; }
+      * { box-sizing: border-box; }
+      body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px; color: #eef8f5; background: radial-gradient(circle at top, #163337, #071214 68%); }
+      main { width: min(520px, 100%); padding: 32px; border: 1px solid #31565a; border-radius: 22px; background: rgba(10, 29, 31, .94); box-shadow: 0 22px 65px rgba(0, 0, 0, .38); }
+      .icon { display: grid; place-items: center; width: 54px; height: 54px; border-radius: 16px; color: #102018; background: #b8f285; font-size: 28px; }
+      h1 { margin: 24px 0 10px; font-size: clamp(25px, 6vw, 36px); }
+      p { margin: 0; color: #b8c9c7; line-height: 1.6; }
+      button { margin-top: 24px; width: 100%; min-height: 48px; border: 0; border-radius: 12px; color: #102018; background: #b8f285; font: inherit; font-weight: 700; cursor: pointer; }
+      button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="icon" aria-hidden="true">⌁</div>
+      <h1>Сайт временно недоступен</h1>
+      <p>Не удалось подключиться к Opole Camera Map. Проверьте интернет или запустите локальный сервер, затем повторите попытку.</p>
+      <button type="button" onclick="location.reload()">Повторить загрузку</button>
+    </main>
+  </body>
+</html>

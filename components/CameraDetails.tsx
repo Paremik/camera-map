@@ -8,6 +8,7 @@ import CameraViewAction from "./CameraViewAction";
 import CameraStatusBadge from "./CameraStatusBadge";
 import type { CameraAvailability } from "@/lib/map-features";
 import { useI18n } from "@/lib/i18n";
+import { cameraFreshness } from "@/lib/catalog-governance";
 
 type Props = { camera: Camera; availability?: CameraAvailability; onClose: () => void; favorite: boolean; favoritesReady: boolean; onToggleFavorite: () => void; onSnapshot: (camera: Camera) => void };
 
@@ -28,6 +29,7 @@ export default function CameraDetails({ camera, availability, onClose, favorite,
   const approximate = camera.opticsVerified ? "" : "≈";
   const availabilityTime = availability?.sourceTime ?? availability?.checkedAt;
   const categoryName = camera.category === "its" ? "ITS Opole" : t(camera.category === "public" ? "layerPublic" : camera.category === "city" ? "layerCity" : camera.category === "private" ? "layerPrivate" : "layerOther");
+  const freshness = cameraFreshness(camera);
   return (
     <section className="details-card" aria-labelledby="camera-details-title" data-camera-id={camera.id}>
       <div className="details-heading"><span className="eyebrow">{t(camera.recordKind === "site" ? "videoSite" : camera.reportedCount ? "cameraGroup" : "selectCamera")}</span><button className="icon-button" aria-label={t("closeCard")} onClick={onClose}><Icon name="close" /></button></div>
@@ -48,6 +50,7 @@ export default function CameraDetails({ camera, availability, onClose, favorite,
         {!share.copied && <input className="share-url" aria-label={t("cameraLink")} readOnly value={share.url} onFocus={(event) => event.target.select()} />}
       </div>}
       <p className={"verification-badge" + (camera.verified ? " verified" : "")}>{t(camera.verified ? "coordsVerified" : "coordsUnverified")}</p>
+      <div className={"freshness-card " + freshness.status}><strong>{freshness.status === "confirmed" ? "Актуальность: подтверждена" : "Актуальность: требует проверки"}</strong><span>{freshness.reviewedAt ? "Последняя дата источника: " + freshness.reviewedAt : "Дата последней проверки не опубликована"}</span><small>Источник: {freshness.source}</small><details><summary>История записи</summary>{freshness.history.map((event, index) => <p key={index}>{event.date ?? "без даты"} · {event.event}</p>)}</details></div>
       <div className="view-parameters">
         <div className="bearing-diagram" aria-hidden="true"><span>N</span><svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="29" /><path d="M40 5v7M40 68v7M5 40h7M68 40h7" />{camera.heading !== null && <g transform={"rotate(" + camera.heading + " 40 40)"}><path className="bearing-cone" d="M40 40 23 14Q40 3 57 14Z" /><path className="bearing-arrow" d="M40 45V15m-5 7 5-7 5 7" /></g>}<circle className="bearing-origin" cx="40" cy="40" r="3" /></svg></div>
         <dl className="optics-grid">

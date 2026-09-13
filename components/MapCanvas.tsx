@@ -3,21 +3,22 @@
 import { useEffect, useRef, useState } from "react";
 import maplibregl, { type GeoJSONSource, type Map as LibreMap } from "maplibre-gl";
 import { catalogCountLabel, countCameras, countDocumentedSites, groupCameraSites, type Camera } from "@/lib/camera";
-import { directionGeoJson, sectorsGeoJson } from "@/lib/geometry";
+import { approximateRoadCoverageGeoJson, directionGeoJson, sectorsGeoJson } from "@/lib/geometry";
 import type { StreetHighlight } from "@/lib/street-search";
 import { coverageGeoJson } from "@/lib/map-features";
 import { selectionGeoJson, type AnalysisMode, type AnalysisSelection, type LngLat } from "@/lib/map-analysis";
 import type { MapView } from "@/lib/map-state";
-import { droneZonesGeoJson } from "@/lib/drone-zones";
+import { droneGeneralAreaGeoJson, droneGeneralLabelGeoJson, droneZonesGeoJson } from "@/lib/drone-zones";
 import type { IncidentPoint } from "@/lib/insurance-case";
 
 type Props = {
   cameras: Camera[]; selected: Camera | null; onSelect: (camera: Camera) => void;
   is3D: boolean; showSectors: boolean; resetRequest: number; focusRequest: number;
   street: StreetHighlight | null; streetFocusRequest: number;
-  mapTheme: "light" | "dark"; coverageMode: boolean; heatmapMode: boolean; droneZonesMode: boolean;
+  mapTheme: "light" | "dark"; coverageMode: boolean; heatmapMode: boolean; droneZonesMode: boolean; droneGeneralLabel: string; onDroneZoneSelect: () => void;
   analysisMode: AnalysisMode; analysisPoints: LngLat[]; onAnalysisPoint: (point: LngLat) => void;
   incidentPoint: IncidentPoint | null; incidentPickMode: boolean; onIncidentPoint: (point: IncidentPoint) => void;
+  streetViewMode: boolean; onStreetViewRequest: (point: LngLat) => void;
   initialView: MapView | null; viewRequest: { id: number; view: MapView } | null; onViewChange: (view: MapView) => void;
 };
 const center: [number, number] = [17.92240, 50.66855];
@@ -47,12 +48,17 @@ function syncData(map: LibreMap, props: Props) {
   (map.getSource("street-highlight") as GeoJSONSource)?.setData(props.street?.geometry ?? empty);
   (map.getSource("coverage-area") as GeoJSONSource)?.setData(props.coverageMode ? coverageGeoJson(props.cameras) : empty);
   (map.getSource("coverage-sectors") as GeoJSONSource)?.setData(props.coverageMode ? sectorsGeoJson(props.cameras) : empty);
+  (map.getSource("approximate-road-coverage") as GeoJSONSource)?.setData(approximateRoadCoverageGeoJson(props.cameras));
+  (map.getSource("drone-general-area") as GeoJSONSource)?.setData(props.droneZonesMode ? droneGeneralAreaGeoJson() : empty);
+  (map.getSource("drone-general-label") as GeoJSONSource)?.setData(props.droneZonesMode ? droneGeneralLabelGeoJson(props.droneGeneralLabel) : empty);
   (map.getSource("drone-zones") as GeoJSONSource)?.setData(props.droneZonesMode ? droneZonesGeoJson() : empty);
   const selection: AnalysisSelection | null = props.analysisPoints.length === 2 && props.analysisMode !== "none" ? { mode: props.analysisMode, points: [props.analysisPoints[0], props.analysisPoints[1]] } : null;
   (map.getSource("analysis-shape") as GeoJSONSource)?.setData(selectionGeoJson(selection));
   (map.getSource("analysis-points") as GeoJSONSource)?.setData({ type: "FeatureCollection", features: props.analysisPoints.map((point, index) => ({ type: "Feature", properties: { index: index + 1 }, geometry: { type: "Point", coordinates: point } })) });
   (map.getSource("incident-point") as GeoJSONSource)?.setData({ type: "FeatureCollection", features: props.incidentPoint ? [{ type: "Feature", properties: {}, geometry: { type: "Point", coordinates: [props.incidentPoint.lng, props.incidentPoint.lat] } }] : [] });
   if (map.getLayer("camera-heat")) map.setLayoutProperty("camera-heat", "visibility", props.heatmapMode ? "visible" : "none");
+  if (map.getLayer("street-view-roads")) map.setLayoutProperty("street-view-roads", "visibility", props.streetViewMode ? "visible" : "none");
+  if (map.getLayer("street-view-roads-casing")) map.setLayoutProperty("street-view-roads-casing", "visibility", props.streetViewMode ? "visible" : "none");
   if (map.getLayer("sector-fill")) {
     map.setPaintProperty("sector-fill", "fill-color", ["case", ["==", ["get", "id"], props.selected?.id ?? ""], "#087a62", "#487b8c"]);
     map.setPaintProperty("sector-fill", "fill-opacity", ["case", ["==", ["get", "id"], props.selected?.id ?? ""], 0.32, 0.09]);
@@ -79,14 +85,15 @@ export default function MapCanvas(props: Props) {
       if (!disposed) setError("Карта загружается слишком долго. Проверьте подключение и повторите попытку.");
     }, 15000);
     try {
+      const night3D = latest.current.mapTheme === "dark" && latest.current.is3D;
       map = new maplibregl.Map({
         container: containerRef.current, center: latest.current.initialView ? [latest.current.initialView.lng, latest.current.initialView.lat] : center, zoom: latest.current.initialView?.zoom ?? 15.3,
         pitch: latest.current.initialView?.pitch ?? (latest.current.is3D ? 55 : 0), bearing: latest.current.initialView?.bearing ?? (latest.current.is3D ? -12 : 0),
         canvasContextAttributes: { antialias: true }, maxZoom: 19, minZoom: 10,
         maxBounds: [[17.7, 50.5], [18.15, 50.85]], renderWorldCopies: false,
-        dragRotate: false, touchPitch: false, attributionControl: false,
+        dragRotate: true, touchPitch: true, attributionControl: false,
         locale: { "Map.Title": "Карта камер Opole. Камеры также доступны в списке.", "NavigationControl.ZoomIn": "Приблизить", "NavigationControl.ZoomOut": "Отдалить", "NavigationControl.ResetBearing": "Север вверху" },
-        style: {
+        style: night3D ? "https://tiles.openfreemap.org/styles/dark" : {
           version: 8,
           glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
           sources: { osm: { type: "raster", tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"], tileSize: 256, maxzoom: 19,
@@ -95,7 +102,7 @@ export default function MapCanvas(props: Props) {
         },
       });
       mapRef.current = map;
-      map.touchZoomRotate.disableRotation();
+      map.touchZoomRotate.enableRotation();
       map.addControl(new maplibregl.NavigationControl({ showCompass: true }), "top-right");
       map.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-right");
       map.addControl(new maplibregl.ScaleControl({ unit: "metric" }), "bottom-left");
@@ -108,24 +115,45 @@ export default function MapCanvas(props: Props) {
       map.on("load", () => {
         if (disposed) return;
         window.clearTimeout(timeout);
+        if (night3D) {
+          map.addSource("openfreemap-buildings", { type: "vector", url: "https://tiles.openfreemap.org/planet", attribution: "OpenFreeMap © OpenMapTiles © OpenStreetMap contributors" });
+          const beforeLabels = map.getStyle().layers?.find((layer) => layer.type === "symbol")?.id;
+          map.addLayer({ id: "night-3d-buildings", type: "fill-extrusion", source: "openfreemap-buildings", "source-layer": "building", minzoom: 13,
+            filter: ["!=", ["get", "hide_3d"], true],
+            paint: { "fill-extrusion-color": ["interpolate", ["linear"], ["coalesce", ["get", "render_height"], 0], 0, "#29445e", 25, "#3b6488", 80, "#5d86aa"], "fill-extrusion-height": ["coalesce", ["get", "render_height"], 5], "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], 0], "fill-extrusion-opacity": 0.94 } }, beforeLabels);
+          // House numbers are deliberately drawn after the base style so they remain readable above 3D roofs.
+          map.addLayer({ id: "night-house-numbers", type: "symbol", source: "openfreemap-buildings", "source-layer": "housenumber", minzoom: 14,
+            layout: { "text-field": ["get", "housenumber"], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 14, 11, 18, 14], "text-allow-overlap": false, "text-ignore-placement": false },
+            paint: { "text-color": "#ffffff", "text-halo-color": "#020914", "text-halo-width": 2.2, "text-halo-blur": 0.35 } });
+        }
         map.addSource("camera-sectors", { type: "geojson", data: empty });
         map.addSource("camera-direction", { type: "geojson", data: empty });
         map.addSource("street-highlight", { type: "geojson", data: empty });
         map.addSource("coverage-area", { type: "geojson", data: empty });
         map.addSource("coverage-sectors", { type: "geojson", data: empty });
+        map.addSource("approximate-road-coverage", { type: "geojson", data: empty });
+        map.addSource("drone-general-area", { type: "geojson", data: empty });
+        map.addSource("drone-general-label", { type: "geojson", data: empty });
         map.addSource("drone-zones", { type: "geojson", data: empty });
         map.addSource("analysis-shape", { type: "geojson", data: empty });
         map.addSource("analysis-points", { type: "geojson", data: empty });
         map.addSource("incident-point", { type: "geojson", data: empty });
+        // OpenStreetMap roads and paths provide city-wide selectable geometry; Google confirms panorama availability after selection.
+        map.addSource("street-view-roads-source", { type: "vector", url: "https://tiles.openfreemap.org/planet", attribution: "OpenFreeMap © OpenMapTiles © OpenStreetMap contributors" });
         map.addSource("camera-points", { type: "geojson", data: empty, cluster: true, clusterMaxZoom: 16, clusterRadius: 48,
           clusterProperties: { cameraCount: ["+", ["get", "cameraCount"]], reportedCount: ["+", ["get", "reportedCount"]], documentedSiteCount: ["+", ["get", "documentedSiteCount"]] } });
         map.addSource("camera-heat-points", { type: "geojson", data: empty });
         map.addLayer({ id: "coverage-unknown", type: "fill", source: "coverage-area", paint: { "fill-color": "#d58637", "fill-opacity": 0.13 } });
         map.addLayer({ id: "coverage-known", type: "fill", source: "coverage-sectors", paint: { "fill-color": "#31b96b", "fill-opacity": 0.42 } });
         map.addLayer({ id: "coverage-known-line", type: "line", source: "coverage-sectors", paint: { "line-color": "#1b8f50", "line-width": 2, "line-opacity": 0.9 } });
-        map.addLayer({ id: "drone-zone-fill", type: "fill", source: "drone-zones", paint: { "fill-color": "#9b5de5", "fill-opacity": 0.12 } });
-        map.addLayer({ id: "drone-zone-line", type: "line", source: "drone-zones", paint: { "line-color": "#8b43d1", "line-width": 3, "line-opacity": 0.9, "line-dasharray": [2, 1.5] } });
-        map.addLayer({ id: "drone-zone-label", type: "symbol", source: "drone-zones", layout: { "text-field": ["concat", ["get", "name"], " · AUP"], "text-font": ["Open Sans Semibold"], "text-size": 14 }, paint: { "text-color": "#7a2fbd", "text-halo-color": "#ffffff", "text-halo-width": 2 } });
+        map.addLayer({ id: "approximate-road-coverage-fill", type: "fill", source: "approximate-road-coverage", paint: { "fill-color": "#258dff", "fill-opacity": ["match", ["get", "kind"], "documented-site-unknown-area", 0.08, "estimated-unknown-direction", 0.12, 0.24] } });
+        map.addLayer({ id: "approximate-road-coverage-line", type: "line", source: "approximate-road-coverage", paint: { "line-color": "#61b3ff", "line-width": 2, "line-opacity": 0.95, "line-dasharray": [1.5, 1.5] } });
+        map.addLayer({ id: "drone-general-area-fill", type: "fill", source: "drone-general-area", paint: { "fill-color": "#20b95a", "fill-opacity": 0.28 } });
+        map.addLayer({ id: "drone-general-area-line", type: "line", source: "drone-general-area", paint: { "line-color": "#159448", "line-width": 2.5, "line-opacity": 0.95, "line-dasharray": [1.5, 1.5] } });
+        map.addLayer({ id: "drone-general-area-label", type: "symbol", source: "drone-general-label", layout: { "text-field": ["get", "label"], "text-font": ["Open Sans Semibold"], "text-size": 13, "text-letter-spacing": 0.04, "text-max-width": 22, "text-allow-overlap": true }, paint: { "text-color": "#f1fff4", "text-halo-color": "#08753a", "text-halo-width": 3, "text-halo-blur": 0.3 } });
+        map.addLayer({ id: "drone-zone-fill", type: "fill", source: "drone-zones", paint: { "fill-color": ["match", ["get", "access"], "prohibited", "#d94848", "conditional", "#e4932e", "information", "#358bd6", "#758184"], "fill-opacity": 0.16 } });
+        map.addLayer({ id: "drone-zone-line", type: "line", source: "drone-zones", paint: { "line-color": ["match", ["get", "access"], "prohibited", "#b92828", "conditional", "#c67516", "information", "#176bb4", "#5e6a6d"], "line-width": 3, "line-opacity": 0.95, "line-dasharray": [2, 1.5] } });
+        map.addLayer({ id: "drone-zone-label", type: "symbol", source: "drone-zones", layout: { "text-field": ["concat", ["get", "name"], " · ", ["get", "zoneType"]], "text-font": ["Open Sans Semibold"], "text-size": 14 }, paint: { "text-color": "#8a4b05", "text-halo-color": "#ffffff", "text-halo-width": 2 } });
         map.addLayer({ id: "analysis-area-fill", type: "fill", source: "analysis-shape", filter: ["==", ["get", "kind"], "area"], paint: { "fill-color": "#8dccff", "fill-opacity": 0.18 } });
         map.addLayer({ id: "analysis-shape-line", type: "line", source: "analysis-shape", paint: { "line-color": "#59b8ff", "line-width": 4, "line-dasharray": [2, 1.5] } });
         map.addLayer({ id: "analysis-points-layer", type: "circle", source: "analysis-points", paint: { "circle-radius": 8, "circle-color": "#59b8ff", "circle-stroke-color": "#ffffff", "circle-stroke-width": 3 } });
@@ -134,6 +162,12 @@ export default function MapCanvas(props: Props) {
         map.addLayer({ id: "street-highlight-casing", type: "line", source: "street-highlight", paint: { "line-color": "#ffffff", "line-width": ["interpolate", ["linear"], ["zoom"], 10, 5, 18, 12], "line-opacity": 0.95 } });
         map.addLayer({ id: "street-highlight-line", type: "line", source: "street-highlight", paint: { "line-color": "#1686ff", "line-width": ["interpolate", ["linear"], ["zoom"], 10, 3, 18, 8], "line-opacity": 0.9 } });
         map.addLayer({ id: "street-highlight-label", type: "symbol", source: "street-highlight", layout: { "symbol-placement": "line", "text-field": ["get", "name"], "text-font": ["Open Sans Semibold"], "text-size": 13, "symbol-spacing": 350 }, paint: { "text-color": "#ffffff", "text-halo-color": "#096ec5", "text-halo-width": 2 } });
+        // OpenMapTiles uses "minor" for many residential streets; paths and tracks make the whole mapped city selectable.
+        const streetViewRoadFilter = ["in", ["get", "class"], ["literal", ["motorway", "trunk", "primary", "secondary", "tertiary", "minor", "residential", "service", "living_street", "unclassified", "track", "path", "pedestrian"]]] as maplibregl.ExpressionSpecification;
+        map.addLayer({ id: "street-view-roads-casing", type: "line", source: "street-view-roads-source", "source-layer": "transportation", minzoom: 11, filter: streetViewRoadFilter,
+          layout: { visibility: "none", "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#d9f3ff", "line-width": ["interpolate", ["linear"], ["zoom"], 11, 2, 17, 7], "line-opacity": 0.9 } });
+        map.addLayer({ id: "street-view-roads", type: "line", source: "street-view-roads-source", "source-layer": "transportation", minzoom: 11, filter: streetViewRoadFilter,
+          layout: { visibility: "none", "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#1686ff", "line-width": ["interpolate", ["linear"], ["zoom"], 11, 1.3, 17, 4.5], "line-opacity": 0.96 } });
         map.addLayer({ id: "sector-fill", type: "fill", source: "camera-sectors", paint: { "fill-color": "#087a62", "fill-opacity": 0.15 } });
         map.addLayer({ id: "sector-line", type: "line", source: "camera-sectors", paint: { "line-color": "#087a62", "line-width": 1.5 } });
         map.addLayer({ id: "direction-line", type: "line", source: "camera-direction", paint: { "line-color": "#075a49", "line-width": 2.5, "line-dasharray": [3, 2] } });
@@ -152,12 +186,20 @@ export default function MapCanvas(props: Props) {
         setReady(true);
       });
       map.on("click", (event) => {
+        if (latest.current.streetViewMode) { latest.current.onStreetViewRequest([event.lngLat.lng, event.lngLat.lat]); setActiveSiteId(null); return; }
         if (latest.current.incidentPickMode) { latest.current.onIncidentPoint({ lng: event.lngLat.lng, lat: event.lngLat.lat }); setActiveSiteId(null); return; }
         if (latest.current.analysisMode !== "none") { latest.current.onAnalysisPoint([event.lngLat.lng, event.lngLat.lat]); setActiveSiteId(null); return; }
         if (!map.getLayer("camera-sites")) return;
         const features = map.queryRenderedFeatures(event.point, { layers: ["camera-clusters", "camera-sites"] });
         const feature = features[0];
-        if (!feature || feature.geometry.type !== "Point") { setActiveSiteId(null); return; }
+        if (!feature || feature.geometry.type !== "Point") {
+          if (latest.current.droneZonesMode && map.getLayer("drone-zone-fill")) {
+            const zone = map.queryRenderedFeatures(event.point, { layers: ["drone-zone-fill"] })[0];
+            if (zone) { latest.current.onDroneZoneSelect(); setActiveSiteId(null); return; }
+          }
+          setActiveSiteId(null);
+          return;
+        }
         const coordinates = feature.geometry.coordinates as [number, number];
         if (feature.properties.cluster) {
           const source = map.getSource("camera-points") as GeoJSONSource;
@@ -172,8 +214,11 @@ export default function MapCanvas(props: Props) {
         }
       });
       map.on("mousemove", (event) => {
-        if (latest.current.analysisMode !== "none" || latest.current.incidentPickMode) map.getCanvas().style.cursor = "crosshair";
-        else if (map.getLayer("camera-sites")) map.getCanvas().style.cursor = map.queryRenderedFeatures(event.point, { layers: ["camera-clusters", "camera-sites"] }).length ? "pointer" : "";
+        if (latest.current.streetViewMode || latest.current.analysisMode !== "none" || latest.current.incidentPickMode) map.getCanvas().style.cursor = "crosshair";
+        else if (map.getLayer("camera-sites")) {
+          const layers = latest.current.droneZonesMode ? ["camera-clusters", "camera-sites", "drone-zone-fill"] : ["camera-clusters", "camera-sites"];
+          map.getCanvas().style.cursor = map.queryRenderedFeatures(event.point, { layers }).length ? "pointer" : "";
+        }
       });
       map.on("moveend", () => { const point = map.getCenter(); latest.current.onViewChange({ lng: point.lng, lat: point.lat, zoom: map.getZoom(), bearing: map.getBearing(), pitch: map.getPitch() }); });
     } catch {
@@ -191,7 +236,7 @@ export default function MapCanvas(props: Props) {
     };
   }, [attempt]);
 
-  useEffect(() => { if (ready && mapRef.current) syncData(mapRef.current, props); }, [ready, props.cameras, props.selected, props.showSectors, props.street, props.coverageMode, props.heatmapMode, props.droneZonesMode, props.analysisMode, props.analysisPoints, props.incidentPoint]);
+  useEffect(() => { if (ready && mapRef.current) syncData(mapRef.current, props); }, [ready, props.cameras, props.selected, props.showSectors, props.street, props.coverageMode, props.heatmapMode, props.droneZonesMode, props.droneGeneralLabel, props.streetViewMode, props.analysisMode, props.analysisPoints, props.incidentPoint]);
   useEffect(() => {
     const map = mapRef.current;
     if (!ready || !map?.getLayer("osm")) return;
@@ -227,7 +272,10 @@ export default function MapCanvas(props: Props) {
   }, [ready, props.coverageMode, props.cameras]);
   useEffect(() => {
     if (!ready || !props.droneZonesMode) return;
-    mapRef.current?.fitBounds([[17.635, 50.542], [17.928, 50.724]], { padding: window.innerWidth <= 760 ? 36 : 70, duration: 750 });
+    const points = droneZonesGeoJson().features[0]?.geometry.coordinates[0] ?? [];
+    if (!points.length) return;
+    const lngs = points.map(point => point[0]), lats = points.map(point => point[1]);
+    mapRef.current?.fitBounds([[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]], { padding: window.innerWidth <= 760 ? 36 : 70, duration: 750 });
   }, [ready, props.droneZonesMode]);
   useEffect(() => {
     if (!ready || !props.viewRequest) return;
@@ -237,7 +285,7 @@ export default function MapCanvas(props: Props) {
 
   return (
     <>
-      <div ref={containerRef} className="map" data-ready={ready} data-mode={props.is3D ? "3d" : "2d"} data-theme={props.mapTheme} data-coverage={props.coverageMode} data-heatmap={props.heatmapMode} data-drone-zones={props.droneZonesMode} data-analysis={props.analysisMode} data-analysis-points={props.analysisPoints.length} data-incident={props.incidentPoint ? "true" : "false"} data-camera-count={countCameras(props.cameras)} data-object-count={countDocumentedSites(props.cameras)} data-street={props.street?.name ?? ""} data-street-segments={props.street?.geometry.features.length ?? 0} />
+      <div ref={containerRef} className="map" data-ready={ready} data-mode={props.is3D ? "3d" : "2d"} data-theme={props.mapTheme} data-basemap={props.mapTheme === "dark" && props.is3D ? "night-3d" : "raster"} data-coverage={props.coverageMode} data-approximate-coverage="true" data-heatmap={props.heatmapMode} data-drone-zones={props.droneZonesMode} data-analysis={props.analysisMode} data-analysis-points={props.analysisPoints.length} data-incident={props.incidentPoint ? "true" : "false"} data-camera-count={countCameras(props.cameras)} data-object-count={countDocumentedSites(props.cameras)} data-street={props.street?.name ?? ""} data-street-segments={props.street?.geometry.features.length ?? 0} />
       {!ready && !error && <div className="map-loading" role="status">Загружаем карту Opole…</div>}
       {error && <div className="map-error" role="alert"><p>{error}</p><button className="secondary-button" onClick={retry}>Повторить загрузку карты</button></div>}
       {activeSite && <section className="site-picker" aria-label="Камеры в этой точке"><div><strong>В этой точке · {catalogCountLabel(activeSite.cameras)}</strong><button aria-label="Закрыть выбор камер" onClick={() => setActiveSiteId(null)}>×</button></div><p>Камеры, группы и объекты с одним ориентиром</p>{activeSite.cameras.map((camera) => <button key={camera.id} onClick={() => { props.onSelect(camera); setActiveSiteId(null); }}>{camera.name}<span>↗</span></button>)}</section>}
