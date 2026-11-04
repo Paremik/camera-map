@@ -76,6 +76,7 @@ function CameraMapInner({ cameras: sourceCameras }: { cameras: Camera[] }) {
   const [mapView, setMapView] = useState<MapView>({ lng: 17.9224, lat: 50.66855, zoom: 15.3, bearing: 0, pitch: 0 });
   const [viewRequest, setViewRequest] = useState<{ id: number; view: MapView } | null>(null);
   const listButtonRef = useRef<HTMLButtonElement>(null);
+  const settingsDialogRef = useRef<HTMLDialogElement>(null);
   const [pageSize, setPageSize] = useState(50);
   const visible = useMemo(() => filterCameras(cameras, { query, category, verifiedOnly }).filter((camera) => enabledLayers.has(cameraLayer(camera)) && (!favoritesOnly || favoriteIds.has(camera.id))), [cameras, query, category, verifiedOnly, enabledLayers, favoritesOnly, favoriteIds]);
   const selected = visible.find((camera) => camera.id === selectedId) ?? null;
@@ -289,21 +290,6 @@ function CameraMapInner({ cameras: sourceCameras }: { cameras: Camera[] }) {
           {favoritesOnly && <p className="favorites-note">{t("favoriteLocal")}</p>}
           {favorites.storageError && <p className="storage-warning" role="status">{t("storageWarning")}</p>}
         </div>
-        <details className="user-panel-details">
-          <summary><Icon name="tools" /><span>{t("userPanelSettings")}</span><small>{t("userPanelSettingsHint")}</small></summary>
-          <div className="user-panel-settings">
-            <div className="sidebar-intro">
-              <p>{t("cityMap")}</p>
-              <div className="catalog-stats"><span><b>{totalCount}</b> {t("cameras")}</span><span><b>{totalSites}</b> {t("objects")}</span></div>
-              <p className="catalog-explanation">{t("catalogExplanation")} {verifiedCount}.</p>
-              {reportedCount > 0 && <p className="catalog-provenance">{t("reportedPrefix")} {reportedCount}</p>}
-              <SourceOverview cameras={cameras} />
-            </div>
-            <div className="experience-tools"><label><span>{t("language")}</span><select aria-label={t("language")} value={locale} onChange={event => setLocale(event.target.value as Locale)}>{Object.entries(languages).map(([code, name]) => <option key={code} value={code}>{name}</option>)}</select></label><div><span>{t("mapTheme")}</span><button aria-pressed={mapTheme === "light"} onClick={() => changeTheme("light")}>{t("light")}</button><button aria-pressed={mapTheme === "dark"} onClick={() => changeTheme("dark")}>{t("dark")}</button></div><AppInstall /></div>
-            <StreetSearch street={street} onFound={showStreet} onClear={() => setStreet(null)} />
-            <details className="layer-filter"><summary>{t("layers")}</summary><div>{cameraLayers.map(layer => <label key={layer}><input type="checkbox" checked={enabledLayers.has(layer)} onChange={() => toggleLayer(layer)} /><span>{t("layer" + layer[0].toUpperCase() + layer.slice(1))}</span><b>{layerCounts[layer]}</b></label>)}</div></details>
-          </div>
-        </details>
         <div className="list-heading"><span>{t("records")}</span><span aria-live="polite">{visible.length} {t("of")} {cameras.length}</span></div>
         <div className="camera-list">
           {visible.slice(0, pageSize).map((camera) => (
@@ -332,6 +318,7 @@ function CameraMapInner({ cameras: sourceCameras }: { cameras: Camera[] }) {
         <MapCanvas key={`${mapTheme}-${is3D}`} cameras={visible} selected={selected} onSelect={selectCamera} is3D={is3D} showSectors={showSectors} resetRequest={resetRequest} focusRequest={focusRequest} street={street} streetFocusRequest={streetFocusRequest} mapTheme={mapTheme} coverageMode={coverageMode} heatmapMode={heatmapMode} droneZonesMode={droneZonesMode} droneGeneralLabel={t("droneGeneralMapLabel")} onDroneZoneSelect={showDroneZone} analysisMode={analysisMode} analysisPoints={analysisPoints} onAnalysisPoint={addAnalysisPoint} incidentPoint={currentIncident} incidentPickMode={incidentPickMode} onIncidentPoint={setIncident} streetViewMode={streetViewMode} onStreetViewRequest={openStreetView} initialView={null} viewRequest={viewRequest} onViewChange={setMapView} />
         <div className="map-topbar">
           <div className="location-chip"><Icon name="pin" /><div><strong>Opole</strong><span>{visibleCount} {t("cameras")} · {visibleSites} {t("objects")}</span></div></div>
+          <button className="map-settings-button" aria-haspopup="dialog" aria-controls="map-settings-dialog" onClick={() => settingsDialogRef.current?.showModal()}><Icon name="tools" /><span>{t("userPanelSettings")}</span></button>
           <div className="map-actions">
             <div className="mode-switch" role="group" aria-label={t("mapMode")}><button aria-pressed={!is3D} onClick={() => setIs3D(false)}>2D</button><button aria-pressed={is3D} onClick={() => setIs3D(true)} title={t("tiltTitle")}>3D</button></div>
             <button className="street-view-button" aria-pressed={streetViewMode} title={t("streetView")} onClick={() => { setStreetViewMode(value => !value); setAnalysisMode("none"); setAnalysisPoints([]); setIncidentPickMode(false); }}><Icon name="streetview" /><span>{t("streetViewShort")}</span></button>
@@ -383,6 +370,24 @@ function CameraMapInner({ cameras: sourceCameras }: { cameras: Camera[] }) {
           <button ref={listButtonRef} onClick={() => setMobileList(true)}><Icon name="list" />{t("menu")} <span>{visible.length}</span></button>
         </nav>
       </main>
+      <dialog ref={settingsDialogRef} id="map-settings-dialog" className="map-settings-dialog" aria-labelledby="map-settings-title" aria-describedby="map-settings-hint">
+        <header className="map-settings-heading">
+          <div><h2 id="map-settings-title">{t("userPanelSettings")}</h2><p id="map-settings-hint">{t("userPanelSettingsHint")}</p></div>
+          <button className="icon-button" aria-label={t("closeMapSettings")} onClick={() => settingsDialogRef.current?.close()}><Icon name="close" /></button>
+        </header>
+          <div className="user-panel-settings">
+            <div className="experience-tools"><label><span>{t("language")}</span><select aria-label={t("language")} value={locale} onChange={event => setLocale(event.target.value as Locale)}>{Object.entries(languages).map(([code, name]) => <option key={code} value={code}>{name}</option>)}</select></label><div><span>{t("mapTheme")}</span><button aria-pressed={mapTheme === "light"} onClick={() => changeTheme("light")}>{t("light")}</button><button aria-pressed={mapTheme === "dark"} onClick={() => changeTheme("dark")}>{t("dark")}</button></div><AppInstall /></div>
+            <div className="sidebar-intro">
+              <p>{t("cityMap")}</p>
+              <div className="catalog-stats"><span><b>{totalCount}</b> {t("cameras")}</span><span><b>{totalSites}</b> {t("objects")}</span></div>
+              <p className="catalog-explanation">{t("catalogExplanation")} {verifiedCount}.</p>
+              {reportedCount > 0 && <p className="catalog-provenance">{t("reportedPrefix")} {reportedCount}</p>}
+              <SourceOverview cameras={cameras} />
+            </div>
+            <StreetSearch street={street} onFound={result => { showStreet(result); settingsDialogRef.current?.close(); }} onClear={() => setStreet(null)} />
+            <details className="layer-filter"><summary>{t("layers")}</summary><div>{cameraLayers.map(layer => <label key={layer}><input type="checkbox" checked={enabledLayers.has(layer)} onChange={() => toggleLayer(layer)} /><span>{t("layer" + layer[0].toUpperCase() + layer.slice(1))}</span><b>{layerCounts[layer]}</b></label>)}</div></details>
+          </div>
+      </dialog>
       {snapshotCamera && <CameraSnapshotViewer key={snapshotCamera.id} camera={snapshotCamera} onStatus={value => updateAvailability(snapshotCamera, value)} onClose={() => setSnapshotCamera(null)} />}
       <AdminPanel cameras={cameras} drafts={adminDrafts} open={adminOpen} initialId={selectedId} onClose={() => setAdminOpen(false)} onSave={saveAdminDraft} onDelete={deleteAdminDraft} onClear={clearAdminDrafts} onSelect={(camera) => { setAdminOpen(false); selectCamera(camera); }} />
     </div>
