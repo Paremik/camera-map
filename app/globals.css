@@ -480,7 +480,9 @@ dd { margin: 0; }
 @media (max-width: 1250px) and (min-width: 761px) {
   .map-settings-button { margin-left: auto; }
   .map-actions { flex-basis: 100%; justify-content: flex-end; }
-  .maplibregl-ctrl-top-right { top: 132px; }
+  .maplibregl-ctrl-top-right { top: 132px; right: auto; left: 12px; }
+  .details-card, .map-workspace > .drone-zone-card { top: 150px; max-height: calc(100% - 195px); }
+  .map-error, .link-notice, .site-picker { top: 151px; }
 }
 @media (max-width: 760px) {
   .map-settings-button { margin-left: auto; min-height: 44px; padding: 10px; font-size: 10px; gap: 6px; max-width: 52%; }
