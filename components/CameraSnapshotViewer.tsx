@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Camera } from "@/lib/camera";
-import { latestItsSnapshot, type CameraSnapshot } from "@/lib/camera-view";
+import { validateSnapshotSource, type CameraSnapshot } from "@/lib/camera-view";
 import type { CameraAvailability } from "@/lib/map-features";
 import { useI18n } from "@/lib/i18n";
 import Icon from "./Icon";
@@ -25,29 +25,39 @@ export default function CameraSnapshotViewer({ camera, onClose, onStatus }: { ca
   }, []);
   useEffect(() => {
     const controller = new AbortController();
+    let objectUrl: string | null = null;
     // Bound metadata and image loading together, including a stalled image request.
     const timeout = window.setTimeout(() => {
       controller.abort();
       setView((state) => state.status === "image" && state.loaded ? state : { status: "error" });
-      onStatus({ status: "unavailable", checkedAt: new Date().toISOString() });
-    }, 15000);
+      onStatus({ status: "unknown", checkedAt: new Date().toISOString() });
+    }, 25000);
     timeoutRef.current = timeout;
     async function load() {
       try {
         if (!camera.snapshotSourceUrl) throw new Error("Missing snapshot source");
-        const response = await fetch(camera.snapshotSourceUrl, { signal: controller.signal, credentials: "omit", cache: "no-store", redirect: "error", referrerPolicy: "no-referrer" });
-        if (!response.ok) throw new Error("ITS request failed");
-        const snapshot = latestItsSnapshot(await response.json(), camera.id, camera.snapshotSourceUrl);
+        validateSnapshotSource(camera.id, camera.snapshotSourceUrl);
+        const response = await fetch(`/api/cameras/${camera.id.slice(4)}/snapshot`, { signal: controller.signal, credentials: "omit", cache: "no-store", redirect: "error" });
+        if (response.status === 204) {
+          window.clearTimeout(timeout);
+          if (!controller.signal.aborted) { setView({ status: "empty" }); onStatus({ status: "unknown", checkedAt: new Date().toISOString() }); }
+          return;
+        }
+        if (!response.ok || response.headers.get("content-type")?.split(";")[0] !== "image/jpeg") throw new Error("ITS snapshot request failed");
+        const sourceTime = response.headers.get("X-Snapshot-Source-Time");
+        if (!sourceTime || !Number.isFinite(Date.parse(sourceTime))) throw new Error("Missing publisher timestamp");
+        const blob = await response.blob();
         if (!controller.signal.aborted) {
-          setView(snapshot ? { status: "image", snapshot, loaded: false } : { status: "empty" });
-          if (!snapshot) { window.clearTimeout(timeout); onStatus({ status: "unavailable", checkedAt: new Date().toISOString() }); }
+          objectUrl = URL.createObjectURL(blob);
+          setView({ status: "image", snapshot: { url: objectUrl, sourceTime }, loaded: false });
         }
       } catch {
-        if (!controller.signal.aborted) { setView({ status: "error" }); onStatus({ status: "unavailable", checkedAt: new Date().toISOString() }); }
+        window.clearTimeout(timeout);
+        if (!controller.signal.aborted) { setView({ status: "error" }); onStatus({ status: "unknown", checkedAt: new Date().toISOString() }); }
       }
     }
     void load();
-    return () => { controller.abort(); window.clearTimeout(timeout); };
+    return () => { controller.abort(); window.clearTimeout(timeout); if (objectUrl) URL.revokeObjectURL(objectUrl); };
   }, [camera.id, camera.snapshotSourceUrl, attempt]);
   const loading = view.status === "loading" || (view.status === "image" && !view.loaded);
   function retry() { setView({ status: "loading" }); setAttempt((value) => value + 1); }
@@ -55,9 +65,9 @@ export default function CameraSnapshotViewer({ camera, onClose, onStatus }: { ca
     <header className="snapshot-heading"><div><p className="eyebrow">{t("snapshotTitle")}</p><h2 id="snapshot-title">{camera.name}</h2><p>{camera.street}</p></div><button className="icon-button" autoFocus aria-label={t("closeView")} onClick={() => dialog.current?.close()}><Icon name="close" /></button></header>
     <div className="snapshot-media" aria-busy={loading}>
       {loading && <p role="status">{t("loadingSnapshot")}</p>}
-      {view.status === "image" && <img key={attempt} src={view.snapshot.url} alt={"Снимок с камеры " + camera.name} referrerPolicy="no-referrer" className={view.loaded ? "" : "snapshot-pending"}
+      {view.status === "image" && <img key={attempt} src={view.snapshot.url} alt={t("snapshotAlt") + ": " + camera.name} referrerPolicy="no-referrer" className={view.loaded ? "" : "snapshot-pending"}
         onLoad={() => { if (timeoutRef.current !== null) window.clearTimeout(timeoutRef.current); setView((state) => state.status === "image" ? { ...state, loaded: true } : state); onStatus({ status: "working", checkedAt: new Date().toISOString(), sourceTime: view.snapshot.sourceTime }); }}
-        onError={() => { if (timeoutRef.current !== null) window.clearTimeout(timeoutRef.current); setView({ status: "error" }); onStatus({ status: "unavailable", checkedAt: new Date().toISOString() }); }} />}
+        onError={() => { if (timeoutRef.current !== null) window.clearTimeout(timeoutRef.current); setView({ status: "error" }); onStatus({ status: "unknown", checkedAt: new Date().toISOString() }); }} />}
       {view.status === "empty" && <p role="status">{t("snapshotEmpty")}</p>}
       {view.status === "error" && <p role="alert">{t("snapshotError")}</p>}
     </div>
@@ -67,3 +77,4 @@ export default function CameraSnapshotViewer({ camera, onClose, onStatus }: { ca
     </footer>
   </dialog>;
 }
+

@@ -20,6 +20,7 @@ Requirements:
 - Keep map/language/data settings accessible from the main map toolbar on desktop and mobile, with language and theme first, outside the scrollable camera catalog.
 - Keep data in a typed module for now, but structure it so it can later be replaced by an API/database.
 - Add loading/error states and basic accessibility.
+- Relay published ITS snapshots through the same-origin API using only catalogue camera IDs. Keep TLS verification, bounded responses and publisher timestamps; transport failures must not imply a camera is offline.
 - Add README instructions.
 
 After implementation:
@@ -27,3 +28,4 @@ After implementation:
 2. fix all errors,
 3. summarize changed files,
 4. list any places where real public data still needs verification.
+
