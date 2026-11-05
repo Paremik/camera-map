@@ -101,3 +101,4 @@
 
 Обновление 2026-09-12: по выбору пользователя встроенная Google-панель, обратный геокодер и требование ключа Maps Embed API удалены. Режим «Улицы» снова открывает официальную Google-панораму в отдельной вкладке: API‑ключ и биллинг не нужны.
 
+TLS source note (2026-11-05): ITS serves a valid *.mzd.opole.pl leaf (2026-08-10 to 2027-02-25) without its cyber_Folks issuer, causing UNABLE_TO_VERIFY_LEAF_SIGNATURE. The server may load cyberfolks2.cer and its issuer only from https://repository.certum.pl/, verify signatures/CA flags/dates up to an existing Node root, and retry with the completed chain. Hostname, certificate expiry and TLS verification remain enforced. Only CA certificates are cached for one hour. No image cache or background polling. Temporary certificate diagnostics were removed.

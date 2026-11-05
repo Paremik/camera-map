@@ -3,7 +3,7 @@ import { latestItsSnapshot, validateSnapshotSource } from "./camera-view.ts";
 
 const responseHeaders = { "Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff" };
 
-async function readBounded(response: Response, limit: number): Promise<Uint8Array<ArrayBuffer>> {
+export async function readBounded(response: Response, limit: number): Promise<Uint8Array<ArrayBuffer>> {
   if (Number(response.headers.get("content-length")) > limit) {
     await response.body?.cancel();
     throw new Error("ITS response too large");
