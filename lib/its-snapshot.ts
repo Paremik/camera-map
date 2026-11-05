@@ -35,6 +35,7 @@ async function readBounded(response: Response, limit: number): Promise<Uint8Arra
 /** Relay only the latest published JPEG for a documented ITS camera, after a user request. */
 export async function itsSnapshotResponse(camera: Camera, requestSignal: AbortSignal, fetcher: typeof fetch = fetch): Promise<Response> {
   const signal = AbortSignal.any([requestSignal, AbortSignal.timeout(20000)]);
+  let stage = "metadata";
   try {
     signal.throwIfAborted();
     if (camera.category !== "its") throw new Error("Not an ITS camera");
@@ -46,6 +47,7 @@ export async function itsSnapshotResponse(camera: Camera, requestSignal: AbortSi
     const snapshot = latestItsSnapshot(value, camera.id, source);
     if (!snapshot) return new Response(null, { status: 204, headers: responseHeaders });
     signal.throwIfAborted();
+    stage = "image";
     const image = await fetcher(snapshot.url, { ...options, headers: { Accept: "image/jpeg" } });
     if (!image.ok || !/^image\/jpeg(?:;|$)/i.test(image.headers.get("content-type") ?? "")) {
       await image.body?.cancel();
@@ -54,7 +56,11 @@ export async function itsSnapshotResponse(camera: Camera, requestSignal: AbortSi
     const bytes = await readBounded(image, 4 * 1024 * 1024);
     if (bytes[0] !== 0xff || bytes[1] !== 0xd8 || bytes[2] !== 0xff) throw new Error("Not a JPEG");
     return new Response(bytes, { headers: { ...responseHeaders, "Content-Type": "image/jpeg", "X-Snapshot-Source-Time": snapshot.sourceTime } });
-  } catch {
-    return Response.json({ error: signal.aborted ? "snapshot_timeout" : "snapshot_unavailable" }, { status: signal.aborted ? 504 : 502, headers: responseHeaders });
+  } catch (error) {
+    const cause = error instanceof Error && error.cause && typeof error.cause === "object" ? error.cause as { code?: unknown } : null;
+    const tlsFailure = typeof cause?.code === "string" && /^(UNABLE_TO_VERIFY_LEAF_SIGNATURE|UNABLE_TO_GET_ISSUER_CERT_LOCALLY|CERT_HAS_EXPIRED|SELF_SIGNED_CERT_IN_CHAIN|DEPTH_ZERO_SELF_SIGNED_CERT|ERR_TLS_CERT_ALTNAME_INVALID)$/.test(cause.code);
+    const code = signal.aborted ? "snapshot_timeout" : tlsFailure ? "snapshot_tls_error" : "snapshot_unavailable";
+    console.warn("ITS snapshot relay failed", { cameraId: camera.id, stage, code });
+    return Response.json({ error: code }, { status: signal.aborted ? 504 : 502, headers: responseHeaders });
   }
 }
