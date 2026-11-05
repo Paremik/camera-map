@@ -17,6 +17,7 @@ Requirements:
 - Only embed a live stream when the official publisher explicitly allows embedding; otherwise open the official page in a new tab.
 - Never attempt authentication bypass, hidden stream discovery, credential guessing, or access to non-public CCTV feeds.
 - Create a clean dark responsive UI for desktop and mobile.
+- Keep map/language/data settings accessible from the main map toolbar on desktop and mobile, with language and theme first, outside the scrollable camera catalog.
 - Keep data in a typed module for now, but structure it so it can later be replaced by an API/database.
 - Add loading/error states and basic accessibility.
 - Add README instructions.
