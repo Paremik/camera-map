@@ -486,6 +486,9 @@ dd { margin: 0; }
 }
 @media (max-width: 760px) {
   .map-settings-button { margin-left: auto; min-height: 44px; padding: 10px; font-size: 10px; gap: 6px; max-width: 52%; }
+  .map-topbar .location-chip { max-width: 44%; }
+  .map-topbar .location-chip > div { min-width: 0; }
+  .map-topbar .location-chip svg { flex-shrink: 0; }
   .map-topbar .map-actions { flex-basis: 100%; justify-content: flex-end; }
   .map-bottom-tools { top: 140px; }
   .maplibregl-ctrl-top-right { top: 130px; }
