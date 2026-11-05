@@ -37,7 +37,7 @@ export default function CameraSnapshotViewer({ camera, onClose, onStatus }: { ca
       try {
         if (!camera.snapshotSourceUrl) throw new Error("Missing snapshot source");
         validateSnapshotSource(camera.id, camera.snapshotSourceUrl);
-        const response = await fetch(`/api/cameras/${camera.id.slice(4)}/snapshot`, { signal: controller.signal, credentials: "omit", cache: "no-store", redirect: "error" });
+        const response = await fetch(`/api/cameras/${camera.id.slice(4)}/snapshot`, { signal: controller.signal, credentials: "same-origin", cache: "no-store", redirect: "error" });
         if (response.status === 204) {
           window.clearTimeout(timeout);
           if (!controller.signal.aborted) { setView({ status: "empty" }); onStatus({ status: "unknown", checkedAt: new Date().toISOString() }); }
