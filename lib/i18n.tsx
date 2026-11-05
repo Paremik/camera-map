@@ -90,6 +90,12 @@ Object.assign(ru,{sidebarNavigation:"Навигация по панели",sideb
 Object.assign(pl,{sidebarNavigation:"Nawigacja panelu",sidebarCatalog:"Kamery",sidebarTools:"Narzędzia",sidebarToolsHint:"Analiza, jakość danych i tryb zdarzenia są tutaj, aby katalog kamer pozostał szybki i czytelny.",mobileNavigation:"Nawigacja",map:"Mapa",menu:"Menu"});
 Object.assign(uk,{sidebarNavigation:"Навігація панелі",sidebarCatalog:"Камери",sidebarTools:"Інструменти",sidebarToolsHint:"Аналіз, якість даних і режим інциденту зібрані тут, щоб каталог камер залишався швидким і зрозумілим.",mobileNavigation:"Навігація",map:"Мапа",menu:"Меню"});
 Object.assign(en,{sidebarNavigation:"Panel navigation",sidebarCatalog:"Cameras",sidebarTools:"Tools",sidebarToolsHint:"Analysis, data quality and incident tools live here so the camera catalog stays fast and clear.",mobileNavigation:"Navigation",map:"Map",menu:"Menu"});
+
+Object.assign(ru,{snapshotError:"Не удалось загрузить снимок в приложении. Это не означает, что камера выключена. Повторите попытку или откройте официальный сайт ITS.",snapshotAlt:"Снимок камеры"});
+Object.assign(pl,{snapshotError:"Nie udało się wczytać obrazu w aplikacji. Nie oznacza to, że kamera jest wyłączona. Spróbuj ponownie lub otwórz oficjalną mapę ITS.",snapshotAlt:"Obraz z kamery"});
+Object.assign(uk,{snapshotError:"Не вдалося завантажити знімок у застосунку. Це не означає, що камеру вимкнено. Спробуйте ще раз або відкрийте офіційний сайт ITS.",snapshotAlt:"Знімок камери"});
+Object.assign(en,{snapshotError:"The image could not be loaded in this app. This does not mean the camera is offline. Retry or open the official ITS map.",snapshotAlt:"Camera image"});
+
 const dictionaries: Record<Locale, Messages> = { ru, pl, uk, en };
 const localeNames: Record<Locale, string> = { ru: "Русский", pl: "Polski", uk: "Українська", en: "English" };
 const Context = createContext<{ locale: Locale; setLocale: (locale: Locale) => void; t: (key: string) => string }>({ locale: "ru", setLocale: () => {}, t: key => ru[key] ?? key });
@@ -108,3 +114,4 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 }
 export function useI18n() { return useContext(Context); }
 export const languages = localeNames;
+
